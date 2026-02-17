@@ -258,7 +258,7 @@ const ChatPage = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Message NexusAI..."
+              placeholder="Message COXMOX..."
               rows={1}
               className="flex-1 bg-transparent border-none outline-none resize-none text-sm py-2 px-1 text-foreground placeholder:text-muted-foreground max-h-32"
               style={{ minHeight: '36px' }}
@@ -281,7 +281,7 @@ const ChatPage = () => {
             )}
           </div>
           <p className="text-[11px] text-muted-foreground text-center mt-2">
-            NexusAI can make mistakes. Consider checking important information.
+            COXMOX can make mistakes. Consider checking important information.
           </p>
         </div>
       </div>

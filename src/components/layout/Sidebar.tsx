@@ -57,8 +57,8 @@ export const Sidebar = () => {
               exit={{ opacity: 0, width: 0 }}
               className="overflow-hidden whitespace-nowrap"
             >
-              <p className="text-sm font-semibold text-foreground">NexusAI</p>
-              <p className="text-[11px] text-sidebar-muted">Workspace</p>
+              <p className="text-sm font-semibold text-foreground tracking-tight">COXMOX</p>
+              <p className="text-[11px] text-sidebar-muted">AI Workspace</p>
             </motion.div>
           )}
         </AnimatePresence>
