@@ -16,10 +16,11 @@ const ProjectsPage = () => {
     <ProjectDashboard
       title="All Projects"
       subtitle="Manage all your projects across workspaces"
-      icon={<Folder className="w-5 h-5 text-accent" />}
+      icon={<Folder className="w-4 h-4" />}
       projects={allProjects}
       onOpenProject={(id) => navigate(`/projects/${id}`)}
-      onNewProject={() => navigate('/web-builder/new')}
+      onNewProject={() => navigate('/web-builder')}
+      promptPlaceholder="Describe what you want to build..."
     />
   );
 };
