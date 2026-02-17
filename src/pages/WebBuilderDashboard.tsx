@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ProjectDashboard, Project } from '@/components/shared/ProjectDashboard';
+import { ProjectDashboard, Project, Template } from '@/components/shared/ProjectDashboard';
 import { Globe } from 'lucide-react';
 import WebBuilder from './WebBuilder';
 
@@ -10,9 +9,15 @@ const webProjects: Project[] = [
   { id: 'web-3', name: 'Portfolio Site', description: 'Minimal personal portfolio with project showcase and contact form.', updatedAt: '5 days ago', status: 'draft' as const },
 ];
 
+const webTemplates: Template[] = [
+  { id: 'tmpl-1', name: 'Startup Landing', description: 'Clean startup landing page with pricing, features, and CTA sections.', author: 'COXMOX Team', category: 'Landing Page' },
+  { id: 'tmpl-2', name: 'Blog Platform', description: 'Full-featured blog with markdown support, categories, and search.', author: 'Community', category: 'Blog' },
+  { id: 'tmpl-3', name: 'Admin Dashboard', description: 'Analytics dashboard with charts, tables, and user management.', author: 'COXMOX Team', category: 'Dashboard' },
+  { id: 'tmpl-4', name: 'E-commerce Store', description: 'Product catalog with cart, checkout, and order management.', author: 'Community', category: 'E-commerce' },
+];
+
 const WebBuilderDashboard = () => {
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
-  const navigate = useNavigate();
 
   if (activeProjectId) {
     return (
@@ -40,10 +45,12 @@ const WebBuilderDashboard = () => {
     <ProjectDashboard
       title="Web Builder"
       subtitle="Build and deploy web applications with AI"
-      icon={<Globe className="w-5 h-5 text-accent" />}
+      icon={<Globe className="w-4 h-4" />}
       projects={webProjects}
+      templates={webTemplates}
       onOpenProject={(id) => setActiveProjectId(id)}
       onNewProject={() => setActiveProjectId('new')}
+      promptPlaceholder="Describe the website you want to build..."
     />
   );
 };

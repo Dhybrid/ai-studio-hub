@@ -1,11 +1,16 @@
 import { useState } from 'react';
-import { ProjectDashboard, Project } from '@/components/shared/ProjectDashboard';
+import { ProjectDashboard, Project, Template } from '@/components/shared/ProjectDashboard';
 import { Image } from 'lucide-react';
 import ImageStudio from './ImageStudio';
 
 const imageProjects: Project[] = [
   { id: 'img-1', name: 'Brand Assets', description: 'Generated brand imagery, logos, and marketing visuals.', updatedAt: '1 week ago', status: 'active' as const },
   { id: 'img-2', name: 'Social Media Pack', description: 'Instagram and Twitter post images with consistent branding.', updatedAt: '2 weeks ago', status: 'deployed' as const },
+];
+
+const imageTemplates: Template[] = [
+  { id: 'itmpl-1', name: 'Product Photography', description: 'Studio-quality product shots with clean backgrounds.', author: 'COXMOX Team', category: 'Product' },
+  { id: 'itmpl-2', name: 'Social Media Kit', description: 'Consistent brand imagery for Instagram, Twitter and LinkedIn.', author: 'Community', category: 'Social' },
 ];
 
 const ImageStudioDashboard = () => {
@@ -37,10 +42,12 @@ const ImageStudioDashboard = () => {
     <ProjectDashboard
       title="Image Studio"
       subtitle="Generate and manage AI-powered images"
-      icon={<Image className="w-5 h-5 text-accent" />}
+      icon={<Image className="w-4 h-4" />}
       projects={imageProjects}
+      templates={imageTemplates}
       onOpenProject={(id) => setActiveProjectId(id)}
       onNewProject={() => setActiveProjectId('new')}
+      promptPlaceholder="Describe the image you want to generate..."
     />
   );
 };
