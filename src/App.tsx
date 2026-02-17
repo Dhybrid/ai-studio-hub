@@ -6,10 +6,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { WorkspaceProvider } from "@/hooks/useWorkspace";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import Chat from "./pages/Chat";
-import WebBuilder from "./pages/WebBuilder";
-import MobileBuilder from "./pages/MobileBuilder";
-import ImageStudio from "./pages/ImageStudio";
+import WebBuilderDashboard from "./pages/WebBuilderDashboard";
+import MobileBuilderDashboard from "./pages/MobileBuilderDashboard";
+import ImageStudioDashboard from "./pages/ImageStudioDashboard";
 import Settings from "./pages/Settings";
+import Projects from "./pages/Projects";
+import History from "./pages/History";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,10 +26,12 @@ const App = () => (
           <Routes>
             <Route element={<DashboardLayout />}>
               <Route path="/" element={<Chat />} />
-              <Route path="/web-builder" element={<WebBuilder />} />
-              <Route path="/mobile-builder" element={<MobileBuilder />} />
-              <Route path="/image-studio" element={<ImageStudio />} />
+              <Route path="/web-builder" element={<WebBuilderDashboard />} />
+              <Route path="/mobile-builder" element={<MobileBuilderDashboard />} />
+              <Route path="/image-studio" element={<ImageStudioDashboard />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/projects" element={<Projects />} />
+              <Route path="/history" element={<History />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
