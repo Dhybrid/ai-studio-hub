@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ProjectDashboard, Project, Template } from '@/components/shared/ProjectDashboard';
 import { Image } from 'lucide-react';
 import ImageStudio from './ImageStudio';
@@ -14,22 +14,29 @@ const imageTemplates: Template[] = [
 ];
 
 const ImageStudioDashboard = () => {
-  const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { projectId } = useParams();
 
-  if (activeProjectId) {
+  if (projectId) {
     return (
       <div className="h-full flex flex-col">
         <div className="h-10 flex items-center gap-3 px-4 border-b border-border bg-surface/50 flex-shrink-0">
           <button
-            onClick={() => setActiveProjectId(null)}
+            onClick={() => navigate('/image-studio')}
             className="text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
             ← Back to Projects
           </button>
           <span className="text-xs text-border">|</span>
           <span className="text-xs font-medium text-foreground">
-            {imageProjects.find(p => p.id === activeProjectId)?.name || 'New Project'}
+            {imageProjects.find(p => p.id === projectId)?.name || 'New Project'}
           </span>
+          <button
+            onClick={() => window.open(window.location.href, '_blank')}
+            className="ml-auto text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+          >
+            ↗ Open in new tab
+          </button>
         </div>
         <div className="flex-1 overflow-hidden">
           <ImageStudio />
@@ -45,8 +52,8 @@ const ImageStudioDashboard = () => {
       icon={<Image className="w-4 h-4" />}
       projects={imageProjects}
       templates={imageTemplates}
-      onOpenProject={(id) => setActiveProjectId(id)}
-      onNewProject={() => setActiveProjectId('new')}
+      onOpenProject={(id) => navigate(`/image-studio/${id}`)}
+      onNewProject={() => navigate('/image-studio/new')}
       promptPlaceholder="Describe the image you want to generate..."
     />
   );

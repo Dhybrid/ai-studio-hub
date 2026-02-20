@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ProjectDashboard, Project, Template } from '@/components/shared/ProjectDashboard';
 import { Smartphone } from 'lucide-react';
 import MobileBuilder from './MobileBuilder';
@@ -15,28 +15,11 @@ const mobileTemplates: Template[] = [
 ];
 
 const MobileBuilderDashboard = () => {
-  const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { projectId } = useParams();
 
-  if (activeProjectId) {
-    return (
-      <div className="h-full flex flex-col">
-        <div className="h-10 flex items-center gap-3 px-4 border-b border-border bg-surface/50 flex-shrink-0">
-          <button
-            onClick={() => setActiveProjectId(null)}
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            ← Back to Projects
-          </button>
-          <span className="text-xs text-border">|</span>
-          <span className="text-xs font-medium text-foreground">
-            {mobileProjects.find(p => p.id === activeProjectId)?.name || 'New Project'}
-          </span>
-        </div>
-        <div className="flex-1 overflow-hidden">
-          <MobileBuilder />
-        </div>
-      </div>
-    );
+  if (projectId) {
+    return <MobileBuilder />;
   }
 
   return (
@@ -46,8 +29,8 @@ const MobileBuilderDashboard = () => {
       icon={<Smartphone className="w-4 h-4" />}
       projects={mobileProjects}
       templates={mobileTemplates}
-      onOpenProject={(id) => setActiveProjectId(id)}
-      onNewProject={() => setActiveProjectId('new')}
+      onOpenProject={(id) => navigate(`/mobile-builder/${id}`)}
+      onNewProject={() => navigate('/mobile-builder/new')}
       promptPlaceholder="Describe the mobile app you want to build..."
     />
   );
