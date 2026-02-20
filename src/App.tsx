@@ -27,8 +27,11 @@ const App = () => (
             <Route element={<DashboardLayout />}>
               <Route path="/" element={<Chat />} />
               <Route path="/web-builder" element={<WebBuilderDashboard />} />
+              <Route path="/web-builder/:projectId" element={<WebBuilderDashboard />} />
               <Route path="/mobile-builder" element={<MobileBuilderDashboard />} />
+              <Route path="/mobile-builder/:projectId" element={<MobileBuilderDashboard />} />
               <Route path="/image-studio" element={<ImageStudioDashboard />} />
+              <Route path="/image-studio/:projectId" element={<ImageStudioDashboard />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/projects" element={<Projects />} />
               <Route path="/history" element={<History />} />

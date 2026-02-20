@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ProjectDashboard, Project, Template } from '@/components/shared/ProjectDashboard';
 import { Globe } from 'lucide-react';
 import WebBuilder from './WebBuilder';
@@ -17,28 +17,11 @@ const webTemplates: Template[] = [
 ];
 
 const WebBuilderDashboard = () => {
-  const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { projectId } = useParams();
 
-  if (activeProjectId) {
-    return (
-      <div className="h-full flex flex-col">
-        <div className="h-10 flex items-center gap-3 px-4 border-b border-border bg-surface/50 flex-shrink-0">
-          <button
-            onClick={() => setActiveProjectId(null)}
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            ← Back to Projects
-          </button>
-          <span className="text-xs text-border">|</span>
-          <span className="text-xs font-medium text-foreground">
-            {webProjects.find(p => p.id === activeProjectId)?.name || 'New Project'}
-          </span>
-        </div>
-        <div className="flex-1 overflow-hidden">
-          <WebBuilder />
-        </div>
-      </div>
-    );
+  if (projectId) {
+    return <WebBuilder />;
   }
 
   return (
@@ -48,8 +31,8 @@ const WebBuilderDashboard = () => {
       icon={<Globe className="w-4 h-4" />}
       projects={webProjects}
       templates={webTemplates}
-      onOpenProject={(id) => setActiveProjectId(id)}
-      onNewProject={() => setActiveProjectId('new')}
+      onOpenProject={(id) => navigate(`/web-builder/${id}`)}
+      onNewProject={() => navigate('/web-builder/new')}
       promptPlaceholder="Describe the website you want to build..."
     />
   );
