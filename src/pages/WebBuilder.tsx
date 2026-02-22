@@ -93,7 +93,7 @@ const WebBuilder = () => {
   const [codeTab, setCodeTab] = useState<'files' | 'code' | 'terminal'>('code');
   const [isBuilding, setIsBuilding] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('preview');
-  const [codePanelOpen, setCodePanelOpen] = useState(true);
+  const [codePanelOpen, setCodePanelOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const projectName = projectNames[projectId || ''] || 'New Project';
 

@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Send, Paperclip, Square, Copy, Check, Plus, MessageSquare,
-  ChevronRight, Coins, Zap, MoreHorizontal, Trash2, Edit3, Search
+  Send, Paperclip, Square, Copy, Check, Coins, Zap,
+  PanelRightClose, PanelRightOpen
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -16,14 +17,6 @@ interface Message {
   content: string;
   timestamp: Date;
   tokens?: number;
-}
-
-interface Conversation {
-  id: string;
-  title: string;
-  preview: string;
-  timestamp: Date;
-  tokenCount: number;
 }
 
 const CodeBlock = ({ language, children }: { language?: string; children: string }) => {
@@ -50,37 +43,6 @@ const CodeBlock = ({ language, children }: { language?: string; children: string
       </SyntaxHighlighter>
     </div>
   );
-};
-
-const pastConversations: Conversation[] = [
-  { id: 'c1', title: 'React hooks explained', preview: 'useState, useEffect, useCallback...', timestamp: new Date(Date.now() - 3600000 * 2), tokenCount: 1842 },
-  { id: 'c2', title: 'TypeScript generics deep dive', preview: 'Generic constraints and utility types...', timestamp: new Date(Date.now() - 3600000 * 5), tokenCount: 3210 },
-  { id: 'c3', title: 'Building a REST API', preview: 'Express.js with authentication...', timestamp: new Date(Date.now() - 86400000), tokenCount: 5104 },
-  { id: 'c4', title: 'CSS Grid vs Flexbox', preview: 'Layout strategies for modern web...', timestamp: new Date(Date.now() - 86400000 * 2), tokenCount: 987 },
-  { id: 'c5', title: 'Next.js App Router migration', preview: 'From Pages to App Router...', timestamp: new Date(Date.now() - 86400000 * 3), tokenCount: 4321 },
-  { id: 'c6', title: 'Database indexing strategies', preview: 'B-tree, hash, and covering indexes...', timestamp: new Date(Date.now() - 86400000 * 7), tokenCount: 2156 },
-];
-
-const formatTime = (d: Date) => {
-  const now = Date.now();
-  const diff = now - d.getTime();
-  if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
-  if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
-  return `${Math.floor(diff / 86400000)}d ago`;
-};
-
-const groupConversations = (convs: Conversation[]) => {
-  const today: Conversation[] = [];
-  const yesterday: Conversation[] = [];
-  const older: Conversation[] = [];
-  const now = Date.now();
-  convs.forEach((c) => {
-    const diff = now - c.timestamp.getTime();
-    if (diff < 86400000) today.push(c);
-    else if (diff < 172800000) yesterday.push(c);
-    else older.push(c);
-  });
-  return { today, yesterday, older };
 };
 
 const sampleMessages: Message[] = [
@@ -144,20 +106,23 @@ useEffect(() => {
 ];
 
 const TOKEN_LIMIT = 128000;
-const TOKENS_USED = 1842 + 284;
 
 const ChatPage = () => {
   const [messages, setMessages] = useState<Message[]>(sampleMessages);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
-  const [activeConv, setActiveConv] = useState<string | null>(null);
-  const [rightTab, setRightTab] = useState<'tokens' | null>(null);
-  const [historySearch, setHistorySearch] = useState('');
+  const [tokenPanelOpen, setTokenPanelOpen] = useState(true);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const isMobile = useIsMobile();
 
   const totalTokens = messages.reduce((sum, m) => sum + (m.tokens || 0), 0);
   const tokenPct = Math.min((totalTokens / TOKEN_LIMIT) * 100, 100);
+
+  // Hide token panel on mobile by default
+  useEffect(() => {
+    if (isMobile) setTokenPanelOpen(false);
+  }, [isMobile]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -212,77 +177,8 @@ const ChatPage = () => {
     }
   };
 
-  const groups = groupConversations(pastConversations);
-  const filteredConvs = pastConversations.filter((c) =>
-    c.title.toLowerCase().includes(historySearch.toLowerCase())
-  );
-  const filteredGroups = groupConversations(filteredConvs);
-
-  const ConvGroup = ({ label, items }: { label: string; items: Conversation[] }) =>
-    items.length === 0 ? null : (
-      <div className="mb-4">
-        <p className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-widest px-3 mb-1">{label}</p>
-        {items.map((c) => (
-          <button
-            key={c.id}
-            onClick={() => setActiveConv(c.id)}
-            className={cn(
-              "w-full text-left px-3 py-2 rounded-lg transition-colors group relative",
-              activeConv === c.id ? "bg-surface-active text-foreground" : "hover:bg-surface-hover text-sidebar-foreground"
-            )}
-          >
-            <p className="text-xs font-medium truncate pr-6">{c.title}</p>
-            <p className="text-[10px] text-muted-foreground truncate mt-0.5">{formatTime(c.timestamp)}</p>
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <MoreHorizontal className="w-3.5 h-3.5 text-muted-foreground" />
-            </div>
-          </button>
-        ))}
-      </div>
-    );
-
   return (
     <div className="flex h-full">
-      {/* Left History Sidebar */}
-      <div className="w-[240px] flex-shrink-0 border-r border-border flex flex-col bg-sidebar">
-        <div className="p-3 border-b border-sidebar-border">
-          <button
-            onClick={() => { setMessages([]); setActiveConv(null); }}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-border hover:border-accent/40 hover:bg-accent/5 transition-all text-xs font-medium text-muted-foreground hover:text-foreground group"
-          >
-            <Plus className="w-3.5 h-3.5 group-hover:text-accent transition-colors" />
-            New Chat
-          </button>
-        </div>
-
-        <div className="px-3 py-2 border-b border-sidebar-border">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
-            <input
-              value={historySearch}
-              onChange={(e) => setHistorySearch(e.target.value)}
-              placeholder="Search chats..."
-              className="w-full pl-7 pr-3 py-1.5 rounded-md bg-surface border border-border text-xs text-foreground outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-accent"
-            />
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-2">
-          {filteredConvs.length === 0 ? (
-            <div className="text-center py-8">
-              <MessageSquare className="w-6 h-6 text-muted-foreground/40 mx-auto mb-2" />
-              <p className="text-xs text-muted-foreground">No chats found</p>
-            </div>
-          ) : (
-            <>
-              <ConvGroup label="Today" items={filteredGroups.today} />
-              <ConvGroup label="Yesterday" items={filteredGroups.yesterday} />
-              <ConvGroup label="Older" items={filteredGroups.older} />
-            </>
-          )}
-        </div>
-      </div>
-
       {/* Center Chat */}
       <div className="flex-1 flex flex-col min-w-0">
         {messages.length === 0 ? (
@@ -301,7 +197,7 @@ const ChatPage = () => {
               <p className="text-sm text-muted-foreground mb-8">
                 Ask anything — from coding to analysis, writing to data.
               </p>
-              <div className="grid grid-cols-2 gap-2 text-left">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-left">
                 {[
                   { q: 'Explain React Server Components', sub: 'with code examples' },
                   { q: 'Write a Python FastAPI endpoint', sub: 'with auth middleware' },
@@ -428,6 +324,14 @@ const ChatPage = () => {
                 className="flex-1 bg-transparent border-none outline-none resize-none text-sm py-2 px-1 text-foreground placeholder:text-muted-foreground max-h-32"
                 style={{ minHeight: '36px' }}
               />
+              {/* Token toggle */}
+              <button
+                onClick={() => setTokenPanelOpen(!tokenPanelOpen)}
+                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-hover transition-colors text-muted-foreground"
+                title={tokenPanelOpen ? 'Hide tokens' : 'Show tokens'}
+              >
+                {tokenPanelOpen ? <PanelRightClose className="w-4 h-4" /> : <PanelRightOpen className="w-4 h-4" />}
+              </button>
               {isStreaming ? (
                 <button
                   onClick={() => setIsStreaming(false)}
@@ -452,88 +356,98 @@ const ChatPage = () => {
         </div>
       </div>
 
-      {/* Right Token Panel */}
-      <div className="w-[220px] flex-shrink-0 border-l border-border flex flex-col bg-sidebar">
-        <div className="p-3 border-b border-sidebar-border">
-          <div className="flex items-center gap-2">
-            <Coins className="w-4 h-4 text-accent" />
-            <span className="text-xs font-semibold text-foreground">Token Usage</span>
-          </div>
-        </div>
-
-        <div className="flex-1 p-3 space-y-4 overflow-y-auto">
-          {/* Context window */}
-          <div>
-            <div className="flex justify-between items-center mb-1.5">
-              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Context Window</span>
-              <span className="text-[10px] font-mono text-muted-foreground">{tokenPct.toFixed(1)}%</span>
-            </div>
-            <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-              <motion.div
-                className={cn(
-                  "h-full rounded-full",
-                  tokenPct > 80 ? "bg-destructive" : tokenPct > 50 ? "bg-warning" : "bg-accent"
-                )}
-                initial={{ width: 0 }}
-                animate={{ width: `${tokenPct}%` }}
-                transition={{ duration: 0.5 }}
-              />
-            </div>
-            <div className="flex justify-between mt-1">
-              <span className="text-[9px] text-muted-foreground font-mono">{totalTokens.toLocaleString()}</span>
-              <span className="text-[9px] text-muted-foreground font-mono">{TOKEN_LIMIT.toLocaleString()}</span>
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div className="space-y-2">
-            {[
-              { label: 'Input Tokens', value: messages.filter(m => m.role === 'user').reduce((s, m) => s + (m.tokens || 0), 0) },
-              { label: 'Output Tokens', value: messages.filter(m => m.role === 'assistant').reduce((s, m) => s + (m.tokens || 0), 0) },
-              { label: 'Total Messages', value: messages.length },
-            ].map((stat) => (
-              <div key={stat.label} className="flex justify-between items-center">
-                <span className="text-[10px] text-muted-foreground">{stat.label}</span>
-                <span className="text-[10px] font-mono font-medium text-foreground">{stat.value.toLocaleString()}</span>
+      {/* Right Token Panel - Toggleable */}
+      <AnimatePresence>
+        {tokenPanelOpen && (
+          <motion.div
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: 220, opacity: 1 }}
+            exit={{ width: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="flex-shrink-0 border-l border-border flex flex-col bg-sidebar overflow-hidden"
+          >
+            <div className="p-3 border-b border-sidebar-border">
+              <div className="flex items-center gap-2">
+                <Coins className="w-4 h-4 text-accent" />
+                <span className="text-xs font-semibold text-foreground">Token Usage</span>
               </div>
-            ))}
-          </div>
+            </div>
 
-          {/* Per message */}
-          <div>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Per Message</p>
-            <div className="space-y-1.5 max-h-48 overflow-y-auto">
-              {messages.map((m, i) => (
-                <div key={m.id} className="flex items-center gap-2">
-                  <div className={cn(
-                    "w-1.5 h-1.5 rounded-full flex-shrink-0",
-                    m.role === 'user' ? "bg-muted-foreground/40" : "bg-accent"
-                  )} />
-                  <span className="text-[9px] text-muted-foreground truncate flex-1">
-                    {m.role === 'user' ? 'You' : 'AI'} #{i + 1}
-                  </span>
-                  <span className="text-[9px] font-mono text-muted-foreground">{m.tokens || 0}</span>
+            <div className="flex-1 p-3 space-y-4 overflow-y-auto">
+              {/* Context window */}
+              <div>
+                <div className="flex justify-between items-center mb-1.5">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Context Window</span>
+                  <span className="text-[10px] font-mono text-muted-foreground">{tokenPct.toFixed(1)}%</span>
                 </div>
-              ))}
-            </div>
-          </div>
+                <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                  <motion.div
+                    className={cn(
+                      "h-full rounded-full",
+                      tokenPct > 80 ? "bg-destructive" : tokenPct > 50 ? "bg-warning" : "bg-accent"
+                    )}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${tokenPct}%` }}
+                    transition={{ duration: 0.5 }}
+                  />
+                </div>
+                <div className="flex justify-between mt-1">
+                  <span className="text-[9px] text-muted-foreground font-mono">{totalTokens.toLocaleString()}</span>
+                  <span className="text-[9px] text-muted-foreground font-mono">{TOKEN_LIMIT.toLocaleString()}</span>
+                </div>
+              </div>
 
-          {/* Monthly usage */}
-          <div className="pt-3 border-t border-border">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">This Month</p>
-            <div className="space-y-1">
-              <div className="flex justify-between">
-                <span className="text-[10px] text-muted-foreground">Tokens</span>
-                <span className="text-[10px] font-mono font-medium text-foreground">1.24M</span>
+              {/* Stats */}
+              <div className="space-y-2">
+                {[
+                  { label: 'Input Tokens', value: messages.filter(m => m.role === 'user').reduce((s, m) => s + (m.tokens || 0), 0) },
+                  { label: 'Output Tokens', value: messages.filter(m => m.role === 'assistant').reduce((s, m) => s + (m.tokens || 0), 0) },
+                  { label: 'Total Messages', value: messages.length },
+                ].map((stat) => (
+                  <div key={stat.label} className="flex justify-between items-center">
+                    <span className="text-[10px] text-muted-foreground">{stat.label}</span>
+                    <span className="text-[10px] font-mono font-medium text-foreground">{stat.value.toLocaleString()}</span>
+                  </div>
+                ))}
               </div>
-              <div className="flex justify-between">
-                <span className="text-[10px] text-muted-foreground">Est. Cost</span>
-                <span className="text-[10px] font-mono font-medium text-foreground">$3.72</span>
+
+              {/* Per message */}
+              <div>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Per Message</p>
+                <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                  {messages.map((m, i) => (
+                    <div key={m.id} className="flex items-center gap-2">
+                      <div className={cn(
+                        "w-1.5 h-1.5 rounded-full flex-shrink-0",
+                        m.role === 'user' ? "bg-muted-foreground/40" : "bg-accent"
+                      )} />
+                      <span className="text-[9px] text-muted-foreground truncate flex-1">
+                        {m.role === 'user' ? 'You' : 'AI'} #{i + 1}
+                      </span>
+                      <span className="text-[9px] font-mono text-muted-foreground">{m.tokens || 0}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Monthly usage */}
+              <div className="pt-3 border-t border-border">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">This Month</p>
+                <div className="space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-[10px] text-muted-foreground">Tokens</span>
+                    <span className="text-[10px] font-mono font-medium text-foreground">1.24M</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[10px] text-muted-foreground">Est. Cost</span>
+                    <span className="text-[10px] font-mono font-medium text-foreground">$3.72</span>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

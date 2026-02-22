@@ -85,7 +85,7 @@ const MobileBuilder = () => {
   const [isBuilding, setIsBuilding] = useState(false);
   const [buildStep, setBuildStep] = useState<BuildStep>('ready');
   const [viewMode, setViewMode] = useState<ViewMode>('preview');
-  const [codePanelOpen, setCodePanelOpen] = useState(true);
+  const [codePanelOpen, setCodePanelOpen] = useState(false);
   const [codeTab, setCodeTab] = useState<'code' | 'files' | 'terminal'>('code');
   const [copied, setCopied] = useState(false);
   const projectName = projectNames[projectId || ''] || 'New App';
