@@ -4,13 +4,13 @@ import { Image } from 'lucide-react';
 import ImageStudio from './ImageStudio';
 
 const imageProjects: Project[] = [
-  { id: 'img-1', name: 'Brand Assets', description: 'Generated brand imagery, logos, and marketing visuals.', updatedAt: '1 week ago', status: 'active' as const },
-  { id: 'img-2', name: 'Social Media Pack', description: 'Instagram and Twitter post images with consistent branding.', updatedAt: '2 weeks ago', status: 'deployed' as const },
+  { id: 'img-1', name: 'Brand Assets', description: 'Generated brand imagery, logos, and marketing visuals.', updatedAt: '1 week ago', status: 'active' as const, thumbnail: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=400&h=250&fit=crop' },
+  { id: 'img-2', name: 'Social Media Pack', description: 'Instagram and Twitter post images with consistent branding.', updatedAt: '2 weeks ago', status: 'deployed' as const, thumbnail: 'https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&h=250&fit=crop' },
 ];
 
 const imageTemplates: Template[] = [
-  { id: 'itmpl-1', name: 'Product Photography', description: 'Studio-quality product shots with clean backgrounds.', author: 'COXMOX Team', category: 'Product' },
-  { id: 'itmpl-2', name: 'Social Media Kit', description: 'Consistent brand imagery for Instagram, Twitter and LinkedIn.', author: 'Community', category: 'Social' },
+  { id: 'itmpl-1', name: 'Product Photography', description: 'Studio-quality product shots with clean backgrounds.', author: 'COXMOX Team', category: 'Product', thumbnail: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=250&fit=crop' },
+  { id: 'itmpl-2', name: 'Social Media Kit', description: 'Consistent brand imagery for Instagram, Twitter and LinkedIn.', author: 'Community', category: 'Social', thumbnail: 'https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&h=250&fit=crop' },
 ];
 
 const ImageStudioDashboard = () => {
@@ -31,12 +31,6 @@ const ImageStudioDashboard = () => {
           <span className="text-xs font-medium text-foreground">
             {imageProjects.find(p => p.id === projectId)?.name || 'New Project'}
           </span>
-          <button
-            onClick={() => window.open(window.location.href, '_blank')}
-            className="ml-auto text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
-          >
-            ↗ Open in new tab
-          </button>
         </div>
         <div className="flex-1 overflow-hidden">
           <ImageStudio />

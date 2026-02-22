@@ -9,6 +9,9 @@ import Chat from "./pages/Chat";
 import WebBuilderDashboard from "./pages/WebBuilderDashboard";
 import MobileBuilderDashboard from "./pages/MobileBuilderDashboard";
 import ImageStudioDashboard from "./pages/ImageStudioDashboard";
+import VideoStudioDashboard from "./pages/VideoStudioDashboard";
+import AudioStudioDashboard from "./pages/AudioStudioDashboard";
+import OfficeDashboard from "./pages/OfficeDashboard";
 import Settings from "./pages/Settings";
 import Projects from "./pages/Projects";
 import History from "./pages/History";
@@ -32,6 +35,12 @@ const App = () => (
               <Route path="/mobile-builder/:projectId" element={<MobileBuilderDashboard />} />
               <Route path="/image-studio" element={<ImageStudioDashboard />} />
               <Route path="/image-studio/:projectId" element={<ImageStudioDashboard />} />
+              <Route path="/video-studio" element={<VideoStudioDashboard />} />
+              <Route path="/video-studio/:projectId" element={<VideoStudioDashboard />} />
+              <Route path="/audio-studio" element={<AudioStudioDashboard />} />
+              <Route path="/audio-studio/:projectId" element={<AudioStudioDashboard />} />
+              <Route path="/office" element={<OfficeDashboard />} />
+              <Route path="/office/:projectId" element={<OfficeDashboard />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/projects" element={<Projects />} />
               <Route path="/history" element={<History />} />

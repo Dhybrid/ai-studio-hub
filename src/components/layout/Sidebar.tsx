@@ -1,23 +1,21 @@
-import { useLocation } from 'react-router-dom';
+import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   MessageSquare, Globe, Smartphone, Image, Settings,
-  History, FolderOpen, ChevronLeft, ChevronRight, Sparkles, ExternalLink
+  History, FolderOpen, ChevronLeft, ChevronRight, Sparkles, ExternalLink,
+  Video, Music, FileSpreadsheet, Plus, Search, MoreHorizontal
 } from 'lucide-react';
 import { useWorkspace, WorkspaceMode } from '@/hooks/useWorkspace';
 import { cn } from '@/lib/utils';
 
-// Chat & History stay in-app (same tab)
-const inAppItems: { icon: React.ElementType; label: string; mode: WorkspaceMode | 'history'; path: string }[] = [
-  { icon: MessageSquare, label: 'AI Chat', mode: 'chat', path: '/' },
-  { icon: History, label: 'History', mode: 'history', path: '/history' },
-];
-
-// Builders open in a new tab
 const builderItems: { icon: React.ElementType; label: string; mode: WorkspaceMode; path: string }[] = [
   { icon: Globe, label: 'Web Builder', mode: 'web-builder', path: '/web-builder' },
   { icon: Smartphone, label: 'Mobile Builder', mode: 'mobile-builder', path: '/mobile-builder' },
   { icon: Image, label: 'Image Studio', mode: 'image-studio', path: '/image-studio' },
+  { icon: Video, label: 'Video Studio', mode: 'image-studio', path: '/video-studio' },
+  { icon: Music, label: 'Audio Studio', mode: 'image-studio', path: '/audio-studio' },
+  { icon: FileSpreadsheet, label: 'Office', mode: 'image-studio', path: '/office' },
 ];
 
 const bottomItems: { icon: React.ElementType; label: string; path: string; mode?: WorkspaceMode }[] = [
@@ -25,14 +23,35 @@ const bottomItems: { icon: React.ElementType; label: string; path: string; mode?
   { icon: Settings, label: 'Settings', path: '/settings', mode: 'settings' },
 ];
 
+interface ChatHistoryItem {
+  id: string;
+  title: string;
+  time: string;
+}
+
+const mockChatHistory: ChatHistoryItem[] = [
+  { id: 'c1', title: 'React hooks explained', time: '2h ago' },
+  { id: 'c2', title: 'TypeScript generics', time: '5h ago' },
+  { id: 'c3', title: 'Building a REST API', time: '1d ago' },
+  { id: 'c4', title: 'CSS Grid vs Flexbox', time: '2d ago' },
+  { id: 'c5', title: 'Next.js migration', time: '3d ago' },
+  { id: 'c6', title: 'Database indexing', time: '1w ago' },
+];
+
 export const Sidebar = () => {
   const { mode, setMode, sidebarOpen, setSidebarOpen } = useWorkspace();
   const location = useLocation();
+  const navigate = useNavigate();
+  const [chatSearch, setChatSearch] = useState('');
 
   const isActive = (path: string) =>
     path === '/'
       ? location.pathname === '/'
       : location.pathname.startsWith(path);
+
+  const filteredHistory = mockChatHistory.filter((c) =>
+    c.title.toLowerCase().includes(chatSearch.toLowerCase())
+  );
 
   return (
     <motion.aside
@@ -64,51 +83,85 @@ export const Sidebar = () => {
       {/* Nav */}
       <div className="flex-1 flex flex-col py-3 px-2 gap-1 overflow-y-auto">
 
-        {/* In-app items: Chat + History */}
-        <div className="space-y-0.5">
-          {inAppItems.map((item) => {
-            const active = isActive(item.path);
-            return (
-              <a
-                key={item.mode}
-                href={item.path}
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (item.mode !== 'history') setMode(item.mode as WorkspaceMode);
-                  window.location.href = item.path;
-                }}
-                className={cn(
-                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150 relative",
-                  "hover:bg-surface-hover",
-                  active
-                    ? "bg-surface-active text-foreground font-medium"
-                    : "text-sidebar-foreground"
-                )}
-              >
-                <item.icon className={cn("w-[18px] h-[18px] flex-shrink-0", active && "text-accent")} />
-                <AnimatePresence>
-                  {sidebarOpen && (
-                    <motion.span
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="truncate"
-                    >
-                      {item.label}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-                {active && (
-                  <motion.div
-                    layoutId="activeIndicator"
-                    className="absolute left-0 w-[3px] h-6 bg-accent rounded-r-full"
-                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                  />
-                )}
-              </a>
-            );
-          })}
-        </div>
+        {/* AI Chat */}
+        <a
+          href="/"
+          onClick={(e) => {
+            e.preventDefault();
+            setMode('chat');
+            navigate('/');
+          }}
+          className={cn(
+            "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150 relative",
+            "hover:bg-surface-hover",
+            isActive('/') && !isActive('/projects') && !isActive('/settings') && !isActive('/history')
+              ? "bg-surface-active text-foreground font-medium"
+              : "text-sidebar-foreground"
+          )}
+        >
+          <MessageSquare className={cn("w-[18px] h-[18px] flex-shrink-0", isActive('/') && !isActive('/projects') && !isActive('/settings') && !isActive('/history') && "text-accent")} />
+          <AnimatePresence>
+            {sidebarOpen && (
+              <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="truncate flex-1">
+                AI Chat
+              </motion.span>
+            )}
+          </AnimatePresence>
+          {sidebarOpen && (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                navigate('/');
+              }}
+              className="w-6 h-6 rounded-md flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+              title="New Chat"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
+          )}
+          {isActive('/') && !isActive('/projects') && !isActive('/settings') && !isActive('/history') && (
+            <motion.div
+              layoutId="activeIndicator"
+              className="absolute left-0 w-[3px] h-6 bg-accent rounded-r-full"
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            />
+          )}
+        </a>
+
+        {/* Chat History (like ChatGPT) */}
+        {sidebarOpen && (
+          <div className="mt-1">
+            <div className="px-2 mb-1">
+              <div className="relative">
+                <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
+                <input
+                  value={chatSearch}
+                  onChange={(e) => setChatSearch(e.target.value)}
+                  placeholder="Search chats..."
+                  className="w-full pl-6 pr-2 py-1 rounded-md bg-surface border border-sidebar-border text-[10px] text-foreground outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-accent"
+                />
+              </div>
+            </div>
+            <div className="max-h-[180px] overflow-y-auto space-y-0.5">
+              {filteredHistory.map((chat) => (
+                <button
+                  key={chat.id}
+                  onClick={() => navigate('/')}
+                  className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-left transition-colors hover:bg-surface-hover group"
+                >
+                  <MessageSquare className="w-3 h-3 text-muted-foreground/50 flex-shrink-0" />
+                  <span className="text-[11px] text-sidebar-foreground truncate flex-1">{chat.title}</span>
+                  <span className="text-[9px] text-muted-foreground/50 flex-shrink-0 group-hover:hidden">{chat.time}</span>
+                  <MoreHorizontal className="w-3 h-3 text-muted-foreground/50 flex-shrink-0 hidden group-hover:block" />
+                </button>
+              ))}
+              {filteredHistory.length === 0 && (
+                <p className="text-[10px] text-muted-foreground/50 text-center py-2">No chats found</p>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Divider + Builders label */}
         {sidebarOpen ? (
@@ -126,7 +179,7 @@ export const Sidebar = () => {
             const active = isActive(item.path);
             return (
               <a
-                key={item.mode}
+                key={item.path}
                 href={item.path}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -159,6 +212,34 @@ export const Sidebar = () => {
           })}
         </div>
 
+        {/* Divider + History */}
+        {sidebarOpen ? (
+          <div className="flex items-center gap-2 px-3 mt-3 mb-1">
+            <span className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-widest">Activity</span>
+            <div className="flex-1 h-px bg-sidebar-border" />
+          </div>
+        ) : (
+          <div className="my-2 mx-3 h-px bg-sidebar-border" />
+        )}
+
+        <a
+          href="/history"
+          onClick={(e) => {
+            e.preventDefault();
+            navigate('/history');
+          }}
+          className={cn(
+            "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150",
+            "hover:bg-surface-hover",
+            isActive('/history')
+              ? "bg-surface-active text-foreground font-medium"
+              : "text-sidebar-foreground"
+          )}
+        >
+          <History className={cn("w-[18px] h-[18px] flex-shrink-0", isActive('/history') && "text-accent")} />
+          {sidebarOpen && <span className="truncate">History</span>}
+        </a>
+
         <div className="flex-1" />
 
         {/* Bottom items */}
@@ -172,7 +253,7 @@ export const Sidebar = () => {
                 onClick={(e) => {
                   e.preventDefault();
                   if (item.mode) setMode(item.mode);
-                  window.location.href = item.path;
+                  navigate(item.path);
                 }}
                 className={cn(
                   "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150",

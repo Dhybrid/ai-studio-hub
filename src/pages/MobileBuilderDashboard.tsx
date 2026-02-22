@@ -4,14 +4,14 @@ import { Smartphone } from 'lucide-react';
 import MobileBuilder from './MobileBuilder';
 
 const mobileProjects: Project[] = [
-  { id: 'mob-1', name: 'Fitness Tracker', description: 'Cross-platform fitness tracking app with workout logs and progress charts.', updatedAt: '3 days ago', status: 'active' as const },
-  { id: 'mob-2', name: 'Recipe App', description: 'Social recipe sharing app with meal planning features.', updatedAt: '1 week ago', status: 'draft' as const },
+  { id: 'mob-1', name: 'Fitness Tracker', description: 'Cross-platform fitness tracking app with workout logs and progress charts.', updatedAt: '3 days ago', status: 'active' as const, thumbnail: 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=400&h=250&fit=crop' },
+  { id: 'mob-2', name: 'Recipe App', description: 'Social recipe sharing app with meal planning features.', updatedAt: '1 week ago', status: 'draft' as const, thumbnail: 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=400&h=250&fit=crop' },
 ];
 
 const mobileTemplates: Template[] = [
-  { id: 'mtmpl-1', name: 'Social Feed App', description: 'Instagram-style social feed with stories, posts, and profiles.', author: 'COXMOX Team', category: 'Social' },
-  { id: 'mtmpl-2', name: 'Task Manager', description: 'Kanban-style task management app with drag-and-drop.', author: 'Community', category: 'Productivity' },
-  { id: 'mtmpl-3', name: 'Chat Messenger', description: 'Real-time messaging app with group chats and media sharing.', author: 'COXMOX Team', category: 'Messaging' },
+  { id: 'mtmpl-1', name: 'Social Feed App', description: 'Instagram-style social feed with stories, posts, and profiles.', author: 'COXMOX Team', category: 'Social', thumbnail: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=250&fit=crop' },
+  { id: 'mtmpl-2', name: 'Task Manager', description: 'Kanban-style task management app with drag-and-drop.', author: 'Community', category: 'Productivity', thumbnail: 'https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=400&h=250&fit=crop' },
+  { id: 'mtmpl-3', name: 'Chat Messenger', description: 'Real-time messaging app with group chats and media sharing.', author: 'COXMOX Team', category: 'Messaging', thumbnail: 'https://images.unsplash.com/photo-1611746872915-64382b5c76da?w=400&h=250&fit=crop' },
 ];
 
 const MobileBuilderDashboard = () => {
