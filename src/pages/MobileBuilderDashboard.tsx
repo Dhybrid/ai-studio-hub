@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { ProjectDashboard, Project, Template } from '@/components/shared/ProjectDashboard';
 import { Smartphone } from 'lucide-react';
+import { WorkspaceSidebar } from '@/components/layout/WorkspaceSidebar';
 import MobileBuilder from './MobileBuilder';
 
 const mobileProjects: Project[] = [
@@ -18,21 +19,43 @@ const MobileBuilderDashboard = () => {
   const navigate = useNavigate();
   const { projectId } = useParams();
 
-  if (projectId) {
-    return <MobileBuilder />;
-  }
+  const sidebarItems = mobileProjects.map(p => ({
+    id: p.id,
+    name: p.name,
+    subtitle: p.status,
+    time: p.updatedAt,
+  }));
 
   return (
-    <ProjectDashboard
-      title="Mobile Builder"
-      subtitle="Build cross-platform mobile apps with AI"
-      icon={<Smartphone className="w-4 h-4" />}
-      projects={mobileProjects}
-      templates={mobileTemplates}
-      onOpenProject={(id) => navigate(`/mobile-builder/${id}`)}
-      onNewProject={() => navigate('/mobile-builder/new')}
-      promptPlaceholder="Describe the mobile app you want to build..."
-    />
+    <div className="flex h-screen w-full overflow-hidden bg-background">
+      <WorkspaceSidebar
+        title="Mobile Builder"
+        icon={Smartphone}
+        items={sidebarItems}
+        selectedId={projectId}
+        onSelectItem={(id) => navigate(`/mobile-builder/${id}`)}
+        onNewItem={() => navigate('/mobile-builder/new')}
+        newItemLabel="New App"
+        searchPlaceholder="Search apps..."
+        itemsLabel="Projects"
+      />
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {projectId ? (
+          <MobileBuilder />
+        ) : (
+          <ProjectDashboard
+            title="Mobile Builder"
+            subtitle="Build cross-platform mobile apps with AI"
+            icon={<Smartphone className="w-4 h-4" />}
+            projects={mobileProjects}
+            templates={mobileTemplates}
+            onOpenProject={(id) => navigate(`/mobile-builder/${id}`)}
+            onNewProject={() => navigate('/mobile-builder/new')}
+            promptPlaceholder="Describe the mobile app you want to build..."
+          />
+        )}
+      </div>
+    </div>
   );
 };
 

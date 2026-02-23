@@ -4,23 +4,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   MessageSquare, Globe, Smartphone, Image, Settings,
   History, FolderOpen, ChevronLeft, ChevronRight, Sparkles, ExternalLink,
-  Video, Music, FileSpreadsheet, Plus, Search, MoreHorizontal
+  Video, Music, FileSpreadsheet, Plus, Search, MoreHorizontal, BookOpen
 } from 'lucide-react';
 import { useWorkspace, WorkspaceMode } from '@/hooks/useWorkspace';
 import { cn } from '@/lib/utils';
 
-const builderItems: { icon: React.ElementType; label: string; mode: WorkspaceMode; path: string }[] = [
-  { icon: Globe, label: 'Web Builder', mode: 'web-builder', path: '/web-builder' },
-  { icon: Smartphone, label: 'Mobile Builder', mode: 'mobile-builder', path: '/mobile-builder' },
-  { icon: Image, label: 'Image Studio', mode: 'image-studio', path: '/image-studio' },
-  { icon: Video, label: 'Video Studio', mode: 'image-studio', path: '/video-studio' },
-  { icon: Music, label: 'Audio Studio', mode: 'image-studio', path: '/audio-studio' },
-  { icon: FileSpreadsheet, label: 'Office', mode: 'image-studio', path: '/office' },
-];
-
-const bottomItems: { icon: React.ElementType; label: string; path: string; mode?: WorkspaceMode }[] = [
-  { icon: FolderOpen, label: 'Projects', path: '/projects' },
-  { icon: Settings, label: 'Settings', path: '/settings', mode: 'settings' },
+const builderItems: { icon: React.ElementType; label: string; path: string }[] = [
+  { icon: Globe, label: 'Web Builder', path: '/web-builder' },
+  { icon: Smartphone, label: 'Mobile Builder', path: '/mobile-builder' },
+  { icon: Image, label: 'Image Studio', path: '/image-studio' },
+  { icon: Video, label: 'Video Studio', path: '/video-studio' },
+  { icon: Music, label: 'Audio Studio', path: '/audio-studio' },
+  { icon: FileSpreadsheet, label: 'Office', path: '/office' },
 ];
 
 interface ChatHistoryItem {
@@ -129,9 +124,80 @@ export const Sidebar = () => {
           )}
         </a>
 
-        {/* Chat History (like ChatGPT) */}
+        {/* Cereva - opens new tab */}
+        <a
+          href="/cereva"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cn(
+            "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150",
+            "hover:bg-surface-hover text-sidebar-foreground"
+          )}
+        >
+          <BookOpen className={cn("w-[18px] h-[18px] flex-shrink-0 text-emerald-500")} />
+          <AnimatePresence>
+            {sidebarOpen && (
+              <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="truncate flex-1">
+                Cereva
+              </motion.span>
+            )}
+          </AnimatePresence>
+          {sidebarOpen && (
+            <ExternalLink className="w-3 h-3 text-muted-foreground/40 flex-shrink-0" />
+          )}
+        </a>
+
+        {/* Divider + Builders label */}
+        {sidebarOpen ? (
+          <div className="flex items-center gap-2 px-3 mt-3 mb-1">
+            <span className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-widest">Builders</span>
+            <div className="flex-1 h-px bg-sidebar-border" />
+          </div>
+        ) : (
+          <div className="my-2 mx-3 h-px bg-sidebar-border" />
+        )}
+
+        {/* Builder items — open in new tab */}
+        <div className="space-y-0.5">
+          {builderItems.map((item) => (
+            <a
+              key={item.path}
+              href={item.path}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150",
+                "hover:bg-surface-hover text-sidebar-foreground"
+              )}
+            >
+              <item.icon className="w-[18px] h-[18px] flex-shrink-0" />
+              <AnimatePresence>
+                {sidebarOpen && (
+                  <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="truncate flex-1">
+                    {item.label}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+              {sidebarOpen && (
+                <ExternalLink className="w-3 h-3 text-muted-foreground/40 flex-shrink-0" />
+              )}
+            </a>
+          ))}
+        </div>
+
+        {/* Divider + Chat History */}
+        {sidebarOpen ? (
+          <div className="flex items-center gap-2 px-3 mt-3 mb-1">
+            <span className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-widest">Chat History</span>
+            <div className="flex-1 h-px bg-sidebar-border" />
+          </div>
+        ) : (
+          <div className="my-2 mx-3 h-px bg-sidebar-border" />
+        )}
+
+        {/* Chat History */}
         {sidebarOpen && (
-          <div className="mt-1">
+          <div>
             <div className="px-2 mb-1">
               <div className="relative">
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
@@ -143,7 +209,7 @@ export const Sidebar = () => {
                 />
               </div>
             </div>
-            <div className="max-h-[180px] overflow-y-auto space-y-0.5">
+            <div className="max-h-[200px] overflow-y-auto space-y-0.5">
               {filteredHistory.map((chat) => (
                 <button
                   key={chat.id}
@@ -163,111 +229,56 @@ export const Sidebar = () => {
           </div>
         )}
 
-        {/* Divider + Builders label */}
-        {sidebarOpen ? (
-          <div className="flex items-center gap-2 px-3 mt-3 mb-1">
-            <span className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-widest">Builders</span>
-            <div className="flex-1 h-px bg-sidebar-border" />
-          </div>
-        ) : (
-          <div className="my-2 mx-3 h-px bg-sidebar-border" />
-        )}
-
-        {/* Builder items — open in new tab */}
-        <div className="space-y-0.5">
-          {builderItems.map((item) => {
-            const active = isActive(item.path);
-            return (
-              <a
-                key={item.path}
-                href={item.path}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cn(
-                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150 relative",
-                  "hover:bg-surface-hover",
-                  active
-                    ? "bg-surface-active text-foreground font-medium"
-                    : "text-sidebar-foreground"
-                )}
-              >
-                <item.icon className={cn("w-[18px] h-[18px] flex-shrink-0", active && "text-accent")} />
-                <AnimatePresence>
-                  {sidebarOpen && (
-                    <motion.span
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="truncate flex-1"
-                    >
-                      {item.label}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-                {sidebarOpen && (
-                  <ExternalLink className="w-3 h-3 text-muted-foreground/40 flex-shrink-0" />
-                )}
-              </a>
-            );
-          })}
-        </div>
-
-        {/* Divider + History */}
-        {sidebarOpen ? (
-          <div className="flex items-center gap-2 px-3 mt-3 mb-1">
-            <span className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-widest">Activity</span>
-            <div className="flex-1 h-px bg-sidebar-border" />
-          </div>
-        ) : (
-          <div className="my-2 mx-3 h-px bg-sidebar-border" />
-        )}
-
-        <a
-          href="/history"
-          onClick={(e) => {
-            e.preventDefault();
-            navigate('/history');
-          }}
-          className={cn(
-            "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150",
-            "hover:bg-surface-hover",
-            isActive('/history')
-              ? "bg-surface-active text-foreground font-medium"
-              : "text-sidebar-foreground"
-          )}
-        >
-          <History className={cn("w-[18px] h-[18px] flex-shrink-0", isActive('/history') && "text-accent")} />
-          {sidebarOpen && <span className="truncate">History</span>}
-        </a>
-
         <div className="flex-1" />
 
         {/* Bottom items */}
         <div className="border-t border-sidebar-border pt-2 mt-2 space-y-0.5">
-          {bottomItems.map((item) => {
-            const active = isActive(item.path);
-            return (
-              <a
-                key={item.label}
-                href={item.path}
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (item.mode) setMode(item.mode);
-                  navigate(item.path);
-                }}
-                className={cn(
-                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150",
-                  "hover:bg-surface-hover",
-                  active
-                    ? "bg-surface-active text-foreground font-medium"
-                    : "text-sidebar-foreground"
-                )}
-              >
-                <item.icon className={cn("w-[18px] h-[18px] flex-shrink-0", active && "text-accent")} />
-                {sidebarOpen && <span className="truncate">{item.label}</span>}
-              </a>
-            );
-          })}
+          <a
+            href="/history"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate('/history');
+            }}
+            className={cn(
+              "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150",
+              "hover:bg-surface-hover",
+              isActive('/history') ? "bg-surface-active text-foreground font-medium" : "text-sidebar-foreground"
+            )}
+          >
+            <History className={cn("w-[18px] h-[18px] flex-shrink-0", isActive('/history') && "text-accent")} />
+            {sidebarOpen && <span className="truncate">History</span>}
+          </a>
+          <a
+            href="/projects"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate('/projects');
+            }}
+            className={cn(
+              "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150",
+              "hover:bg-surface-hover",
+              isActive('/projects') ? "bg-surface-active text-foreground font-medium" : "text-sidebar-foreground"
+            )}
+          >
+            <FolderOpen className={cn("w-[18px] h-[18px] flex-shrink-0", isActive('/projects') && "text-accent")} />
+            {sidebarOpen && <span className="truncate">Projects</span>}
+          </a>
+          <a
+            href="/settings"
+            onClick={(e) => {
+              e.preventDefault();
+              setMode('settings');
+              navigate('/settings');
+            }}
+            className={cn(
+              "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150",
+              "hover:bg-surface-hover",
+              isActive('/settings') ? "bg-surface-active text-foreground font-medium" : "text-sidebar-foreground"
+            )}
+          >
+            <Settings className={cn("w-[18px] h-[18px] flex-shrink-0", isActive('/settings') && "text-accent")} />
+            {sidebarOpen && <span className="truncate">Settings</span>}
+          </a>
         </div>
       </div>
 
