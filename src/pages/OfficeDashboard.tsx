@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { ProjectDashboard, Project, Template } from '@/components/shared/ProjectDashboard';
 import { FileSpreadsheet } from 'lucide-react';
+import { WorkspaceSidebar } from '@/components/layout/WorkspaceSidebar';
 import OfficeEditor from './OfficeEditor';
 
 const officeProjects: Project[] = [
@@ -19,21 +20,43 @@ const OfficeDashboard = () => {
   const navigate = useNavigate();
   const { projectId } = useParams();
 
-  if (projectId) {
-    return <OfficeEditor />;
-  }
+  const sidebarItems = officeProjects.map(p => ({
+    id: p.id,
+    name: p.name,
+    subtitle: p.status,
+    time: p.updatedAt,
+  }));
 
   return (
-    <ProjectDashboard
-      title="Office"
-      subtitle="Create presentations, reports, and data analysis with AI"
-      icon={<FileSpreadsheet className="w-4 h-4" />}
-      projects={officeProjects}
-      templates={officeTemplates}
-      onOpenProject={(id) => navigate(`/office/${id}`)}
-      onNewProject={() => navigate('/office/new')}
-      promptPlaceholder="Describe the document or presentation you want to create..."
-    />
+    <div className="flex h-screen w-full overflow-hidden bg-background">
+      <WorkspaceSidebar
+        title="Office"
+        icon={FileSpreadsheet}
+        items={sidebarItems}
+        selectedId={projectId}
+        onSelectItem={(id) => navigate(`/office/${id}`)}
+        onNewItem={() => navigate('/office/new')}
+        newItemLabel="New Document"
+        searchPlaceholder="Search documents..."
+        itemsLabel="Documents"
+      />
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {projectId ? (
+          <OfficeEditor />
+        ) : (
+          <ProjectDashboard
+            title="Office"
+            subtitle="Create presentations, reports, and data analysis with AI"
+            icon={<FileSpreadsheet className="w-4 h-4" />}
+            projects={officeProjects}
+            templates={officeTemplates}
+            onOpenProject={(id) => navigate(`/office/${id}`)}
+            onNewProject={() => navigate('/office/new')}
+            promptPlaceholder="Describe the document or presentation you want to create..."
+          />
+        )}
+      </div>
+    </div>
   );
 };
 

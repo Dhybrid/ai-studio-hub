@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { WorkspaceProvider } from "@/hooks/useWorkspace";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import Chat from "./pages/Chat";
+import Cereva from "./pages/Cereva";
 import WebBuilderDashboard from "./pages/WebBuilderDashboard";
 import MobileBuilderDashboard from "./pages/MobileBuilderDashboard";
 import ImageStudioDashboard from "./pages/ImageStudioDashboard";
@@ -27,24 +28,36 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            {/* Main layout — AI Chat, Settings, Projects, History */}
             <Route element={<DashboardLayout />}>
               <Route path="/" element={<Chat />} />
-              <Route path="/web-builder" element={<WebBuilderDashboard />} />
-              <Route path="/web-builder/:projectId" element={<WebBuilderDashboard />} />
-              <Route path="/mobile-builder" element={<MobileBuilderDashboard />} />
-              <Route path="/mobile-builder/:projectId" element={<MobileBuilderDashboard />} />
-              <Route path="/image-studio" element={<ImageStudioDashboard />} />
-              <Route path="/image-studio/:projectId" element={<ImageStudioDashboard />} />
-              <Route path="/video-studio" element={<VideoStudioDashboard />} />
-              <Route path="/video-studio/:projectId" element={<VideoStudioDashboard />} />
-              <Route path="/audio-studio" element={<AudioStudioDashboard />} />
-              <Route path="/audio-studio/:projectId" element={<AudioStudioDashboard />} />
-              <Route path="/office" element={<OfficeDashboard />} />
-              <Route path="/office/:projectId" element={<OfficeDashboard />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/projects" element={<Projects />} />
               <Route path="/history" element={<History />} />
             </Route>
+
+            {/* Independent workspaces — each has its own sidebar/layout */}
+            <Route path="/cereva" element={<Cereva />} />
+            <Route path="/cereva/:chatId" element={<Cereva />} />
+
+            <Route path="/web-builder" element={<WebBuilderDashboard />} />
+            <Route path="/web-builder/:projectId" element={<WebBuilderDashboard />} />
+
+            <Route path="/mobile-builder" element={<MobileBuilderDashboard />} />
+            <Route path="/mobile-builder/:projectId" element={<MobileBuilderDashboard />} />
+
+            <Route path="/image-studio" element={<ImageStudioDashboard />} />
+            <Route path="/image-studio/:projectId" element={<ImageStudioDashboard />} />
+
+            <Route path="/video-studio" element={<VideoStudioDashboard />} />
+            <Route path="/video-studio/:projectId" element={<VideoStudioDashboard />} />
+
+            <Route path="/audio-studio" element={<AudioStudioDashboard />} />
+            <Route path="/audio-studio/:projectId" element={<AudioStudioDashboard />} />
+
+            <Route path="/office" element={<OfficeDashboard />} />
+            <Route path="/office/:projectId" element={<OfficeDashboard />} />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

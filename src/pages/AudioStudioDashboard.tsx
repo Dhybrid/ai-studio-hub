@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { ProjectDashboard, Project, Template } from '@/components/shared/ProjectDashboard';
 import { Music } from 'lucide-react';
+import { WorkspaceSidebar } from '@/components/layout/WorkspaceSidebar';
 import AudioStudio from './AudioStudio';
 
 const audioProjects: Project[] = [
@@ -18,21 +19,43 @@ const AudioStudioDashboard = () => {
   const navigate = useNavigate();
   const { projectId } = useParams();
 
-  if (projectId) {
-    return <AudioStudio />;
-  }
+  const sidebarItems = audioProjects.map(p => ({
+    id: p.id,
+    name: p.name,
+    subtitle: p.status,
+    time: p.updatedAt,
+  }));
 
   return (
-    <ProjectDashboard
-      title="Audio Studio"
-      subtitle="Generate music, voiceovers, and sound effects with AI"
-      icon={<Music className="w-4 h-4" />}
-      projects={audioProjects}
-      templates={audioTemplates}
-      onOpenProject={(id) => navigate(`/audio-studio/${id}`)}
-      onNewProject={() => navigate('/audio-studio/new')}
-      promptPlaceholder="Describe the audio you want to create..."
-    />
+    <div className="flex h-screen w-full overflow-hidden bg-background">
+      <WorkspaceSidebar
+        title="Audio Studio"
+        icon={Music}
+        items={sidebarItems}
+        selectedId={projectId}
+        onSelectItem={(id) => navigate(`/audio-studio/${id}`)}
+        onNewItem={() => navigate('/audio-studio/new')}
+        newItemLabel="New Audio"
+        searchPlaceholder="Search audio..."
+        itemsLabel="Projects"
+      />
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {projectId ? (
+          <AudioStudio />
+        ) : (
+          <ProjectDashboard
+            title="Audio Studio"
+            subtitle="Generate music, voiceovers, and sound effects with AI"
+            icon={<Music className="w-4 h-4" />}
+            projects={audioProjects}
+            templates={audioTemplates}
+            onOpenProject={(id) => navigate(`/audio-studio/${id}`)}
+            onNewProject={() => navigate('/audio-studio/new')}
+            promptPlaceholder="Describe the audio you want to create..."
+          />
+        )}
+      </div>
+    </div>
   );
 };
 

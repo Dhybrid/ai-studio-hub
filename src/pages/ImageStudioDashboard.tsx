@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { ProjectDashboard, Project, Template } from '@/components/shared/ProjectDashboard';
 import { Image } from 'lucide-react';
+import { WorkspaceSidebar } from '@/components/layout/WorkspaceSidebar';
 import ImageStudio from './ImageStudio';
 
 const imageProjects: Project[] = [
@@ -17,39 +18,43 @@ const ImageStudioDashboard = () => {
   const navigate = useNavigate();
   const { projectId } = useParams();
 
-  if (projectId) {
-    return (
-      <div className="h-full flex flex-col">
-        <div className="h-10 flex items-center gap-3 px-4 border-b border-border bg-surface/50 flex-shrink-0">
-          <button
-            onClick={() => navigate('/image-studio')}
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            ← Back to Projects
-          </button>
-          <span className="text-xs text-border">|</span>
-          <span className="text-xs font-medium text-foreground">
-            {imageProjects.find(p => p.id === projectId)?.name || 'New Project'}
-          </span>
-        </div>
-        <div className="flex-1 overflow-hidden">
-          <ImageStudio />
-        </div>
-      </div>
-    );
-  }
+  const sidebarItems = imageProjects.map(p => ({
+    id: p.id,
+    name: p.name,
+    subtitle: p.status,
+    time: p.updatedAt,
+  }));
 
   return (
-    <ProjectDashboard
-      title="Image Studio"
-      subtitle="Generate and manage AI-powered images"
-      icon={<Image className="w-4 h-4" />}
-      projects={imageProjects}
-      templates={imageTemplates}
-      onOpenProject={(id) => navigate(`/image-studio/${id}`)}
-      onNewProject={() => navigate('/image-studio/new')}
-      promptPlaceholder="Describe the image you want to generate..."
-    />
+    <div className="flex h-screen w-full overflow-hidden bg-background">
+      <WorkspaceSidebar
+        title="Image Studio"
+        icon={Image}
+        items={sidebarItems}
+        selectedId={projectId}
+        onSelectItem={(id) => navigate(`/image-studio/${id}`)}
+        onNewItem={() => navigate('/image-studio/new')}
+        newItemLabel="New Image Project"
+        searchPlaceholder="Search projects..."
+        itemsLabel="Projects"
+      />
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {projectId ? (
+          <ImageStudio />
+        ) : (
+          <ProjectDashboard
+            title="Image Studio"
+            subtitle="Generate and manage AI-powered images"
+            icon={<Image className="w-4 h-4" />}
+            projects={imageProjects}
+            templates={imageTemplates}
+            onOpenProject={(id) => navigate(`/image-studio/${id}`)}
+            onNewProject={() => navigate('/image-studio/new')}
+            promptPlaceholder="Describe the image you want to generate..."
+          />
+        )}
+      </div>
+    </div>
   );
 };
 

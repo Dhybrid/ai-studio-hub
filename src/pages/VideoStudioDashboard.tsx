@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { ProjectDashboard, Project, Template } from '@/components/shared/ProjectDashboard';
 import { Video } from 'lucide-react';
+import { WorkspaceSidebar } from '@/components/layout/WorkspaceSidebar';
 import VideoStudio from './VideoStudio';
 
 const videoProjects: Project[] = [
@@ -17,21 +18,43 @@ const VideoStudioDashboard = () => {
   const navigate = useNavigate();
   const { projectId } = useParams();
 
-  if (projectId) {
-    return <VideoStudio />;
-  }
+  const sidebarItems = videoProjects.map(p => ({
+    id: p.id,
+    name: p.name,
+    subtitle: p.status,
+    time: p.updatedAt,
+  }));
 
   return (
-    <ProjectDashboard
-      title="Video Studio"
-      subtitle="Create and edit videos with AI"
-      icon={<Video className="w-4 h-4" />}
-      projects={videoProjects}
-      templates={videoTemplates}
-      onOpenProject={(id) => navigate(`/video-studio/${id}`)}
-      onNewProject={() => navigate('/video-studio/new')}
-      promptPlaceholder="Describe the video you want to create..."
-    />
+    <div className="flex h-screen w-full overflow-hidden bg-background">
+      <WorkspaceSidebar
+        title="Video Studio"
+        icon={Video}
+        items={sidebarItems}
+        selectedId={projectId}
+        onSelectItem={(id) => navigate(`/video-studio/${id}`)}
+        onNewItem={() => navigate('/video-studio/new')}
+        newItemLabel="New Video"
+        searchPlaceholder="Search videos..."
+        itemsLabel="Projects"
+      />
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {projectId ? (
+          <VideoStudio />
+        ) : (
+          <ProjectDashboard
+            title="Video Studio"
+            subtitle="Create and edit videos with AI"
+            icon={<Video className="w-4 h-4" />}
+            projects={videoProjects}
+            templates={videoTemplates}
+            onOpenProject={(id) => navigate(`/video-studio/${id}`)}
+            onNewProject={() => navigate('/video-studio/new')}
+            promptPlaceholder="Describe the video you want to create..."
+          />
+        )}
+      </div>
+    </div>
   );
 };
 

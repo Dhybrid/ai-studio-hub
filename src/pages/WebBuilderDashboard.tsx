@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { ProjectDashboard, Project, Template } from '@/components/shared/ProjectDashboard';
 import { Globe } from 'lucide-react';
+import { WorkspaceSidebar } from '@/components/layout/WorkspaceSidebar';
 import WebBuilder from './WebBuilder';
 
 const webProjects: Project[] = [
@@ -20,21 +21,43 @@ const WebBuilderDashboard = () => {
   const navigate = useNavigate();
   const { projectId } = useParams();
 
-  if (projectId) {
-    return <WebBuilder />;
-  }
+  const sidebarItems = webProjects.map(p => ({
+    id: p.id,
+    name: p.name,
+    subtitle: p.status,
+    time: p.updatedAt,
+  }));
 
   return (
-    <ProjectDashboard
-      title="Web Builder"
-      subtitle="Build and deploy web applications with AI"
-      icon={<Globe className="w-4 h-4" />}
-      projects={webProjects}
-      templates={webTemplates}
-      onOpenProject={(id) => navigate(`/web-builder/${id}`)}
-      onNewProject={() => navigate('/web-builder/new')}
-      promptPlaceholder="Describe the website you want to build..."
-    />
+    <div className="flex h-screen w-full overflow-hidden bg-background">
+      <WorkspaceSidebar
+        title="Web Builder"
+        icon={Globe}
+        items={sidebarItems}
+        selectedId={projectId}
+        onSelectItem={(id) => navigate(`/web-builder/${id}`)}
+        onNewItem={() => navigate('/web-builder/new')}
+        newItemLabel="New Project"
+        searchPlaceholder="Search projects..."
+        itemsLabel="Projects"
+      />
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {projectId ? (
+          <WebBuilder />
+        ) : (
+          <ProjectDashboard
+            title="Web Builder"
+            subtitle="Build and deploy web applications with AI"
+            icon={<Globe className="w-4 h-4" />}
+            projects={webProjects}
+            templates={webTemplates}
+            onOpenProject={(id) => navigate(`/web-builder/${id}`)}
+            onNewProject={() => navigate('/web-builder/new')}
+            promptPlaceholder="Describe the website you want to build..."
+          />
+        )}
+      </div>
+    </div>
   );
 };
 
