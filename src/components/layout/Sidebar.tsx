@@ -6,7 +6,7 @@ import {
   History, FolderOpen, ChevronLeft, ChevronRight, Sparkles, ExternalLink,
   Video, Music, FileSpreadsheet, Plus, Search, MoreHorizontal, BookOpen
 } from 'lucide-react';
-import { useWorkspace, WorkspaceMode } from '@/hooks/useWorkspace';
+import { useWorkspace } from '@/hooks/useWorkspace';
 import { cn } from '@/lib/utils';
 
 const builderItems: { icon: React.ElementType; label: string; path: string }[] = [
@@ -34,7 +34,7 @@ const mockChatHistory: ChatHistoryItem[] = [
 ];
 
 export const Sidebar = () => {
-  const { mode, setMode, sidebarOpen, setSidebarOpen } = useWorkspace();
+  const { mode, setMode, sidebarOpen, setSidebarOpen, startNewChat } = useWorkspace();
   const location = useLocation();
   const navigate = useNavigate();
   const [chatSearch, setChatSearch] = useState('');
@@ -107,6 +107,7 @@ export const Sidebar = () => {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                startNewChat();
                 navigate('/');
               }}
               className="w-6 h-6 rounded-md flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
