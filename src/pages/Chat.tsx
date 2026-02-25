@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useWorkspace } from '@/hooks/useWorkspace';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -108,6 +109,7 @@ useEffect(() => {
 const TOKEN_LIMIT = 128000;
 
 const ChatPage = () => {
+  const { chatKey } = useWorkspace();
   const [messages, setMessages] = useState<Message[]>(sampleMessages);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
@@ -115,6 +117,15 @@ const ChatPage = () => {
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const isMobile = useIsMobile();
+
+  // Reset chat when chatKey changes (New Chat clicked)
+  useEffect(() => {
+    if (chatKey > 0) {
+      setMessages([]);
+      setInput('');
+      setIsStreaming(false);
+    }
+  }, [chatKey]);
 
   const totalTokens = messages.reduce((sum, m) => sum + (m.tokens || 0), 0);
   const tokenPct = Math.min((totalTokens / TOKEN_LIMIT) * 100, 100);
