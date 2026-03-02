@@ -12,48 +12,23 @@ const audioProjects: Project[] = [
 const audioTemplates: Template[] = [
   { id: 'atmpl-1', name: 'Podcast', description: 'Multi-voice podcast with intro music and transitions.', author: 'COXMOX Team', category: 'Podcast', thumbnail: 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&h=250&fit=crop' },
   { id: 'atmpl-2', name: 'Audiobook', description: 'Narrated audiobook with chapter markers and ambient sound.', author: 'Community', category: 'Narration', thumbnail: 'https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?w=400&h=250&fit=crop' },
-  { id: 'atmpl-3', name: 'Sound Effects Pack', description: 'Collection of AI-generated sound effects for games and apps.', author: 'COXMOX Team', category: 'SFX', thumbnail: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&h=250&fit=crop' },
 ];
 
 const AudioStudioDashboard = () => {
   const navigate = useNavigate();
   const { projectId } = useParams();
 
-  const sidebarItems = audioProjects.map(p => ({
-    id: p.id,
-    name: p.name,
-    subtitle: p.status,
-    time: p.updatedAt,
-  }));
+  if (projectId) {
+    return <div className="flex h-screen w-full overflow-hidden bg-background"><AudioStudio /></div>;
+  }
+
+  const sidebarItems = audioProjects.map(p => ({ id: p.id, name: p.name, subtitle: p.status, time: p.updatedAt, thumbnail: p.thumbnail }));
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
-      <WorkspaceSidebar
-        title="Audio Studio"
-        icon={Music}
-        items={sidebarItems}
-        selectedId={projectId}
-        onSelectItem={(id) => navigate(`/audio-studio/${id}`)}
-        onNewItem={() => navigate('/audio-studio/new')}
-        newItemLabel="New Audio"
-        searchPlaceholder="Search audio..."
-        itemsLabel="Projects"
-      />
+      <WorkspaceSidebar title="Audio Studio" icon={Music} items={sidebarItems} selectedId={projectId} onSelectItem={(id) => navigate(`/audio-studio/${id}`)} onNewItem={() => navigate('/audio-studio/new')} searchPlaceholder="Search audio..." basePath="/audio-studio" />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {projectId ? (
-          <AudioStudio />
-        ) : (
-          <ProjectDashboard
-            title="Audio Studio"
-            subtitle="Generate music, voiceovers, and sound effects with AI"
-            icon={<Music className="w-4 h-4" />}
-            projects={audioProjects}
-            templates={audioTemplates}
-            onOpenProject={(id) => navigate(`/audio-studio/${id}`)}
-            onNewProject={() => navigate('/audio-studio/new')}
-            promptPlaceholder="Describe the audio you want to create..."
-          />
-        )}
+        <ProjectDashboard title="Audio Studio" subtitle="Generate music, voiceovers, and sound effects with AI" icon={<Music className="w-4 h-4" />} projects={audioProjects} templates={audioTemplates} onOpenProject={(id) => navigate(`/audio-studio/${id}`)} onNewProject={() => navigate('/audio-studio/new')} promptPlaceholder="Describe the audio you want to create..." />
       </div>
     </div>
   );
