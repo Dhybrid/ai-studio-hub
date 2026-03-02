@@ -18,41 +18,17 @@ const ImageStudioDashboard = () => {
   const navigate = useNavigate();
   const { projectId } = useParams();
 
-  const sidebarItems = imageProjects.map(p => ({
-    id: p.id,
-    name: p.name,
-    subtitle: p.status,
-    time: p.updatedAt,
-  }));
+  if (projectId) {
+    return <div className="flex h-screen w-full overflow-hidden bg-background"><ImageStudio /></div>;
+  }
+
+  const sidebarItems = imageProjects.map(p => ({ id: p.id, name: p.name, subtitle: p.status, time: p.updatedAt, thumbnail: p.thumbnail }));
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
-      <WorkspaceSidebar
-        title="Image Studio"
-        icon={Image}
-        items={sidebarItems}
-        selectedId={projectId}
-        onSelectItem={(id) => navigate(`/image-studio/${id}`)}
-        onNewItem={() => navigate('/image-studio/new')}
-        newItemLabel="New Image Project"
-        searchPlaceholder="Search projects..."
-        itemsLabel="Projects"
-      />
+      <WorkspaceSidebar title="Image Studio" icon={Image} items={sidebarItems} selectedId={projectId} onSelectItem={(id) => navigate(`/image-studio/${id}`)} onNewItem={() => navigate('/image-studio/new')} searchPlaceholder="Search projects..." basePath="/image-studio" />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {projectId ? (
-          <ImageStudio />
-        ) : (
-          <ProjectDashboard
-            title="Image Studio"
-            subtitle="Generate and manage AI-powered images"
-            icon={<Image className="w-4 h-4" />}
-            projects={imageProjects}
-            templates={imageTemplates}
-            onOpenProject={(id) => navigate(`/image-studio/${id}`)}
-            onNewProject={() => navigate('/image-studio/new')}
-            promptPlaceholder="Describe the image you want to generate..."
-          />
-        )}
+        <ProjectDashboard title="Image Studio" subtitle="Generate and manage AI-powered images" icon={<Image className="w-4 h-4" />} projects={imageProjects} templates={imageTemplates} onOpenProject={(id) => navigate(`/image-studio/${id}`)} onNewProject={() => navigate('/image-studio/new')} promptPlaceholder="Describe the image you want to generate..." />
       </div>
     </div>
   );

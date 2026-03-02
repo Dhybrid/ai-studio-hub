@@ -18,41 +18,17 @@ const VideoStudioDashboard = () => {
   const navigate = useNavigate();
   const { projectId } = useParams();
 
-  const sidebarItems = videoProjects.map(p => ({
-    id: p.id,
-    name: p.name,
-    subtitle: p.status,
-    time: p.updatedAt,
-  }));
+  if (projectId) {
+    return <div className="flex h-screen w-full overflow-hidden bg-background"><VideoStudio /></div>;
+  }
+
+  const sidebarItems = videoProjects.map(p => ({ id: p.id, name: p.name, subtitle: p.status, time: p.updatedAt, thumbnail: p.thumbnail }));
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
-      <WorkspaceSidebar
-        title="Video Studio"
-        icon={Video}
-        items={sidebarItems}
-        selectedId={projectId}
-        onSelectItem={(id) => navigate(`/video-studio/${id}`)}
-        onNewItem={() => navigate('/video-studio/new')}
-        newItemLabel="New Video"
-        searchPlaceholder="Search videos..."
-        itemsLabel="Projects"
-      />
+      <WorkspaceSidebar title="Video Studio" icon={Video} items={sidebarItems} selectedId={projectId} onSelectItem={(id) => navigate(`/video-studio/${id}`)} onNewItem={() => navigate('/video-studio/new')} searchPlaceholder="Search videos..." basePath="/video-studio" />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {projectId ? (
-          <VideoStudio />
-        ) : (
-          <ProjectDashboard
-            title="Video Studio"
-            subtitle="Create and edit videos with AI"
-            icon={<Video className="w-4 h-4" />}
-            projects={videoProjects}
-            templates={videoTemplates}
-            onOpenProject={(id) => navigate(`/video-studio/${id}`)}
-            onNewProject={() => navigate('/video-studio/new')}
-            promptPlaceholder="Describe the video you want to create..."
-          />
-        )}
+        <ProjectDashboard title="Video Studio" subtitle="Create and edit videos with AI" icon={<Video className="w-4 h-4" />} projects={videoProjects} templates={videoTemplates} onOpenProject={(id) => navigate(`/video-studio/${id}`)} onNewProject={() => navigate('/video-studio/new')} promptPlaceholder="Describe the video you want to create..." />
       </div>
     </div>
   );

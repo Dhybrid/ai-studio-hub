@@ -1,15 +1,17 @@
-import { useState, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Send, RefreshCw, Download, Rocket, ExternalLink,
   File, FolderOpen, Terminal, Check, Loader2, Circle,
-  Code2, Eye, PanelRightClose, PanelRightOpen, ArrowLeft, Copy
+  Code2, Eye, PanelRightClose, PanelRightOpen, Copy, MousePointer2,
+  Settings, MoreHorizontal, Menu, X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type BuildStep = 'planning' | 'generating' | 'installing' | 'building' | 'ready' | 'idle';
 type ViewMode = 'preview' | 'code';
@@ -57,23 +59,11 @@ export default function Hero() {
   );
 }`;
 
-const terminalLogs = [
-  { text: '$ npm install', type: 'command' },
-  { text: 'Installing dependencies...', type: 'info' },
-  { text: 'added 127 packages in 3.2s', type: 'success' },
-  { text: '$ npm run build', type: 'command' },
-  { text: 'Creating optimized production build...', type: 'info' },
-  { text: '✓ Compiled successfully', type: 'success' },
-  { text: '✓ Collecting page data', type: 'success' },
-  { text: '✓ Generating static pages', type: 'success' },
-  { text: 'Ready in 2.1s', type: 'success' },
-];
-
 const buildSteps: { key: BuildStep; label: string }[] = [
-  { key: 'planning', label: 'Planning' },
-  { key: 'generating', label: 'Generating Files' },
-  { key: 'installing', label: 'Installing Dependencies' },
-  { key: 'building', label: 'Building Preview' },
+  { key: 'planning', label: 'Planning structure...' },
+  { key: 'generating', label: 'Generating components...' },
+  { key: 'installing', label: 'Installing dependencies...' },
+  { key: 'building', label: 'Building preview...' },
   { key: 'ready', label: 'Ready' },
 ];
 
@@ -83,6 +73,23 @@ const projectNames: Record<string, string> = {
   'web-3': 'Portfolio Site',
   new: 'New Project',
 };
+
+interface ActivityLog {
+  id: string;
+  type: 'info' | 'file' | 'success' | 'thinking';
+  text: string;
+  time: string;
+}
+
+const mockActivity: ActivityLog[] = [
+  { id: '1', type: 'thinking', text: 'Analyzing your prompt...', time: '0s' },
+  { id: '2', type: 'info', text: 'Planning component architecture', time: '1s' },
+  { id: '3', type: 'file', text: 'Created app/page.tsx', time: '2s' },
+  { id: '4', type: 'file', text: 'Created components/Hero.tsx', time: '3s' },
+  { id: '5', type: 'file', text: 'Created components/Header.tsx', time: '3s' },
+  { id: '6', type: 'file', text: 'Updated globals.css', time: '4s' },
+  { id: '7', type: 'success', text: 'Build complete — preview is ready', time: '5s' },
+];
 
 const WebBuilder = () => {
   const { projectId } = useParams();
@@ -95,7 +102,9 @@ const WebBuilder = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('preview');
   const [codePanelOpen, setCodePanelOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [mobilePromptOpen, setMobilePromptOpen] = useState(false);
   const projectName = projectNames[projectId || ''] || 'New Project';
+  const isMobile = useIsMobile();
 
   const handleGenerate = () => {
     if (!prompt.trim()) return;
@@ -103,18 +112,9 @@ const WebBuilder = () => {
     const steps: BuildStep[] = ['planning', 'generating', 'installing', 'building', 'ready'];
     let i = 0;
     const interval = setInterval(() => {
-      if (i < steps.length) {
-        setBuildStep(steps[i]);
-        i++;
-      } else {
-        clearInterval(interval);
-        setIsBuilding(false);
-      }
+      if (i < steps.length) { setBuildStep(steps[i]); i++; }
+      else { clearInterval(interval); setIsBuilding(false); }
     }, 1200);
-  };
-
-  const openInNewTab = () => {
-    window.open(window.location.href, '_blank');
   };
 
   const copyCode = () => {
@@ -125,64 +125,34 @@ const WebBuilder = () => {
 
   const currentStepIndex = buildSteps.findIndex((s) => s.key === buildStep);
 
-  return (
-    <div className="flex h-full">
-      {/* Left – Prompt Panel */}
-      <div className="w-[300px] border-r border-border flex flex-col bg-background flex-shrink-0">
-        {/* Project header */}
-        <div className="px-4 py-3 border-b border-border flex-shrink-0">
-          <button
-            onClick={() => navigate('/web-builder')}
-            className="flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors mb-3"
-          >
-            <ArrowLeft className="w-3 h-3" /> All Projects
-          </button>
-          <h2 className="text-sm font-semibold text-foreground truncate">{projectName}</h2>
-          <div className="mt-2 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-success" />
-            <span className="text-[10px] text-muted-foreground">Ready · localhost:3000</span>
+  // Left prompt panel content
+  const PromptPanel = () => (
+    <div className="flex flex-col h-full bg-background">
+      {/* Activity Log */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-2">
+        {mockActivity.map((log) => (
+          <div key={log.id} className="flex items-start gap-2 text-xs">
+            {log.type === 'thinking' && <Loader2 className="w-3 h-3 text-accent mt-0.5 flex-shrink-0 animate-spin" />}
+            {log.type === 'info' && <Circle className="w-3 h-3 text-muted-foreground mt-0.5 flex-shrink-0" />}
+            {log.type === 'file' && <File className="w-3 h-3 text-accent mt-0.5 flex-shrink-0" />}
+            {log.type === 'success' && <Check className="w-3 h-3 text-success mt-0.5 flex-shrink-0" />}
+            <span className={cn(
+              "flex-1",
+              log.type === 'success' ? 'text-success font-medium' : 'text-muted-foreground'
+            )}>{log.text}</span>
           </div>
-        </div>
+        ))}
 
-        {/* Prompt */}
-        <div className="flex-1 p-3 flex flex-col overflow-hidden">
-          <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2">
-            Prompt
-          </label>
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            className="flex-1 w-full rounded-lg bg-surface border border-border p-3 text-sm text-foreground outline-none resize-none focus:ring-1 focus:ring-accent placeholder:text-muted-foreground"
-            placeholder="Describe a change or feature to add..."
-          />
-          <button
-            onClick={handleGenerate}
-            disabled={isBuilding || !prompt.trim()}
-            className="mt-2 w-full py-2.5 rounded-lg bg-foreground text-background text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-40 flex items-center justify-center gap-2"
-          >
-            {isBuilding ? (
-              <><Loader2 className="w-4 h-4 animate-spin" /> Building...</>
-            ) : (
-              <><Send className="w-4 h-4" /> Generate</>
-            )}
-          </button>
-        </div>
-
-        {/* Build Progress */}
-        {buildStep !== 'idle' && (
-          <div className="p-3 border-t border-border flex-shrink-0">
-            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2">Build</p>
+        {/* Build progress */}
+        {isBuilding && buildStep !== 'idle' && (
+          <div className="mt-4 p-3 rounded-lg bg-surface border border-border">
             <div className="space-y-1.5">
               {buildSteps.map((step, idx) => (
                 <div key={step.key} className="flex items-center gap-2 text-xs">
                   {idx < currentStepIndex ? (
                     <Check className="w-3 h-3 text-success flex-shrink-0" />
                   ) : idx === currentStepIndex ? (
-                    isBuilding ? (
-                      <Loader2 className="w-3 h-3 text-accent animate-spin flex-shrink-0" />
-                    ) : (
-                      <Check className="w-3 h-3 text-success flex-shrink-0" />
-                    )
+                    <Loader2 className="w-3 h-3 text-accent animate-spin flex-shrink-0" />
                   ) : (
                     <Circle className="w-3 h-3 text-muted-foreground/30 flex-shrink-0" />
                   )}
@@ -202,72 +172,138 @@ const WebBuilder = () => {
             </div>
           </div>
         )}
-
-        {/* Actions */}
-        <div className="p-3 border-t border-border flex gap-1.5 flex-shrink-0">
-          <button className="flex-1 py-2 rounded-lg border border-border text-[11px] font-medium text-foreground hover:bg-surface-hover transition-colors flex items-center justify-center gap-1">
-            <RefreshCw className="w-3 h-3" /> Rebuild
-          </button>
-          <button className="flex-1 py-2 rounded-lg border border-border text-[11px] font-medium text-foreground hover:bg-surface-hover transition-colors flex items-center justify-center gap-1">
-            <Download className="w-3 h-3" /> ZIP
-          </button>
-          <button className="flex-1 py-2 rounded-lg bg-accent text-accent-foreground text-[11px] font-medium hover:opacity-90 transition-opacity flex items-center justify-center gap-1">
-            <Rocket className="w-3 h-3" /> Deploy
-          </button>
-        </div>
       </div>
 
-      {/* Center + Right via ResizablePanels */}
+      {/* Prompt Input */}
+      <div className="p-3 border-t border-border">
+        <div className="flex items-end gap-2 bg-surface rounded-xl border border-border p-2">
+          <textarea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleGenerate(); }
+            }}
+            className="flex-1 bg-transparent border-none outline-none resize-none text-sm py-2 px-1 text-foreground placeholder:text-muted-foreground max-h-32"
+            placeholder="Describe a change or feature..."
+            rows={1}
+            style={{ minHeight: '36px' }}
+          />
+          {isBuilding ? (
+            <button
+              onClick={() => setIsBuilding(false)}
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-destructive text-destructive-foreground"
+            >
+              <Circle className="w-3.5 h-3.5" />
+            </button>
+          ) : (
+            <button
+              onClick={handleGenerate}
+              disabled={!prompt.trim()}
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-foreground text-background hover:opacity-90 disabled:opacity-30"
+            >
+              <Send className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="flex h-full">
+      {/* Left Panel - Prompt & Activity (hidden on mobile, toggled) */}
+      {!isMobile && (
+        <div className="w-[320px] border-r border-border flex-shrink-0 flex flex-col">
+          <PromptPanel />
+        </div>
+      )}
+
+      {/* Mobile prompt sheet */}
+      {isMobile && (
+        <AnimatePresence>
+          {mobilePromptOpen && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/50 z-40"
+                onClick={() => setMobilePromptOpen(false)}
+              />
+              <motion.div
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+                className="fixed bottom-0 left-0 right-0 h-[60vh] bg-background border-t border-border rounded-t-2xl z-50 flex flex-col"
+              >
+                <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                  <span className="text-sm font-medium text-foreground">AI Activity</span>
+                  <button onClick={() => setMobilePromptOpen(false)}><X className="w-4 h-4" /></button>
+                </div>
+                <PromptPanel />
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      )}
+
+      {/* Right - Preview */}
       <ResizablePanelGroup direction="horizontal" className="flex-1 min-w-0">
-        {/* Preview / Code Center */}
         <ResizablePanel defaultSize={codePanelOpen ? 60 : 100} minSize={35}>
           <div className="flex flex-col h-full">
-            {/* Browser chrome */}
+            {/* Browser chrome / toolbar */}
             <div className="h-10 flex items-center justify-between px-3 border-b border-border bg-surface/50 flex-shrink-0">
               <div className="flex items-center gap-2">
+                {isMobile && (
+                  <button onClick={() => setMobilePromptOpen(true)} className="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-hover text-muted-foreground">
+                    <Menu className="w-4 h-4" />
+                  </button>
+                )}
                 <div className="flex gap-1.5">
                   <span className="w-3 h-3 rounded-full bg-destructive/60" />
                   <span className="w-3 h-3 rounded-full bg-warning/60" />
                   <span className="w-3 h-3 rounded-full bg-success/60" />
                 </div>
-                <div className="ml-2 px-3 py-1 rounded-md bg-background border border-border text-[11px] text-muted-foreground font-mono max-w-[200px] truncate">
+                <div className="ml-2 px-3 py-1 rounded-md bg-background border border-border text-[11px] text-muted-foreground font-mono max-w-[160px] truncate hidden sm:block">
                   localhost:3000
                 </div>
               </div>
               <div className="flex items-center gap-1">
+                {/* Visual Edit */}
+                <button className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-all" title="Visual Edit">
+                  <MousePointer2 className="w-3 h-3" />
+                  <span className="hidden sm:inline">Edit</span>
+                </button>
                 {/* View toggle */}
-                <div className="flex items-center p-0.5 rounded-md bg-muted mr-1">
+                <div className="flex items-center p-0.5 rounded-md bg-muted">
                   <button
                     onClick={() => setViewMode('preview')}
-                    className={cn(
-                      "flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-all",
-                      viewMode === 'preview' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
-                    )}
+                    className={cn("flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-all", viewMode === 'preview' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}
                   >
-                    <Eye className="w-3 h-3" /> Preview
+                    <Eye className="w-3 h-3" /> <span className="hidden sm:inline">Preview</span>
                   </button>
                   <button
                     onClick={() => setViewMode('code')}
-                    className={cn(
-                      "flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-all",
-                      viewMode === 'code' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
-                    )}
+                    className={cn("flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-all", viewMode === 'code' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}
                   >
-                    <Code2 className="w-3 h-3" /> Code
+                    <Code2 className="w-3 h-3" /> <span className="hidden sm:inline">Code</span>
                   </button>
                 </div>
-                <button
-                  onClick={() => { window.open(window.location.href, '_blank'); }}
-                  className="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-hover transition-colors text-muted-foreground"
-                  title="Open in new tab"
-                >
+                {/* Action icons */}
+                <button className="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-hover transition-colors text-muted-foreground" title="Refresh">
+                  <RefreshCw className="w-3.5 h-3.5" />
+                </button>
+                <button className="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-hover transition-colors text-muted-foreground" title="Download ZIP">
+                  <Download className="w-3.5 h-3.5" />
+                </button>
+                <button className="w-7 h-7 flex items-center justify-center rounded bg-accent text-accent-foreground hover:opacity-90 transition-opacity" title="Deploy">
+                  <Rocket className="w-3.5 h-3.5" />
+                </button>
+                <button onClick={() => window.open(window.location.href, '_blank')} className="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-hover transition-colors text-muted-foreground" title="Open in new tab">
                   <ExternalLink className="w-3.5 h-3.5" />
                 </button>
-                <button
-                  onClick={() => setCodePanelOpen(!codePanelOpen)}
-                  className="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-hover transition-colors text-muted-foreground"
-                  title={codePanelOpen ? 'Hide code panel' : 'Show code panel'}
-                >
+                <button onClick={() => setCodePanelOpen(!codePanelOpen)} className="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-hover transition-colors text-muted-foreground hidden md:flex" title={codePanelOpen ? 'Hide code' : 'Show code'}>
                   {codePanelOpen ? <PanelRightClose className="w-3.5 h-3.5" /> : <PanelRightOpen className="w-3.5 h-3.5" />}
                 </button>
               </div>
@@ -281,19 +317,11 @@ const WebBuilder = () => {
                     <div className="inline-block px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-medium mb-6 border border-blue-100">
                       ✨ Just shipped v2.0
                     </div>
-                    <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
-                      Build faster with AI
-                    </h1>
-                    <p className="mt-4 text-lg text-gray-500 max-w-xl mx-auto">
-                      Transform your ideas into production-ready applications in minutes, not months.
-                    </p>
-                    <div className="mt-8 flex gap-3 justify-center">
-                      <button className="px-6 py-3 rounded-xl bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors">
-                        Get Started
-                      </button>
-                      <button className="px-6 py-3 rounded-xl border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
-                        Learn More
-                      </button>
+                    <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">Build faster with AI</h1>
+                    <p className="mt-4 text-lg text-gray-500 max-w-xl mx-auto">Transform your ideas into production-ready applications in minutes, not months.</p>
+                    <div className="mt-8 flex gap-3 justify-center flex-wrap">
+                      <button className="px-6 py-3 rounded-xl bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors">Get Started</button>
+                      <button className="px-6 py-3 rounded-xl border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">Learn More</button>
                     </div>
                   </div>
                 </div>
@@ -321,8 +349,8 @@ const WebBuilder = () => {
           </div>
         </ResizablePanel>
 
-        {/* Code/File Panel */}
-        {codePanelOpen && (
+        {/* Code Panel */}
+        {codePanelOpen && !isMobile && (
           <>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={40} minSize={25} maxSize={60}>
@@ -344,7 +372,6 @@ const WebBuilder = () => {
                     </button>
                   ))}
                 </div>
-
                 <div className="flex-1 overflow-auto">
                   {codeTab === 'files' && (
                     <div className="p-2 text-sm">
@@ -360,10 +387,7 @@ const WebBuilder = () => {
                                 <button
                                   key={child.name}
                                   onClick={() => { setSelectedFile(child.name); setCodeTab('code'); }}
-                                  className={cn(
-                                    "flex items-center gap-2 px-2 py-1.5 rounded hover:bg-surface-hover cursor-pointer ml-4 w-full text-left transition-colors",
-                                    selectedFile === child.name ? "text-accent bg-accent/5" : "text-muted-foreground"
-                                  )}
+                                  className={cn("flex items-center gap-2 px-2 py-1.5 rounded hover:bg-surface-hover cursor-pointer ml-4 w-full text-left transition-colors", selectedFile === child.name ? "text-accent bg-accent/5" : "text-muted-foreground")}
                                 >
                                   <File className="w-3 h-3" />
                                   <span className="text-xs">{child.name}</span>
@@ -371,10 +395,7 @@ const WebBuilder = () => {
                               ))}
                             </>
                           ) : (
-                            <button
-                              onClick={() => { setSelectedFile(item.name); setCodeTab('code'); }}
-                              className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-surface-hover cursor-pointer text-muted-foreground w-full text-left"
-                            >
+                            <button onClick={() => { setSelectedFile(item.name); setCodeTab('code'); }} className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-surface-hover cursor-pointer text-muted-foreground w-full text-left">
                               <File className="w-3 h-3" />
                               <span className="text-xs">{item.name}</span>
                             </button>
@@ -391,28 +412,21 @@ const WebBuilder = () => {
                           {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                         </button>
                       </div>
-                      <SyntaxHighlighter
-                        language="tsx"
-                        style={oneDark}
-                        customStyle={{ margin: 0, padding: '0.75rem', background: 'transparent', fontSize: '11px' }}
-                        showLineNumbers
-                        lineNumberStyle={{ color: 'hsl(var(--muted-foreground))', opacity: 0.3, fontSize: '10px' }}
-                      >
+                      <SyntaxHighlighter language="tsx" style={oneDark} customStyle={{ margin: 0, padding: '0.75rem', background: 'transparent', fontSize: '11px' }} showLineNumbers lineNumberStyle={{ color: 'hsl(var(--muted-foreground))', opacity: 0.3, fontSize: '10px' }}>
                         {sampleCode}
                       </SyntaxHighlighter>
                     </div>
                   )}
                   {codeTab === 'terminal' && (
                     <div className="p-4 font-mono text-xs space-y-1 bg-[hsl(var(--code-bg))]">
-                      {terminalLogs.map((log, i) => (
-                        <div
-                          key={i}
-                          className={cn(
-                            log.type === 'command' && "text-accent font-medium",
-                            log.type === 'info' && "text-muted-foreground",
-                            log.type === 'success' && "text-success",
-                          )}
-                        >
+                      {[
+                        { text: '$ npm install', type: 'command' },
+                        { text: 'added 127 packages in 3.2s', type: 'success' },
+                        { text: '$ npm run build', type: 'command' },
+                        { text: '✓ Compiled successfully', type: 'success' },
+                        { text: 'Ready in 2.1s', type: 'success' },
+                      ].map((log, i) => (
+                        <div key={i} className={cn(log.type === 'command' && "text-accent font-medium", log.type === 'success' && "text-success")}>
                           {log.text}
                         </div>
                       ))}

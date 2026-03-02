@@ -13,6 +13,7 @@ import ImageStudioDashboard from "./pages/ImageStudioDashboard";
 import VideoStudioDashboard from "./pages/VideoStudioDashboard";
 import AudioStudioDashboard from "./pages/AudioStudioDashboard";
 import OfficeDashboard from "./pages/OfficeDashboard";
+import AllTools from "./pages/AllTools";
 import Settings from "./pages/Settings";
 import Projects from "./pages/Projects";
 import History from "./pages/History";
@@ -28,15 +29,16 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Main layout — AI Chat, Settings, Projects, History */}
+            {/* Main layout — AI Chat, Settings, Projects, History, All Tools */}
             <Route element={<DashboardLayout />}>
               <Route path="/" element={<Chat />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/projects" element={<Projects />} />
               <Route path="/history" element={<History />} />
+              <Route path="/all-tools" element={<AllTools />} />
             </Route>
 
-            {/* Independent workspaces — each has its own sidebar/layout */}
+            {/* Independent workspaces */}
             <Route path="/cereva" element={<Cereva />} />
             <Route path="/cereva/:chatId" element={<Cereva />} />
 

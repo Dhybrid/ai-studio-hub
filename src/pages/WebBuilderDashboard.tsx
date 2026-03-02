@@ -21,11 +21,21 @@ const WebBuilderDashboard = () => {
   const navigate = useNavigate();
   const { projectId } = useParams();
 
+  // When in active project, no sidebar - full builder view
+  if (projectId) {
+    return (
+      <div className="flex h-screen w-full overflow-hidden bg-background">
+        <WebBuilder />
+      </div>
+    );
+  }
+
   const sidebarItems = webProjects.map(p => ({
     id: p.id,
     name: p.name,
     subtitle: p.status,
     time: p.updatedAt,
+    thumbnail: p.thumbnail,
   }));
 
   return (
@@ -39,23 +49,19 @@ const WebBuilderDashboard = () => {
         onNewItem={() => navigate('/web-builder/new')}
         newItemLabel="New Project"
         searchPlaceholder="Search projects..."
-        itemsLabel="Projects"
+        basePath="/web-builder"
       />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {projectId ? (
-          <WebBuilder />
-        ) : (
-          <ProjectDashboard
-            title="Web Builder"
-            subtitle="Build and deploy web applications with AI"
-            icon={<Globe className="w-4 h-4" />}
-            projects={webProjects}
-            templates={webTemplates}
-            onOpenProject={(id) => navigate(`/web-builder/${id}`)}
-            onNewProject={() => navigate('/web-builder/new')}
-            promptPlaceholder="Describe the website you want to build..."
-          />
-        )}
+        <ProjectDashboard
+          title="Web Builder"
+          subtitle="Build and deploy web applications with AI"
+          icon={<Globe className="w-4 h-4" />}
+          projects={webProjects}
+          templates={webTemplates}
+          onOpenProject={(id) => navigate(`/web-builder/${id}`)}
+          onNewProject={() => navigate('/web-builder/new')}
+          promptPlaceholder="Describe the website you want to build..."
+        />
       </div>
     </div>
   );
