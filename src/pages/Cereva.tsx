@@ -589,13 +589,5 @@ const VoiceSelectorPopup = ({ open, onClose, voices, selectedVoice, onSelectVoic
   </AnimatePresence>
 );
 
-const voiceOptions = [
-  { id: 'nova', name: 'Nova', accent: 'American', type: 'Female', demo: 'Hi! I\'m Nova, ready to help you learn.' },
-  { id: 'atlas', name: 'Atlas', accent: 'British', type: 'Male', demo: 'Hello, I\'m Atlas. Let\'s explore together.' },
-  { id: 'sage', name: 'Sage', accent: 'Australian', type: 'Female', demo: 'G\'day! I\'m Sage, your learning companion.' },
-  { id: 'echo', name: 'Echo', accent: 'American', type: 'Male', demo: 'Hey there! I\'m Echo, here to teach.' },
-  { id: 'luna', name: 'Luna', accent: 'British', type: 'Female', demo: 'Hi! I\'m Luna, let me explain that for you.' },
-  { id: 'kai', name: 'Kai', accent: 'Japanese', type: 'Male', demo: 'Hello! I\'m Kai, ready to guide you.' },
-];
 
 export default Cereva;
