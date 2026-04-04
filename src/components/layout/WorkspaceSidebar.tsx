@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   Search, ChevronLeft, ChevronRight,
   Home, Star, Users, Clock, Share2, Zap,
@@ -69,7 +69,6 @@ export const WorkspaceSidebar = ({
     { key: 'recents' as const, icon: Clock, label: 'Recents' },
   ];
 
-  // Mobile: hamburger trigger
   if (isMobile) {
     return (
       <>
@@ -80,51 +79,45 @@ export const WorkspaceSidebar = ({
           <Menu className="w-4 h-4" />
         </button>
 
-        <AnimatePresence>
-          {mobileOpen && (
-            <>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/50 z-50"
-                onClick={() => setMobileOpen(false)}
-              />
-              <motion.aside
-                initial={{ x: -280 }}
-                animate={{ x: 0 }}
-                exit={{ x: -280 }}
-                transition={{ duration: 0.2, ease: 'easeOut' }}
-                className="fixed left-0 top-0 bottom-0 w-[280px] z-50 flex flex-col border-r border-sidebar-border bg-sidebar overflow-hidden"
-              >
-                <SidebarContent
-                  title={title}
-                  Icon={Icon}
-                  navItems={navItems}
-                  projectSections={projectSections}
-                  activeSection={activeSection}
-                  setActiveSection={setActiveSection}
-                  searchOpen={searchOpen}
-                  setSearchOpen={setSearchOpen}
-                  search={search}
-                  setSearch={setSearch}
-                  filtered={filtered}
-                  items={items}
-                  selectedId={selectedId}
-                  onSelectItem={(id) => { onSelectItem(id); setMobileOpen(false); }}
-                  collapsed={false}
-                  sharePopup={sharePopup}
-                  setSharePopup={setSharePopup}
-                  upgradePopup={upgradePopup}
-                  setUpgradePopup={setUpgradePopup}
-                  onClose={() => setMobileOpen(false)}
-                />
-              </motion.aside>
-            </>
+        {/* Overlay */}
+        <div
+          className={cn(
+            "fixed inset-0 bg-black/50 z-50 transition-opacity duration-200",
+            mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
           )}
-        </AnimatePresence>
+          onClick={() => setMobileOpen(false)}
+        />
+        {/* Sidebar drawer */}
+        <aside
+          className={cn(
+            "fixed left-0 top-0 bottom-0 w-[280px] z-50 flex flex-col border-r border-sidebar-border bg-sidebar overflow-hidden transition-transform duration-200 ease-out",
+            mobileOpen ? "translate-x-0" : "-translate-x-full"
+          )}
+        >
+          <SidebarContent
+            title={title}
+            Icon={Icon}
+            navItems={navItems}
+            projectSections={projectSections}
+            activeSection={activeSection}
+            setActiveSection={setActiveSection}
+            searchOpen={searchOpen}
+            setSearchOpen={setSearchOpen}
+            search={search}
+            setSearch={setSearch}
+            filtered={filtered}
+            items={items}
+            selectedId={selectedId}
+            onSelectItem={(id: string) => { onSelectItem(id); setMobileOpen(false); }}
+            collapsed={false}
+            sharePopup={sharePopup}
+            setSharePopup={setSharePopup}
+            upgradePopup={upgradePopup}
+            setUpgradePopup={setUpgradePopup}
+            onClose={() => setMobileOpen(false)}
+          />
+        </aside>
 
-        {/* Search Popup */}
         <SearchPopup
           open={searchOpen}
           onClose={() => { setSearchOpen(false); setSearch(''); }}
@@ -141,11 +134,9 @@ export const WorkspaceSidebar = ({
 
   return (
     <>
-      <motion.aside
-        initial={false}
-        animate={{ width: collapsed ? 64 : 260 }}
-        transition={{ duration: 0.2, ease: 'easeInOut' }}
-        className="h-screen flex-shrink-0 flex flex-col border-r border-sidebar-border bg-sidebar overflow-hidden relative"
+      <aside
+        className="h-screen flex-shrink-0 flex flex-col border-r border-sidebar-border bg-sidebar overflow-hidden relative transition-[width] duration-200 ease-in-out"
+        style={{ width: collapsed ? 64 : 260 }}
       >
         <SidebarContent
           title={title}
@@ -169,7 +160,6 @@ export const WorkspaceSidebar = ({
           setUpgradePopup={setUpgradePopup}
         />
 
-        {/* Collapse Toggle */}
         <button
           onClick={() => setCollapsed(!collapsed)}
           className="absolute top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-card border border-border flex items-center justify-center hover:bg-surface-hover transition-colors z-10"
@@ -177,9 +167,8 @@ export const WorkspaceSidebar = ({
         >
           {collapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}
         </button>
-      </motion.aside>
+      </aside>
 
-      {/* Popups */}
       <SearchPopup
         open={searchOpen}
         onClose={() => { setSearchOpen(false); setSearch(''); }}
@@ -194,7 +183,6 @@ export const WorkspaceSidebar = ({
   );
 };
 
-// Sidebar inner content (shared between mobile and desktop)
 const SidebarContent = ({
   title, Icon, navItems, projectSections, activeSection, setActiveSection,
   collapsed, sharePopup, setSharePopup, upgradePopup, setUpgradePopup,
@@ -202,23 +190,15 @@ const SidebarContent = ({
   onClose,
 }: any) => (
   <>
-    {/* Header */}
     <div className="flex items-center gap-3 px-4 h-14 border-b border-sidebar-border flex-shrink-0">
       <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center flex-shrink-0">
         <Icon className="w-4 h-4 text-accent-foreground" />
       </div>
-      <AnimatePresence>
-        {!collapsed && (
-          <motion.div
-            initial={{ opacity: 0, width: 0 }}
-            animate={{ opacity: 1, width: 'auto' }}
-            exit={{ opacity: 0, width: 0 }}
-            className="overflow-hidden whitespace-nowrap flex-1"
-          >
-            <p className="text-sm font-semibold text-foreground tracking-tight">IIkiogha's {title}</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {!collapsed && (
+        <div className="overflow-hidden whitespace-nowrap flex-1">
+          <p className="text-sm font-semibold text-foreground tracking-tight">IIkiogha's {title}</p>
+        </div>
+      )}
       {onClose && (
         <button onClick={onClose} className="w-7 h-7 rounded-md flex items-center justify-center hover:bg-surface-hover text-muted-foreground ml-auto">
           <X className="w-4 h-4" />
@@ -226,7 +206,6 @@ const SidebarContent = ({
       )}
     </div>
 
-    {/* Nav */}
     <div className="flex-1 flex flex-col py-3 px-2 gap-0.5 overflow-y-auto">
       {navItems.map((item: any) => (
         <button
@@ -242,7 +221,6 @@ const SidebarContent = ({
         </button>
       ))}
 
-      {/* Divider */}
       {!collapsed ? (
         <div className="flex items-center gap-2 px-3 mt-4 mb-1">
           <span className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-widest">Projects</span>
@@ -252,7 +230,6 @@ const SidebarContent = ({
         <div className="my-2 mx-3 h-px bg-sidebar-border" />
       )}
 
-      {/* Project sections */}
       {projectSections.map((section: any) => (
         <button
           key={section.key}
@@ -272,7 +249,6 @@ const SidebarContent = ({
 
       <div className="flex-1" />
 
-      {/* Share / Referral */}
       {!collapsed && (
         <button
           onClick={() => setSharePopup(true)}
@@ -286,7 +262,6 @@ const SidebarContent = ({
         </button>
       )}
 
-      {/* Upgrade */}
       {!collapsed && (
         <button
           onClick={() => setUpgradePopup(true)}
@@ -301,7 +276,6 @@ const SidebarContent = ({
       )}
     </div>
 
-    {/* User */}
     <div className="border-t border-sidebar-border p-3 flex items-center gap-3">
       <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-medium text-foreground flex-shrink-0">
         II
@@ -316,7 +290,6 @@ const SidebarContent = ({
   </>
 );
 
-// Search Popup
 const SearchPopup = ({ open, onClose, search, setSearch, items, onSelect }: {
   open: boolean; onClose: () => void; search: string; setSearch: (s: string) => void;
   items: SidebarItem[]; onSelect: (id: string) => void;
@@ -387,7 +360,6 @@ const SearchPopup = ({ open, onClose, search, setSearch, items, onSelect }: {
   );
 };
 
-// Share Popup
 const SharePopup = ({ open, onClose }: { open: boolean; onClose: () => void }) => (
   <AnimatePresence>
     {open && (
@@ -433,7 +405,6 @@ const SharePopup = ({ open, onClose }: { open: boolean; onClose: () => void }) =
   </AnimatePresence>
 );
 
-// Upgrade Popup
 const UpgradePopup = ({ open, onClose }: { open: boolean; onClose: () => void }) => (
   <AnimatePresence>
     {open && (
