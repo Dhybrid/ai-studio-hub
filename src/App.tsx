@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { WorkspaceProvider } from "@/hooks/useWorkspace";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import Index from "./pages/Index";
 import Chat from "./pages/Chat";
 import Cereva from "./pages/Cereva";
 import WebBuilderDashboard from "./pages/WebBuilderDashboard";
@@ -29,13 +30,18 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Main layout — AI Chat, Settings, Projects, History, All Tools */}
+            {/* Landing page - no sidebar */}
+            <Route path="/" element={<Index />} />
+
+            {/* Standalone pages - own layout with back button */}
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/projects" element={<Projects />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/all-tools" element={<AllTools />} />
+
+            {/* AI Chat with sidebar */}
             <Route element={<DashboardLayout />}>
-              <Route path="/" element={<Chat />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/projects" element={<Projects />} />
-              <Route path="/history" element={<History />} />
-              <Route path="/all-tools" element={<AllTools />} />
+              <Route path="/chat" element={<Chat />} />
             </Route>
 
             {/* Independent workspaces */}
