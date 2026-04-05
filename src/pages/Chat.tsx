@@ -335,14 +335,6 @@ const ChatPage = () => {
                 className="flex-1 bg-transparent border-none outline-none resize-none text-sm py-2 px-1 text-foreground placeholder:text-muted-foreground max-h-32"
                 style={{ minHeight: '36px' }}
               />
-              {/* Token toggle */}
-              <button
-                onClick={() => setTokenPanelOpen(!tokenPanelOpen)}
-                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-hover transition-colors text-muted-foreground"
-                title={tokenPanelOpen ? 'Hide tokens' : 'Show tokens'}
-              >
-                {tokenPanelOpen ? <PanelRightClose className="w-4 h-4" /> : <PanelRightOpen className="w-4 h-4" />}
-              </button>
               {isStreaming ? (
                 <button
                   onClick={() => setIsStreaming(false)}

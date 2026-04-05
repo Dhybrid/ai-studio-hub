@@ -1,5 +1,5 @@
-import { Clock, MessageSquare, Globe, Smartphone, Image } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Clock, MessageSquare, Globe, Smartphone, Image } from 'lucide-react';
 
 const historyItems = [
   { id: '1', type: 'chat', title: 'React hooks explanation', time: '2 hours ago', preview: 'Explain how React hooks work with a code example...' },
@@ -26,17 +26,21 @@ const typeLabel: Record<string, string> = {
 };
 
 const HistoryPage = () => {
-  return (
-    <div className="h-full overflow-y-auto">
-      <div className="max-w-3xl mx-auto px-8 py-10">
-        <div className="flex items-center gap-3 mb-8">
-          <Clock className="w-5 h-5 text-muted-foreground" />
-          <div>
-            <h1 className="text-xl font-semibold text-foreground">History</h1>
-            <p className="text-sm text-muted-foreground">Your recent activity across all workspaces</p>
-          </div>
-        </div>
+  const navigate = useNavigate();
 
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-20 border-b border-border bg-background/80 backdrop-blur-sm">
+        <div className="max-w-3xl mx-auto flex items-center gap-3 h-14 px-4 sm:px-6">
+          <button onClick={() => navigate('/')} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-surface-hover transition-colors text-muted-foreground">
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+          <Clock className="w-4 h-4 text-muted-foreground" />
+          <h1 className="text-sm font-semibold text-foreground">History</h1>
+        </div>
+      </header>
+
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6">
         <div className="space-y-1">
           {historyItems.map((item) => (
             <button
