@@ -14,6 +14,7 @@ import ImageStudioDashboard from "./pages/ImageStudioDashboard";
 import VideoStudioDashboard from "./pages/VideoStudioDashboard";
 import AudioStudioDashboard from "./pages/AudioStudioDashboard";
 import OfficeDashboard from "./pages/OfficeDashboard";
+import OfficeHome from "./pages/OfficeHome";
 import AllTools from "./pages/AllTools";
 import Settings from "./pages/Settings";
 import Projects from "./pages/Projects";
@@ -63,8 +64,17 @@ const App = () => (
             <Route path="/audio-studio" element={<AudioStudioDashboard />} />
             <Route path="/audio-studio/:projectId" element={<AudioStudioDashboard />} />
 
+            {/* Office Suite */}
             <Route path="/office" element={<OfficeDashboard />} />
             <Route path="/office/:projectId" element={<OfficeDashboard />} />
+
+            {/* Per-office type homes */}
+            <Route path="/office/documents" element={<OfficeHome type="documents" />} />
+            <Route path="/office/documents/:projectId" element={<OfficeHome type="documents" />} />
+            <Route path="/office/spreadsheets" element={<OfficeHome type="spreadsheets" />} />
+            <Route path="/office/spreadsheets/:projectId" element={<OfficeHome type="spreadsheets" />} />
+            <Route path="/office/presentations" element={<OfficeHome type="presentations" />} />
+            <Route path="/office/presentations/:projectId" element={<OfficeHome type="presentations" />} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>

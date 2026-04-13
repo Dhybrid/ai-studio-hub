@@ -2,7 +2,8 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Plus, Trash2, Copy, Play, ChevronDown, Image, Type, Square,
   PieChart, TrendingUp, Layout, Palette, Wand2, Loader2, Mic,
-  LayoutGrid, MoveUp, MoveDown, Maximize2, X
+  LayoutGrid, MoveUp, MoveDown, Maximize2, X, Bold, Italic, Underline,
+  AlignLeft, AlignCenter, AlignRight, Shapes, ChevronRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -11,7 +12,8 @@ type Slide = {
   title: string;
   subtitle: string;
   content: string;
-  layout: 'title' | 'content' | 'two-column' | 'image' | 'chart' | 'blank';
+  layout: 'title' | 'content' | 'two-column' | 'image' | 'chart' | 'blank' | 'section' | 'comparison';
+  theme: string;
   bgColor: string;
   textColor: string;
 };
@@ -19,29 +21,35 @@ type Slide = {
 let slideIdCounter = 100;
 
 const defaultSlides: Slide[] = [
-  { id: 1, title: 'Q4 Business Report', subtitle: 'Annual Review & Strategy', content: '', layout: 'title', bgColor: 'bg-gradient-to-br from-accent/10 to-accent/5', textColor: '' },
-  { id: 2, title: 'Executive Summary', subtitle: '', content: '• Revenue grew 23% year-over-year\n• Customer base expanded to 50,000+\n• Launched 3 new product lines\n• Net profit margin improved by 4%', layout: 'content', bgColor: 'bg-card', textColor: '' },
-  { id: 3, title: 'Revenue Analysis', subtitle: 'Revenue trends by segment', content: '', layout: 'chart', bgColor: 'bg-card', textColor: '' },
-  { id: 4, title: 'Market Position', subtitle: '', content: '', layout: 'two-column', bgColor: 'bg-card', textColor: '' },
-  { id: 5, title: 'Next Steps', subtitle: '', content: '• Expand into European markets\n• Launch mobile app v2.0\n• Hire 50 new team members\n• Increase marketing budget by 30%', layout: 'content', bgColor: 'bg-card', textColor: '' },
+  { id: 1, title: 'Q4 Business Report', subtitle: 'Annual Review & Strategy', content: '', layout: 'title', theme: 'default', bgColor: 'bg-gradient-to-br from-accent/10 to-accent/5', textColor: '' },
+  { id: 2, title: 'Executive Summary', subtitle: '', content: '• Revenue grew 23% year-over-year\n• Customer base expanded to 50,000+\n• Launched 3 new product lines\n• Net profit margin improved by 4%', layout: 'content', theme: 'default', bgColor: 'bg-card', textColor: '' },
+  { id: 3, title: 'Revenue Analysis', subtitle: 'Revenue trends by segment', content: '', layout: 'chart', theme: 'default', bgColor: 'bg-card', textColor: '' },
+  { id: 4, title: 'Market Position', subtitle: '', content: '', layout: 'two-column', theme: 'default', bgColor: 'bg-card', textColor: '' },
+  { id: 5, title: 'Next Steps', subtitle: '', content: '• Expand into European markets\n• Launch mobile app v2.0\n• Hire 50 new team members\n• Increase marketing budget by 30%', layout: 'content', theme: 'default', bgColor: 'bg-card', textColor: '' },
 ];
 
 const layouts = [
   { id: 'title' as const, label: 'Title Slide', icon: Layout },
   { id: 'content' as const, label: 'Content', icon: Type },
   { id: 'two-column' as const, label: 'Two Column', icon: LayoutGrid },
+  { id: 'section' as const, label: 'Section Header', icon: Shapes },
+  { id: 'comparison' as const, label: 'Comparison', icon: ChevronRight },
   { id: 'chart' as const, label: 'Chart', icon: PieChart },
   { id: 'image' as const, label: 'Image', icon: Image },
   { id: 'blank' as const, label: 'Blank', icon: Square },
 ];
 
-const themes = [
-  { name: 'Default', bg: 'bg-card', accent: 'bg-accent', text: '' },
-  { name: 'Dark', bg: 'bg-zinc-900', accent: 'bg-blue-500', text: 'text-white' },
-  { name: 'Warm', bg: 'bg-amber-50', accent: 'bg-orange-500', text: 'text-zinc-900' },
-  { name: 'Nature', bg: 'bg-emerald-50', accent: 'bg-emerald-600', text: 'text-zinc-900' },
-  { name: 'Corporate', bg: 'bg-slate-100', accent: 'bg-indigo-600', text: 'text-zinc-900' },
-  { name: 'Midnight', bg: 'bg-slate-900', accent: 'bg-purple-500', text: 'text-white' },
+const designTemplates = [
+  { name: 'Default', bg: 'bg-card', accent: 'bg-accent', text: '', preview: 'bg-card border-accent/30' },
+  { name: 'Midnight', bg: 'bg-slate-900', accent: 'bg-purple-500', text: 'text-white', preview: 'bg-slate-900' },
+  { name: 'Corporate', bg: 'bg-slate-100', accent: 'bg-indigo-600', text: 'text-zinc-900', preview: 'bg-slate-100' },
+  { name: 'Warm Sunset', bg: 'bg-gradient-to-br from-orange-50 to-amber-50', accent: 'bg-orange-500', text: 'text-zinc-900', preview: 'bg-orange-50' },
+  { name: 'Forest', bg: 'bg-gradient-to-br from-emerald-50 to-green-50', accent: 'bg-emerald-600', text: 'text-zinc-900', preview: 'bg-emerald-50' },
+  { name: 'Dark Pro', bg: 'bg-zinc-900', accent: 'bg-blue-500', text: 'text-white', preview: 'bg-zinc-900' },
+  { name: 'Ocean', bg: 'bg-gradient-to-br from-blue-50 to-cyan-50', accent: 'bg-blue-600', text: 'text-zinc-900', preview: 'bg-blue-50' },
+  { name: 'Berry', bg: 'bg-gradient-to-br from-pink-50 to-rose-50', accent: 'bg-rose-500', text: 'text-zinc-900', preview: 'bg-pink-50' },
+  { name: 'Charcoal', bg: 'bg-gradient-to-br from-zinc-800 to-zinc-900', accent: 'bg-amber-500', text: 'text-zinc-100', preview: 'bg-zinc-800' },
+  { name: 'Minimal', bg: 'bg-white', accent: 'bg-zinc-900', text: 'text-zinc-900', preview: 'bg-white' },
 ];
 
 const PresentationEditor = ({ isMobile, onContentChange }: { isMobile: boolean; onContentChange?: () => void }) => {
@@ -50,22 +58,24 @@ const PresentationEditor = ({ isMobile, onContentChange }: { isMobile: boolean; 
   const [editingField, setEditingField] = useState<'title' | 'subtitle' | 'content' | null>(null);
   const [showThemes, setShowThemes] = useState(false);
   const [showLayouts, setShowLayouts] = useState(false);
+  const [showDesigns, setShowDesigns] = useState(false);
   const [isPresenting, setIsPresenting] = useState(false);
   const [showVoice, setShowVoice] = useState(false);
+  const [activeTab, setActiveTab] = useState<'home' | 'insert' | 'design' | 'transitions'>('home');
   const current = slides[selectedSlide];
 
-  const closeMenus = () => { setShowThemes(false); setShowLayouts(false); };
+  const closeMenus = () => { setShowThemes(false); setShowLayouts(false); setShowDesigns(false); };
 
   const addSlide = useCallback(() => {
     slideIdCounter++;
     const newSlide: Slide = {
       id: slideIdCounter, title: 'New Slide', subtitle: '', content: 'Click to add content',
-      layout: 'content', bgColor: 'bg-card', textColor: '',
+      layout: 'content', theme: current?.theme || 'default', bgColor: current?.bgColor || 'bg-card', textColor: current?.textColor || '',
     };
     setSlides(prev => { const n = [...prev]; n.splice(selectedSlide + 1, 0, newSlide); return n; });
     setSelectedSlide(prev => prev + 1);
     onContentChange?.();
-  }, [selectedSlide, onContentChange]);
+  }, [selectedSlide, onContentChange, current]);
 
   const deleteSlide = useCallback(() => {
     if (slides.length <= 1) return;
@@ -85,11 +95,7 @@ const PresentationEditor = ({ isMobile, onContentChange }: { isMobile: boolean; 
   const moveSlide = (dir: -1 | 1) => {
     const newIdx = selectedSlide + dir;
     if (newIdx < 0 || newIdx >= slides.length) return;
-    setSlides(prev => {
-      const n = [...prev];
-      [n[selectedSlide], n[newIdx]] = [n[newIdx], n[selectedSlide]];
-      return n;
-    });
+    setSlides(prev => { const n = [...prev]; [n[selectedSlide], n[newIdx]] = [n[newIdx], n[selectedSlide]]; return n; });
     setSelectedSlide(newIdx);
     onContentChange?.();
   };
@@ -99,7 +105,12 @@ const PresentationEditor = ({ isMobile, onContentChange }: { isMobile: boolean; 
     onContentChange?.();
   };
 
-  // Keyboard shortcuts
+  const applyDesignToAll = (design: typeof designTemplates[0]) => {
+    setSlides(prev => prev.map(s => ({ ...s, bgColor: design.bg, textColor: design.text, theme: design.name })));
+    setShowDesigns(false);
+    onContentChange?.();
+  };
+
   useEffect(() => {
     if (isPresenting) {
       const handler = (e: KeyboardEvent) => {
@@ -134,6 +145,16 @@ const PresentationEditor = ({ isMobile, onContentChange }: { isMobile: boolean; 
             )}
           </div>
         );
+      case 'section':
+        return (
+          <div className={cn("flex flex-col items-center justify-center h-full text-center p-8", textColor)}>
+            <div className="w-16 h-1 bg-accent/50 rounded-full mb-6" />
+            <h1 className={cn("font-bold mb-2 cursor-text", isThumb ? "text-[6px]" : "text-3xl")}
+              onClick={() => !isThumb && setEditingField('title')}>{slide.title}</h1>
+            <p className={cn("opacity-60 cursor-text", isThumb ? "text-[4px]" : "text-base")}
+              onClick={() => !isThumb && setEditingField('subtitle')}>{slide.subtitle || (isThumb ? '' : 'Click to add subtitle')}</p>
+          </div>
+        );
       case 'chart':
         return (
           <div className={cn("h-full flex flex-col p-4 sm:p-8", textColor)}>
@@ -151,16 +172,28 @@ const PresentationEditor = ({ isMobile, onContentChange }: { isMobile: boolean; 
             </div>
           </div>
         );
+      case 'comparison':
+        return (
+          <div className={cn("h-full flex flex-col p-4 sm:p-8", textColor)}>
+            <h2 className={cn("font-semibold mb-4 cursor-text", isThumb ? "text-[5px] mb-1" : "text-xl")}
+              onClick={() => !isThumb && setEditingField('title')}>{slide.title}</h2>
+            <div className="flex-1 grid grid-cols-2 gap-4">
+              <div className="border border-border/50 rounded-lg p-3">
+                <h3 className={cn("font-medium mb-2 text-green-500", isThumb ? "text-[4px]" : "text-sm")}>Option A</h3>
+                <div className={cn("opacity-60", isThumb ? "text-[3px]" : "text-xs")}>Click to edit</div>
+              </div>
+              <div className="border border-border/50 rounded-lg p-3">
+                <h3 className={cn("font-medium mb-2 text-blue-500", isThumb ? "text-[4px]" : "text-sm")}>Option B</h3>
+                <div className={cn("opacity-60", isThumb ? "text-[3px]" : "text-xs")}>Click to edit</div>
+              </div>
+            </div>
+          </div>
+        );
       case 'two-column':
         return (
           <div className={cn("h-full flex flex-col p-4 sm:p-8", textColor)}>
             <h2 className={cn("font-semibold mb-4 cursor-text", isThumb ? "text-[5px] mb-1" : isMobile ? "text-sm" : "text-xl")}
-              onClick={() => !isThumb && setEditingField('title')}>
-              {editingField === 'title' && !isThumb ? (
-                <input className="text-xl font-semibold bg-transparent outline-none w-full border-b border-dashed border-accent/30 focus:border-accent"
-                  value={slide.title} onChange={(e) => updateSlide('title', e.target.value)} onBlur={() => setEditingField(null)} autoFocus />
-              ) : slide.title}
-            </h2>
+              onClick={() => !isThumb && setEditingField('title')}>{slide.title}</h2>
             <div className="flex-1 grid grid-cols-2 gap-4">
               <div className="bg-muted/30 rounded-lg p-3 flex items-center justify-center">
                 <PieChart className={cn("text-accent/30", isThumb ? "w-2 h-2" : "w-16 h-16")} />
@@ -180,19 +213,11 @@ const PresentationEditor = ({ isMobile, onContentChange }: { isMobile: boolean; 
                 {!isThumb && <p className="text-xs text-muted-foreground">Click to add image</p>}
               </div>
             </div>
-            {!isThumb && (
-              <p className="text-sm text-muted-foreground cursor-text" onClick={() => setEditingField('subtitle')}>
-                {editingField === 'subtitle' ? (
-                  <input className="bg-transparent outline-none text-center w-full border-b border-dashed border-accent/20" 
-                    value={slide.subtitle} onChange={(e) => updateSlide('subtitle', e.target.value)} onBlur={() => setEditingField(null)} autoFocus />
-                ) : (slide.subtitle || 'Click to add caption')}
-              </p>
-            )}
           </div>
         );
       case 'blank':
         return <div className="h-full p-4 sm:p-8" />;
-      default: // content
+      default:
         return (
           <div className={cn("h-full flex flex-col p-4 sm:p-8", textColor)}>
             <h2 className={cn("font-semibold mb-3 cursor-text", isThumb ? "text-[5px] mb-1" : isMobile ? "text-sm" : "text-xl")}
@@ -216,7 +241,6 @@ const PresentationEditor = ({ isMobile, onContentChange }: { isMobile: boolean; 
     }
   };
 
-  // Fullscreen presentation mode
   if (isPresenting) {
     return (
       <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center cursor-none"
@@ -268,79 +292,111 @@ const PresentationEditor = ({ isMobile, onContentChange }: { isMobile: boolean; 
       )}
 
       <div className="flex-1 flex flex-col min-h-0">
-        {/* Toolbar */}
-        <div className="h-10 border-b border-border flex items-center gap-1 px-2 sm:px-3 overflow-x-auto flex-shrink-0 bg-surface/50">
-          {isMobile && (
-            <>
-              <div className="flex items-center gap-1 overflow-x-auto mr-2">
-                {slides.map((_, i) => (
-                  <button key={i} onClick={() => setSelectedSlide(i)} className={cn("w-6 h-6 rounded text-[10px] font-medium flex-shrink-0",
-                    selectedSlide === i ? "bg-accent/10 text-accent" : "text-muted-foreground hover:bg-surface-hover")}>{i + 1}</button>
-                ))}
-                <button onClick={addSlide} className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground flex-shrink-0"><Plus className="w-3 h-3" /></button>
-              </div>
-              <div className="w-px h-5 bg-border" />
-            </>
-          )}
-
-          {/* Layout dropdown */}
-          <div className="relative">
-            <button onClick={() => { setShowLayouts(!showLayouts); setShowThemes(false); }}
-              className="flex items-center gap-1 px-2 py-1 rounded text-xs text-muted-foreground hover:bg-surface-hover flex-shrink-0">
-              <Layout className="w-3 h-3" /> Layout <ChevronDown className="w-2.5 h-2.5" />
+        {/* Ribbon Tabs */}
+        <div className="border-b border-border flex-shrink-0">
+          <div className="flex items-center px-2 gap-0 h-8 bg-surface/30">
+            {(['home', 'insert', 'design', 'transitions'] as const).map(tab => (
+              <button key={tab} onClick={() => setActiveTab(tab)}
+                className={cn("px-3 py-1.5 text-xs font-medium transition-colors capitalize",
+                  activeTab === tab ? "text-accent border-b-2 border-accent" : "text-muted-foreground hover:text-foreground")}>
+                {tab}
+              </button>
+            ))}
+            <div className="flex-1" />
+            <button onClick={() => setIsPresenting(true)}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-accent/10 text-accent text-xs font-medium hover:bg-accent/20 flex-shrink-0 mr-1">
+              <Play className="w-3 h-3" /> Present
             </button>
-            {showLayouts && (
-              <div className="absolute top-8 left-0 bg-card border border-border rounded-lg shadow-xl z-30 p-2 w-44">
-                {layouts.map(l => (
-                  <button key={l.id} onClick={() => { updateSlide('layout', l.id); setShowLayouts(false); }}
-                    className={cn("w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs hover:bg-surface-hover",
-                      current?.layout === l.id && "bg-accent/10 text-accent")}>
-                    <l.icon className="w-3.5 h-3.5" /> {l.label}
+          </div>
+
+          {/* Ribbon Content */}
+          <div className="h-10 flex items-center gap-1 px-2 overflow-x-auto bg-surface/50">
+            {activeTab === 'home' && (
+              <>
+                {isMobile && (
+                  <>
+                    <div className="flex items-center gap-1 overflow-x-auto mr-2">
+                      {slides.map((_, i) => (
+                        <button key={i} onClick={() => setSelectedSlide(i)} className={cn("w-6 h-6 rounded text-[10px] font-medium flex-shrink-0",
+                          selectedSlide === i ? "bg-accent/10 text-accent" : "text-muted-foreground hover:bg-surface-hover")}>{i + 1}</button>
+                      ))}
+                      <button onClick={addSlide} className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground flex-shrink-0"><Plus className="w-3 h-3" /></button>
+                    </div>
+                    <div className="w-px h-5 bg-border" />
+                  </>
+                )}
+                <button onClick={addSlide} className="flex items-center gap-1 px-2 py-1 rounded text-xs text-muted-foreground hover:bg-surface-hover flex-shrink-0">
+                  <Plus className="w-3 h-3" /> New Slide
+                </button>
+                <div className="w-px h-5 bg-border mx-0.5" />
+                <div className="relative">
+                  <button onClick={() => { setShowLayouts(!showLayouts); setShowThemes(false); setShowDesigns(false); }}
+                    className="flex items-center gap-1 px-2 py-1 rounded text-xs text-muted-foreground hover:bg-surface-hover flex-shrink-0">
+                    <Layout className="w-3 h-3" /> Layout <ChevronDown className="w-2.5 h-2.5" />
+                  </button>
+                  {showLayouts && (
+                    <div className="absolute top-8 left-0 bg-card border border-border rounded-lg shadow-xl z-30 p-2 w-44">
+                      {layouts.map(l => (
+                        <button key={l.id} onClick={() => { updateSlide('layout', l.id); setShowLayouts(false); }}
+                          className={cn("w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs hover:bg-surface-hover",
+                            current?.layout === l.id && "bg-accent/10 text-accent")}>
+                          <l.icon className="w-3.5 h-3.5" /> {l.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="w-px h-5 bg-border mx-0.5" />
+                <button onClick={() => document.execCommand('bold')} className="w-7 h-7 rounded flex items-center justify-center text-muted-foreground hover:bg-surface-hover flex-shrink-0"><Bold className="w-3.5 h-3.5" /></button>
+                <button onClick={() => document.execCommand('italic')} className="w-7 h-7 rounded flex items-center justify-center text-muted-foreground hover:bg-surface-hover flex-shrink-0"><Italic className="w-3.5 h-3.5" /></button>
+                <button onClick={() => document.execCommand('underline')} className="w-7 h-7 rounded flex items-center justify-center text-muted-foreground hover:bg-surface-hover flex-shrink-0"><Underline className="w-3.5 h-3.5" /></button>
+                <div className="w-px h-5 bg-border mx-0.5" />
+                <button onClick={() => document.execCommand('justifyLeft')} className="w-7 h-7 rounded flex items-center justify-center text-muted-foreground hover:bg-surface-hover flex-shrink-0"><AlignLeft className="w-3.5 h-3.5" /></button>
+                <button onClick={() => document.execCommand('justifyCenter')} className="w-7 h-7 rounded flex items-center justify-center text-muted-foreground hover:bg-surface-hover flex-shrink-0"><AlignCenter className="w-3.5 h-3.5" /></button>
+                <button onClick={() => document.execCommand('justifyRight')} className="w-7 h-7 rounded flex items-center justify-center text-muted-foreground hover:bg-surface-hover flex-shrink-0"><AlignRight className="w-3.5 h-3.5" /></button>
+                {isMobile && (
+                  <>
+                    <div className="w-px h-5 bg-border mx-0.5" />
+                    <button onClick={duplicateSlide} className="w-7 h-7 rounded flex items-center justify-center text-muted-foreground hover:bg-surface-hover flex-shrink-0"><Copy className="w-3 h-3" /></button>
+                    <button onClick={deleteSlide} className="w-7 h-7 rounded flex items-center justify-center text-muted-foreground hover:bg-surface-hover hover:text-red-500 flex-shrink-0"><Trash2 className="w-3 h-3" /></button>
+                  </>
+                )}
+              </>
+            )}
+            {activeTab === 'insert' && (
+              <>
+                <button onClick={addSlide} className="flex items-center gap-1 px-2 py-1 rounded text-xs text-muted-foreground hover:bg-surface-hover flex-shrink-0"><Plus className="w-3 h-3" /> New Slide</button>
+                <div className="w-px h-5 bg-border mx-0.5" />
+                <button className="flex items-center gap-1 px-2 py-1 rounded text-xs text-muted-foreground hover:bg-surface-hover flex-shrink-0"><Type className="w-3 h-3" /> Text Box</button>
+                <button className="flex items-center gap-1 px-2 py-1 rounded text-xs text-muted-foreground hover:bg-surface-hover flex-shrink-0"><Image className="w-3 h-3" /> Image</button>
+                <button className="flex items-center gap-1 px-2 py-1 rounded text-xs text-muted-foreground hover:bg-surface-hover flex-shrink-0"><Shapes className="w-3 h-3" /> Shape</button>
+                <button className="flex items-center gap-1 px-2 py-1 rounded text-xs text-muted-foreground hover:bg-surface-hover flex-shrink-0"><PieChart className="w-3 h-3" /> Chart</button>
+              </>
+            )}
+            {activeTab === 'design' && (
+              <div className="flex items-center gap-2 overflow-x-auto py-1">
+                {designTemplates.map((d) => (
+                  <button key={d.name} onClick={() => applyDesignToAll(d)}
+                    className={cn("flex flex-col items-center gap-1 flex-shrink-0 group")} title={d.name}>
+                    <div className={cn("w-16 h-9 rounded border border-border flex items-center justify-center overflow-hidden", d.preview,
+                      current?.theme === d.name && "ring-2 ring-accent")}>
+                      <div className={cn("w-2 h-2 rounded-full", d.accent)} />
+                    </div>
+                    <span className="text-[9px] text-muted-foreground group-hover:text-foreground">{d.name}</span>
                   </button>
                 ))}
               </div>
             )}
-          </div>
-
-          {/* Theme dropdown */}
-          <div className="relative">
-            <button onClick={() => { setShowThemes(!showThemes); setShowLayouts(false); }}
-              className="flex items-center gap-1 px-2 py-1 rounded text-xs text-muted-foreground hover:bg-surface-hover flex-shrink-0">
-              <Palette className="w-3 h-3" /> Theme <ChevronDown className="w-2.5 h-2.5" />
-            </button>
-            {showThemes && (
-              <div className="absolute top-8 left-0 bg-card border border-border rounded-lg shadow-xl z-30 p-2 w-40">
-                {themes.map(t => (
-                  <button key={t.name} onClick={() => { updateSlide('bgColor', t.bg); updateSlide('textColor', t.text); setShowThemes(false); }}
-                    className="w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs hover:bg-surface-hover">
-                    <div className={cn("w-4 h-4 rounded border border-border", t.bg)} />
-                    <div className={cn("w-2 h-2 rounded-full", t.accent)} />
-                    {t.name}
-                  </button>
+            {activeTab === 'transitions' && (
+              <>
+                <span className="text-xs text-muted-foreground px-2">Transitions are applied during presentation mode</span>
+                <div className="w-px h-5 bg-border mx-0.5" />
+                {['None', 'Fade', 'Slide', 'Zoom'].map(t => (
+                  <button key={t} className="px-2 py-1 rounded text-xs text-muted-foreground hover:bg-surface-hover flex-shrink-0">{t}</button>
                 ))}
-              </div>
+              </>
             )}
           </div>
-
-          <div className="w-px h-5 bg-border mx-0.5" />
-          <button onClick={addSlide} className="flex items-center gap-1 px-2 py-1 rounded text-xs text-muted-foreground hover:bg-surface-hover flex-shrink-0">
-            <Plus className="w-3 h-3" /> New Slide
-          </button>
-          {isMobile && (
-            <>
-              <button onClick={duplicateSlide} className="flex items-center gap-1 px-2 py-1 rounded text-xs text-muted-foreground hover:bg-surface-hover flex-shrink-0">
-                <Copy className="w-3 h-3" />
-              </button>
-              <button onClick={deleteSlide} className="flex items-center gap-1 px-2 py-1 rounded text-xs text-muted-foreground hover:bg-surface-hover hover:text-red-500 flex-shrink-0">
-                <Trash2 className="w-3 h-3" />
-              </button>
-            </>
-          )}
-          <div className="flex-1" />
-          <button onClick={() => setIsPresenting(true)}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-accent/10 text-accent text-xs font-medium hover:bg-accent/20 flex-shrink-0">
-            <Play className="w-3 h-3" /> Present
-          </button>
         </div>
 
         {/* Stage */}
