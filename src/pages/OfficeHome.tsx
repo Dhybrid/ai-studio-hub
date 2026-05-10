@@ -75,6 +75,9 @@ const OfficeHome = ({ type }: OfficeHomeProps) => {
     time: p.updatedAt,
   }));
 
+  const newPath = type === 'documents' ? '/office/documents/new' : `/office/new?mode=${c.mode}`;
+  const openPath = (id: string) => type === 'documents' ? `/office/documents/${id}` : `/office/${type}/${id}?mode=${c.mode}`;
+
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
       <WorkspaceSidebar
@@ -82,8 +85,8 @@ const OfficeHome = ({ type }: OfficeHomeProps) => {
         icon={c.icon}
         items={sidebarItems}
         selectedId={projectId}
-        onSelectItem={(id) => navigate(`/office/${type}/${id}`)}
-        onNewItem={() => navigate(`/office/new?mode=${c.mode}`)}
+        onSelectItem={(id) => navigate(openPath(id))}
+        onNewItem={() => navigate(newPath)}
         newItemLabel={`New ${c.title.slice(0, -1)}`}
         searchPlaceholder={`Search ${type}...`}
         basePath={`/office/${type}`}
@@ -95,8 +98,8 @@ const OfficeHome = ({ type }: OfficeHomeProps) => {
           icon={<c.icon className="w-4 h-4" />}
           projects={demoProjects[type]}
           templates={demoTemplates[type]}
-          onOpenProject={(id) => navigate(`/office/${type}/${id}?mode=${c.mode}`)}
-          onNewProject={() => navigate(`/office/new?mode=${c.mode}`)}
+          onOpenProject={(id) => navigate(openPath(id))}
+          onNewProject={() => navigate(newPath)}
           promptPlaceholder={c.promptPlaceholder}
         />
       </div>
