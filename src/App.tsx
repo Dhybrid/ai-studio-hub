@@ -15,6 +15,8 @@ import VideoStudioDashboard from "./pages/VideoStudioDashboard";
 import AudioStudioDashboard from "./pages/AudioStudioDashboard";
 import OfficeDashboard from "./pages/OfficeDashboard";
 import OfficeHome from "./pages/OfficeHome";
+import DocumentTemplatePicker from "./pages/DocumentTemplatePicker";
+import WordWorkspace from "./pages/WordWorkspace";
 import AllTools from "./pages/AllTools";
 import Settings from "./pages/Settings";
 import Projects from "./pages/Projects";
@@ -70,7 +72,8 @@ const App = () => (
 
             {/* Per-office type homes */}
             <Route path="/office/documents" element={<OfficeHome type="documents" />} />
-            <Route path="/office/documents/:projectId" element={<OfficeHome type="documents" />} />
+            <Route path="/office/documents/new" element={<DocumentTemplatePicker />} />
+            <Route path="/office/documents/:projectId" element={<WordWorkspace />} />
             <Route path="/office/spreadsheets" element={<OfficeHome type="spreadsheets" />} />
             <Route path="/office/spreadsheets/:projectId" element={<OfficeHome type="spreadsheets" />} />
             <Route path="/office/presentations" element={<OfficeHome type="presentations" />} />
