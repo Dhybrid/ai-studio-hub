@@ -221,7 +221,8 @@ export default function WordWorkspace() {
   useEffect(() => {
     const handler = () => {
       const sel = window.getSelection();
-      if (!sel || sel.isCollapsed || !editorRef.current?.contains(sel.anchorNode)) {
+      const inAnyPage = sel && !sel.isCollapsed && pageRefs.current.some(p => p?.contains(sel.anchorNode));
+      if (!inAnyPage) {
         setShowMini(false);
         return;
       }
