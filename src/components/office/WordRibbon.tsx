@@ -415,8 +415,3 @@ export default function WordRibbon(props: WordRibbonProps) {
     </div>
   );
 }
-
-// Local icon shim - lucide doesn't export FrameText
-function FrameText(props: any) {
-  return <Frame {...props} />;
-}
