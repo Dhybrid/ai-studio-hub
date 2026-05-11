@@ -228,7 +228,7 @@ export default function WordRibbon(props: WordRibbonProps) {
               <Btn icon={Hash} label="Page #" large onClick={() => {}} />
             </Group>
             <Group label="Text">
-              <Btn icon={FrameText} label="Text Box" large onClick={() => {}} />
+              <Btn icon={Type} label="Text Box" large onClick={() => {}} />
               <Btn icon={Type} label="WordArt" large onClick={() => {}} />
               <Btn icon={Calendar} label="Date" large onClick={() => exec('insertText', new Date().toLocaleDateString())} />
             </Group>
