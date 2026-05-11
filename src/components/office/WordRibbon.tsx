@@ -83,7 +83,7 @@ const SmallStack = ({ children }: { children: React.ReactNode }) => (
 );
 
 export default function WordRibbon(props: WordRibbonProps) {
-  const { activeTab, onTabChange, exec, activeFormats, onInsertImage, onInsertTable, onInsertLink, onAIRewrite, zoom, setZoom, showRuler, setShowRuler } = props;
+  const { activeTab, onTabChange, exec, activeFormats, onInsertImage, onInsertTable, onInsertLink, onAIRewrite, onAddPage, zoom, setZoom, showRuler, setShowRuler } = props;
   const [font, setFont] = useState('Calibri');
   const [size, setSize] = useState('11');
 
