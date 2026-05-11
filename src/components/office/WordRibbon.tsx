@@ -285,7 +285,7 @@ export default function WordRibbon(props: WordRibbonProps) {
               <Btn icon={RotateCw} label="Orientation" large onClick={() => {}} />
               <Btn icon={FileImage} label="Size" large onClick={() => {}} />
               <Btn icon={Columns} label="Columns" large onClick={() => {}} />
-              <Btn icon={SplitSquareHorizontal} label="Breaks" large onClick={() => {}} />
+              <Btn icon={SplitSquareHorizontal} label="Breaks" large onClick={() => onAddPage?.()} />
               <Btn icon={Hash} label="Line #" large onClick={() => {}} />
             </Group>
             <Group label="Paragraph">
