@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, FileText, Briefcase, GraduationCap, FileSignature, Newspaper, ClipboardList, BookOpen, Mail, FileCheck2, FileBarChart, Heart, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 
@@ -30,6 +30,7 @@ const categories = ['All', 'Basic', 'Business', 'Personal', 'Work', 'Academic', 
 
 export default function DocumentTemplatePicker() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [active, setActive] = useState('All');
   const [search, setSearch] = useState('');
 
@@ -40,7 +41,10 @@ export default function DocumentTemplatePicker() {
 
   const open = (id: string) => {
     const projectId = `doc-${Date.now()}`;
-    navigate(`/office/documents/${projectId}?template=${id}`);
+    const prompt = searchParams.get('prompt');
+    const params = new URLSearchParams({ template: id });
+    if (prompt) params.set('prompt', prompt);
+    navigate(`/office/documents/${projectId}?${params.toString()}`);
   };
 
   return (
@@ -69,7 +73,7 @@ export default function DocumentTemplatePicker() {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-xl sm:text-2xl font-semibold text-foreground">Start a new document</h2>
-                <p className="text-xs text-muted-foreground mt-1">Pick a template or start blank — you can always switch later.</p>
+                <p className="text-xs text-muted-foreground mt-1">Pick a styled template or start blank — your Word workspace opens after this.</p>
               </div>
             </div>
 
