@@ -377,6 +377,7 @@ export default function WordWorkspace() {
         onInsertTable={handleInsertTable}
         onInsertLink={handleInsertLink}
         onAIRewrite={handleAIRewrite}
+        onAddPage={() => addPage(activePage)}
         zoom={zoom}
         setZoom={setZoom}
         showRuler={showRuler}
