@@ -203,9 +203,9 @@ export default function WordRibbon(props: WordRibbonProps) {
         {activeTab === 'insert' && (
           <>
             <Group label="Pages">
-              <Btn icon={FileText} label="Cover Page" large onClick={() => {}} />
-              <Btn icon={FileImage} label="Blank Page" large onClick={() => {}} />
-              <Btn icon={SplitSquareHorizontal} label="Page Break" large onClick={() => exec('insertHTML', '<div style="page-break-after:always"></div>')} />
+              <Btn icon={FileText} label="Cover Page" large onClick={() => onAddPage?.()} />
+              <Btn icon={FileImage} label="Blank Page" large onClick={() => onAddPage?.()} />
+              <Btn icon={SplitSquareHorizontal} label="Page Break" large onClick={() => onAddPage?.()} />
             </Group>
             <Group label="Tables">
               <Btn icon={TableIcon} label="Table" large onClick={onInsertTable} />
