@@ -76,6 +76,10 @@ const OfficeHome = ({ type }: OfficeHomeProps) => {
   }));
 
   const newPath = type === 'documents' ? '/office/documents/new' : `/office/new?mode=${c.mode}`;
+  const createPath = (prompt?: string) => {
+    if (type !== 'documents') return newPath;
+    return prompt?.trim() ? `${newPath}?prompt=${encodeURIComponent(prompt.trim())}` : newPath;
+  };
   const openPath = (id: string) => type === 'documents' ? `/office/documents/${id}` : `/office/${type}/${id}?mode=${c.mode}`;
 
   return (
@@ -86,7 +90,7 @@ const OfficeHome = ({ type }: OfficeHomeProps) => {
         items={sidebarItems}
         selectedId={projectId}
         onSelectItem={(id) => navigate(openPath(id))}
-        onNewItem={() => navigate(newPath)}
+        onNewItem={() => navigate(createPath())}
         newItemLabel={`New ${c.title.slice(0, -1)}`}
         searchPlaceholder={`Search ${type}...`}
         basePath={`/office/${type}`}
@@ -99,7 +103,7 @@ const OfficeHome = ({ type }: OfficeHomeProps) => {
           projects={demoProjects[type]}
           templates={demoTemplates[type]}
           onOpenProject={(id) => navigate(openPath(id))}
-          onNewProject={() => navigate(newPath)}
+          onNewProject={(prompt) => navigate(createPath(prompt))}
           promptPlaceholder={c.promptPlaceholder}
         />
       </div>
