@@ -174,19 +174,39 @@ export default function WordWorkspace() {
   }, []);
 
   const updateCounts = useCallback(() => {
-    const text = editorRef.current?.innerText || '';
+    const text = pageRefs.current.map(p => p?.innerText || '').join('\n');
     setWordCount(text.trim().split(/\s+/).filter(Boolean).length);
-    const h = editorRef.current?.scrollHeight || 0;
-    setPageCount(Math.max(1, Math.ceil(h / 1056)));
-  }, []);
+    setPageCount(pages.length);
+  }, [pages.length]);
 
+  // Reset pages when template changes
   useEffect(() => {
-    if (editorRef.current) {
-      editorRef.current.innerHTML = tpl.html;
-      setDocName(tpl.name);
-      updateCounts();
-    }
+    setPages([tpl.html]);
+    setActivePage(0);
+    setDocName(tpl.name);
+    // Defer count update until refs are populated
+    setTimeout(updateCounts, 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [templateId]);
+
+  const addPage = useCallback((after = activePage) => {
+    setPages(prev => {
+      const next = [...prev];
+      next.splice(after + 1, 0, '<p><br></p>');
+      return next;
+    });
+    setActivePage(after + 1);
+    markUnsaved();
+    setTimeout(() => { pageRefs.current[after + 1]?.focus(); updateCounts(); }, 30);
+  }, [activePage, markUnsaved, updateCounts]);
+
+  const removePage = useCallback((idx: number) => {
+    if (pages.length <= 1) return;
+    setPages(prev => prev.filter((_, i) => i !== idx));
+    setActivePage(i => Math.max(0, Math.min(i, pages.length - 2)));
+    markUnsaved();
+    setTimeout(updateCounts, 0);
+  }, [pages.length, markUnsaved, updateCounts]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
