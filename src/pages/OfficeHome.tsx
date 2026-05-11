@@ -32,10 +32,10 @@ const demoProjects: Record<OfficeType, Project[]> = {
 
 const demoTemplates: Record<OfficeType, Template[]> = {
   documents: [
-    { id: 'dt-1', name: 'Business Report', description: 'Professional business report with charts.', author: 'COXMOX', category: 'Business' },
-    { id: 'dt-2', name: 'Meeting Notes', description: 'Structured meeting notes template.', author: 'COXMOX', category: 'Notes' },
-    { id: 'dt-3', name: 'Resume', description: 'Modern resume/CV template.', author: 'Community', category: 'Personal' },
-    { id: 'dt-4', name: 'Letter', description: 'Formal business letter template.', author: 'COXMOX', category: 'Business' },
+    { id: 'business-report', name: 'Business Report', description: 'Professional business report with charts.', author: 'COXMOX', category: 'Business' },
+    { id: 'meeting-notes', name: 'Meeting Notes', description: 'Structured meeting notes template.', author: 'COXMOX', category: 'Notes' },
+    { id: 'resume', name: 'Resume', description: 'Modern resume/CV template.', author: 'Community', category: 'Personal' },
+    { id: 'letter', name: 'Letter', description: 'Formal business letter template.', author: 'COXMOX', category: 'Business' },
   ],
   spreadsheets: [
     { id: 'st-1', name: 'Budget Planner', description: 'Monthly budget with auto-calculations.', author: 'COXMOX', category: 'Finance' },
@@ -76,7 +76,15 @@ const OfficeHome = ({ type }: OfficeHomeProps) => {
   }));
 
   const newPath = type === 'documents' ? '/office/documents/new' : `/office/new?mode=${c.mode}`;
-  const openPath = (id: string) => type === 'documents' ? `/office/documents/${id}` : `/office/${type}/${id}?mode=${c.mode}`;
+  const createPath = (prompt?: string) => {
+    if (type !== 'documents') return newPath;
+    return prompt?.trim() ? `${newPath}?prompt=${encodeURIComponent(prompt.trim())}` : newPath;
+  };
+  const documentTemplateIds = new Set(demoTemplates.documents.map(t => t.id));
+  const openPath = (id: string) => {
+    if (type !== 'documents') return `/office/${type}/${id}?mode=${c.mode}`;
+    return documentTemplateIds.has(id) ? `/office/documents/doc-${Date.now()}?template=${id}` : `/office/documents/${id}`;
+  };
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
@@ -86,7 +94,7 @@ const OfficeHome = ({ type }: OfficeHomeProps) => {
         items={sidebarItems}
         selectedId={projectId}
         onSelectItem={(id) => navigate(openPath(id))}
-        onNewItem={() => navigate(newPath)}
+        onNewItem={() => navigate(createPath())}
         newItemLabel={`New ${c.title.slice(0, -1)}`}
         searchPlaceholder={`Search ${type}...`}
         basePath={`/office/${type}`}
@@ -99,7 +107,7 @@ const OfficeHome = ({ type }: OfficeHomeProps) => {
           projects={demoProjects[type]}
           templates={demoTemplates[type]}
           onOpenProject={(id) => navigate(openPath(id))}
-          onNewProject={() => navigate(newPath)}
+          onNewProject={(prompt) => navigate(createPath(prompt))}
           promptPlaceholder={c.promptPlaceholder}
         />
       </div>

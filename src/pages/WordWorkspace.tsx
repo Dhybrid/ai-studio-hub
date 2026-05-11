@@ -118,6 +118,7 @@ export default function WordWorkspace() {
   const { projectId } = useParams();
   const [search] = useSearchParams();
   const templateId = search.get('template') || 'blank';
+  const initialPrompt = search.get('prompt') || '';
   const tpl = templateContent[templateId] || templateContent.blank;
 
   const [docName, setDocName] = useState(tpl.name);
@@ -132,7 +133,7 @@ export default function WordWorkspace() {
   const [pageCount, setPageCount] = useState(1);
   const [showAI, setShowAI] = useState(true);
   const [showFile, setShowFile] = useState(false);
-  const [aiPrompt, setAiPrompt] = useState('');
+  const [aiPrompt, setAiPrompt] = useState(initialPrompt);
   const [aiBusy, setAiBusy] = useState(false);
   const [voice, setVoice] = useState(false);
   const [showMini, setShowMini] = useState(false);
@@ -176,6 +177,7 @@ export default function WordWorkspace() {
   useEffect(() => {
     if (editorRef.current) {
       editorRef.current.innerHTML = tpl.html;
+      setDocName(tpl.name);
       updateCounts();
     }
   }, [templateId]);
@@ -414,7 +416,7 @@ export default function WordWorkspace() {
 
         {/* AI Right panel */}
         {showAI && (
-          <aside className="hidden lg:flex w-80 border-l border-border bg-card flex-col flex-shrink-0">
+          <aside className="flex w-72 sm:w-80 border-l border-border bg-card flex-col flex-shrink-0">
             <div className="h-10 border-b border-border flex items-center justify-between px-3 flex-shrink-0">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-accent" />
