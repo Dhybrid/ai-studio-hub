@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { FileSpreadsheet, FileText, Presentation, Wand2, Loader2, ArrowLeft, Clock, Plus, Sparkles, Shield, Zap, Globe, Users, Star, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -35,6 +35,7 @@ const tips = [
 const OfficeDashboard = () => {
   const navigate = useNavigate();
   const { projectId } = useParams();
+  const [searchParams] = useSearchParams();
   const isMobile = useIsMobile();
   const [prompt, setPrompt] = useState('');
   const [selectedType, setSelectedType] = useState<OfficeType | null>(null);
@@ -46,17 +47,34 @@ const OfficeDashboard = () => {
     if (el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 160) + 'px'; }
   }, [prompt]);
 
+  if (projectId === 'new' && (searchParams.get('mode') === 'document' || !searchParams.get('mode'))) {
+    return <Navigate to="/office/documents/new" replace />;
+  }
+
   if (projectId) {
     return <div className="flex h-screen w-full overflow-hidden bg-background"><OfficeEditor /></div>;
   }
 
-  const handleCreate = (type: OfficeType) => navigate(`/office/new?mode=${type}`);
+  const handleCreate = (type: OfficeType) => {
+    if (type === 'document') {
+      navigate('/office/documents/new');
+      return;
+    }
+    navigate(`/office/new?mode=${type}`);
+  };
 
   const handleGenerate = () => {
     if (!prompt.trim()) return;
     setIsGenerating(true);
     const type = selectedType || 'document';
-    setTimeout(() => { setIsGenerating(false); navigate(`/office/new?mode=${type}`); }, 1500);
+    setTimeout(() => {
+      setIsGenerating(false);
+      if (type === 'document') {
+        navigate(`/office/documents/new?prompt=${encodeURIComponent(prompt.trim())}`);
+        return;
+      }
+      navigate(`/office/new?mode=${type}`);
+    }, 1500);
   };
 
   return (
