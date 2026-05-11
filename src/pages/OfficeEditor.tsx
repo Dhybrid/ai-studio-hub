@@ -203,7 +203,7 @@ const OfficeEditor = () => {
                   <MenuItem icon={Home} label={`${m.label} Home`} onClick={() => { navigate(m.homePath); setActiveMenu(null); }} />
                   <MenuItem icon={FolderOpen} label="Office Home" onClick={() => { navigate('/office'); setActiveMenu(null); }} />
                   <MenuSep />
-                  <MenuItem icon={FilePlus} label={`New ${m.label}`} onClick={() => { navigate(`/office/new?mode=${mode}`); setActiveMenu(null); }} />
+                  <MenuItem icon={FilePlus} label={`New ${m.label}`} onClick={() => { navigate(mode === 'document' ? '/office/documents/new' : `/office/new?mode=${mode}`); setActiveMenu(null); }} />
                   <MenuItem icon={FolderOpen} label="Import File..." shortcut="Ctrl+O" onClick={handleImport} />
                   <MenuSep />
                   <MenuItem icon={Save} label="Save" shortcut="Ctrl+S" onClick={handleSave} />
@@ -414,6 +414,7 @@ const OfficeEditor = () => {
           <MenuItem icon={Home} label={`${m.label} Home`} onClick={() => { navigate(m.homePath); setActiveMenu(null); }} />
           <MenuItem icon={FolderOpen} label="Office Home" onClick={() => { navigate('/office'); setActiveMenu(null); }} />
           <MenuSep />
+          <MenuItem icon={FilePlus} label={`New ${m.label}`} onClick={() => { navigate(mode === 'document' ? '/office/documents/new' : `/office/new?mode=${mode}`); setActiveMenu(null); }} />
           <MenuItem icon={FolderOpen} label="Import File" onClick={handleImport} />
           <MenuItem icon={FileDown} label="Download PDF" onClick={handleDownloadPDF} />
           <MenuItem icon={FileDown} label={`Download ${modeExtensions[mode].ext}`} onClick={handleDownloadNative} />
