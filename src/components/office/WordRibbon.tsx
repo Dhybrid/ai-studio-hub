@@ -24,6 +24,7 @@ interface WordRibbonProps {
   onInsertTable: () => void;
   onInsertLink: () => void;
   onAIRewrite: () => void;
+  onAddPage?: () => void;
   zoom: number;
   setZoom: (z: number) => void;
   showRuler: boolean;
