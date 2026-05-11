@@ -139,8 +139,14 @@ export default function WordWorkspace() {
   const [showMini, setShowMini] = useState(false);
   const [miniPos, setMiniPos] = useState({ x: 0, y: 0 });
 
-  const editorRef = useRef<HTMLDivElement>(null);
+  // Multi-page state — each page has its own HTML
+  const [pages, setPages] = useState<string[]>([tpl.html]);
+  const [activePage, setActivePage] = useState(0);
+  const pageRefs = useRef<Array<HTMLDivElement | null>>([]);
   const saveTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  // Backwards-compat: editorRef points to the currently focused page
+  const editorRef = { get current() { return pageRefs.current[activePage] || null; } } as React.MutableRefObject<HTMLDivElement | null>;
 
   const markUnsaved = useCallback(() => {
     setSaveStatus('unsaved');
