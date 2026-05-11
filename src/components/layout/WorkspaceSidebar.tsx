@@ -38,6 +38,7 @@ export const WorkspaceSidebar = ({
   selectedId,
   onSelectItem,
   onNewItem,
+  newItemLabel = 'New Project',
   searchPlaceholder = 'Search...',
   basePath,
 }: WorkspaceSidebarProps) => {
@@ -109,6 +110,8 @@ export const WorkspaceSidebar = ({
             items={items}
             selectedId={selectedId}
             onSelectItem={(id: string) => { onSelectItem(id); setMobileOpen(false); }}
+            onNewItem={() => { onNewItem(); setMobileOpen(false); }}
+            newItemLabel={newItemLabel}
             collapsed={false}
             sharePopup={sharePopup}
             setSharePopup={setSharePopup}
@@ -153,6 +156,8 @@ export const WorkspaceSidebar = ({
           items={items}
           selectedId={selectedId}
           onSelectItem={onSelectItem}
+          onNewItem={onNewItem}
+          newItemLabel={newItemLabel}
           collapsed={collapsed}
           sharePopup={sharePopup}
           setSharePopup={setSharePopup}
@@ -186,7 +191,7 @@ export const WorkspaceSidebar = ({
 const SidebarContent = ({
   title, Icon, navItems, projectSections, activeSection, setActiveSection,
   collapsed, sharePopup, setSharePopup, upgradePopup, setUpgradePopup,
-  selectedId, onSelectItem, items, filtered, search, setSearch, searchOpen, setSearchOpen,
+  selectedId, onSelectItem, onNewItem, newItemLabel, items, filtered, search, setSearch, searchOpen, setSearchOpen,
   onClose,
 }: any) => (
   <>
@@ -220,6 +225,14 @@ const SidebarContent = ({
           {!collapsed && <span className="truncate">{item.label}</span>}
         </button>
       ))}
+
+      <button
+        onClick={onNewItem}
+        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150 bg-accent/10 text-accent hover:bg-accent/15 font-medium"
+      >
+        <Zap className="w-[18px] h-[18px] flex-shrink-0" />
+        {!collapsed && <span className="truncate">{newItemLabel}</span>}
+      </button>
 
       {!collapsed ? (
         <div className="flex items-center gap-2 px-3 mt-4 mb-1">
