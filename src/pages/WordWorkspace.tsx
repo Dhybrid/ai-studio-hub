@@ -269,12 +269,13 @@ export default function WordWorkspace() {
     }, 1200);
   };
 
+  const allHTML = () => pageRefs.current.map((p, i) => `<section data-page="${i + 1}" style="page-break-after:always">${p?.innerHTML || ''}</section>`).join('\n');
   const downloadPDF = () => {
-    const blob = new Blob([editorRef.current?.innerHTML || ''], { type: 'application/pdf' });
+    const blob = new Blob([allHTML()], { type: 'application/pdf' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${docName}.pdf`; a.click();
   };
   const downloadDocx = () => {
-    const blob = new Blob([editorRef.current?.innerHTML || ''], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+    const blob = new Blob([allHTML()], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${docName}.docx`; a.click();
   };
 
