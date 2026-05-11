@@ -398,29 +398,61 @@ export default function WordWorkspace() {
             </div>
           )}
 
-          {/* Doc canvas */}
+          {/* Doc canvas — multi-page with gaps */}
           <div className="flex-1 overflow-auto py-6 px-4">
-            <div className="mx-auto bg-card border border-border shadow-sm rounded-sm transition-all"
-              style={{ width: `${(816 * zoom) / 100}px`, minHeight: `${(1056 * zoom) / 100}px`, padding: `${(96 * zoom) / 100}px ${(72 * zoom) / 100}px`, transformOrigin: 'top center' }}>
-              <div
-                ref={editorRef}
-                contentEditable
-                suppressContentEditableWarning
-                onInput={() => { markUnsaved(); updateCounts(); }}
-                onKeyUp={refreshFormats}
-                onMouseUp={refreshFormats}
-                style={{ fontSize: `${(11 * zoom) / 100}pt`, fontFamily: 'Calibri, sans-serif', lineHeight: 1.5 }}
-                className="outline-none text-foreground min-h-[200px]
-                  [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:mb-3 [&_h1]:mt-4
-                  [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:mb-2 [&_h2]:mt-4
-                  [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mb-2 [&_h3]:mt-3
-                  [&_blockquote]:border-l-4 [&_blockquote]:border-accent/40 [&_blockquote]:pl-4 [&_blockquote]:italic
-                  [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6
-                  [&_a]:text-accent [&_a]:underline
-                  [&_table]:border-collapse [&_table]:w-full
-                  [&_td]:border [&_td]:border-border [&_td]:p-1.5
-                  [&_img]:max-w-full [&_img]:my-2"
-              />
+            <div className="flex flex-col items-center gap-6">
+              {pages.map((html, idx) => (
+                <div key={idx} className="relative group">
+                  <div className="absolute -left-12 top-2 hidden lg:flex flex-col items-center gap-1 text-[10px] text-muted-foreground select-none">
+                    <span>Pg {idx + 1}</span>
+                    {pages.length > 1 && (
+                      <button onClick={() => removePage(idx)} title="Delete page"
+                        className="opacity-0 group-hover:opacity-100 w-5 h-5 rounded hover:bg-red-500/10 hover:text-red-500 flex items-center justify-center transition-opacity">
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                  <div className={cn("bg-card border shadow-sm rounded-sm transition-all",
+                    activePage === idx ? "border-accent/40" : "border-border")}
+                    style={{ width: `${(816 * zoom) / 100}px`, minHeight: `${(1056 * zoom) / 100}px`, padding: `${(96 * zoom) / 100}px ${(72 * zoom) / 100}px` }}>
+                    <div
+                      ref={(el) => { pageRefs.current[idx] = el; }}
+                      contentEditable
+                      suppressContentEditableWarning
+                      onFocus={() => setActivePage(idx)}
+                      onInput={() => { markUnsaved(); updateCounts(); }}
+                      onKeyUp={refreshFormats}
+                      onMouseUp={refreshFormats}
+                      onKeyDown={(e) => {
+                        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); addPage(idx); }
+                      }}
+                      style={{ fontSize: `${(11 * zoom) / 100}pt`, fontFamily: 'Calibri, sans-serif', lineHeight: 1.5 }}
+                      className="outline-none text-foreground min-h-[200px]
+                        [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:mb-3 [&_h1]:mt-4
+                        [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:mb-2 [&_h2]:mt-4
+                        [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mb-2 [&_h3]:mt-3
+                        [&_blockquote]:border-l-4 [&_blockquote]:border-accent/40 [&_blockquote]:pl-4 [&_blockquote]:italic
+                        [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6
+                        [&_a]:text-accent [&_a]:underline
+                        [&_table]:border-collapse [&_table]:w-full
+                        [&_td]:border [&_td]:border-border [&_td]:p-1.5
+                        [&_img]:max-w-full [&_img]:my-2"
+                      dangerouslySetInnerHTML={{ __html: html }}
+                    />
+                  </div>
+                  {idx < pages.length - 1 && (
+                    <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 text-[9px] text-muted-foreground bg-background px-2 py-0.5 rounded-full border border-border/60 select-none">
+                      Page Break
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              <button onClick={() => addPage(pages.length - 1)}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-dashed border-border hover:border-accent hover:bg-accent/5 text-xs text-muted-foreground hover:text-accent transition-all"
+                style={{ width: `${(816 * zoom) / 100}px` }}>
+                <FilePlus className="w-3.5 h-3.5" /> Add a new page
+              </button>
             </div>
           </div>
 
