@@ -24,6 +24,7 @@ interface WordRibbonProps {
   onInsertTable: () => void;
   onInsertLink: () => void;
   onAIRewrite: () => void;
+  onAddPage?: () => void;
   zoom: number;
   setZoom: (z: number) => void;
   showRuler: boolean;
@@ -82,7 +83,7 @@ const SmallStack = ({ children }: { children: React.ReactNode }) => (
 );
 
 export default function WordRibbon(props: WordRibbonProps) {
-  const { activeTab, onTabChange, exec, activeFormats, onInsertImage, onInsertTable, onInsertLink, onAIRewrite, zoom, setZoom, showRuler, setShowRuler } = props;
+  const { activeTab, onTabChange, exec, activeFormats, onInsertImage, onInsertTable, onInsertLink, onAIRewrite, onAddPage, zoom, setZoom, showRuler, setShowRuler } = props;
   const [font, setFont] = useState('Calibri');
   const [size, setSize] = useState('11');
 
@@ -202,9 +203,9 @@ export default function WordRibbon(props: WordRibbonProps) {
         {activeTab === 'insert' && (
           <>
             <Group label="Pages">
-              <Btn icon={FileText} label="Cover Page" large onClick={() => {}} />
-              <Btn icon={FileImage} label="Blank Page" large onClick={() => {}} />
-              <Btn icon={SplitSquareHorizontal} label="Page Break" large onClick={() => exec('insertHTML', '<div style="page-break-after:always"></div>')} />
+              <Btn icon={FileText} label="Cover Page" large onClick={() => onAddPage?.()} />
+              <Btn icon={FileImage} label="Blank Page" large onClick={() => onAddPage?.()} />
+              <Btn icon={SplitSquareHorizontal} label="Page Break" large onClick={() => onAddPage?.()} />
             </Group>
             <Group label="Tables">
               <Btn icon={TableIcon} label="Table" large onClick={onInsertTable} />
@@ -284,7 +285,7 @@ export default function WordRibbon(props: WordRibbonProps) {
               <Btn icon={RotateCw} label="Orientation" large onClick={() => {}} />
               <Btn icon={FileImage} label="Size" large onClick={() => {}} />
               <Btn icon={Columns} label="Columns" large onClick={() => {}} />
-              <Btn icon={SplitSquareHorizontal} label="Breaks" large onClick={() => {}} />
+              <Btn icon={SplitSquareHorizontal} label="Breaks" large onClick={() => onAddPage?.()} />
               <Btn icon={Hash} label="Line #" large onClick={() => {}} />
             </Group>
             <Group label="Paragraph">
