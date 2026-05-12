@@ -44,10 +44,10 @@ const demoTemplates: Record<OfficeType, Template[]> = {
     { id: 'st-4', name: 'Grade Book', description: 'Student grade tracking and averages.', author: 'Community', category: 'Education' },
   ],
   presentations: [
-    { id: 'pt-1', name: 'Pitch Deck', description: 'Startup pitch deck with 10 slides.', author: 'COXMOX', category: 'Business' },
-    { id: 'pt-2', name: 'Lesson Plan', description: 'Educational presentation template.', author: 'Community', category: 'Education' },
-    { id: 'pt-3', name: 'Product Launch', description: 'Product launch announcement slides.', author: 'COXMOX', category: 'Marketing' },
-    { id: 'pt-4', name: 'Portfolio', description: 'Creative portfolio showcase.', author: 'Community', category: 'Creative' },
+    { id: 'pitch-deck', name: 'Pitch Deck', description: 'Startup pitch deck with 10 slides.', author: 'COXMOX', category: 'Business' },
+    { id: 'lesson-plan', name: 'Lesson Plan', description: 'Educational presentation template.', author: 'Community', category: 'Education' },
+    { id: 'product-launch', name: 'Product Launch', description: 'Product launch announcement slides.', author: 'COXMOX', category: 'Marketing' },
+    { id: 'portfolio', name: 'Portfolio', description: 'Creative portfolio showcase.', author: 'Community', category: 'Creative' },
   ],
 };
 
@@ -60,7 +60,7 @@ const OfficeHome = ({ type }: OfficeHomeProps) => {
   const { projectId } = useParams();
   const c = config[type];
 
-  if (projectId) {
+  if (projectId && type === 'spreadsheets') {
     return (
       <div className="flex h-screen w-full overflow-hidden bg-background">
         <OfficeEditor />
@@ -75,15 +75,20 @@ const OfficeHome = ({ type }: OfficeHomeProps) => {
     time: p.updatedAt,
   }));
 
-  const newPath = type === 'documents' ? '/office/documents/new' : `/office/new?mode=${c.mode}`;
+  const newPath =
+    type === 'documents' ? '/office/documents/new' :
+    type === 'presentations' ? '/office/presentations/new' :
+    `/office/new?mode=${c.mode}`;
   const createPath = (prompt?: string) => {
-    if (type !== 'documents') return newPath;
+    if (type === 'spreadsheets') return newPath;
     return prompt?.trim() ? `${newPath}?prompt=${encodeURIComponent(prompt.trim())}` : newPath;
   };
   const documentTemplateIds = new Set(demoTemplates.documents.map(t => t.id));
+  const presentationTemplateIds = new Set(demoTemplates.presentations.map(t => t.id));
   const openPath = (id: string) => {
-    if (type !== 'documents') return `/office/${type}/${id}?mode=${c.mode}`;
-    return documentTemplateIds.has(id) ? `/office/documents/doc-${Date.now()}?template=${id}` : `/office/documents/${id}`;
+    if (type === 'documents') return documentTemplateIds.has(id) ? `/office/documents/doc-${Date.now()}?template=${id}` : `/office/documents/${id}`;
+    if (type === 'presentations') return presentationTemplateIds.has(id) ? `/office/presentations/pres-${Date.now()}?template=${id}` : `/office/presentations/${id}`;
+    return `/office/${type}/${id}?mode=${c.mode}`;
   };
 
   return (
