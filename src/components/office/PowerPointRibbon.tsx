@@ -8,7 +8,7 @@ import {
   ZoomIn, ZoomOut, Maximize2, Search, Replace, SpellCheck, Languages, Sparkles, Wand2,
   MonitorPlay, Play, Timer, Mic, Volume2, Frame, RotateCw, FileImage, Lightbulb,
   HelpCircle, MessageCircle, Lock, GitMerge, Plus, Trash2, LayoutGrid, Columns,
-  Square, Circle, Triangle, ArrowRight, Star, Maximize, Wand
+  Square, Circle, Triangle, ArrowRight, Star, Maximize, Wand, Settings as SettingsIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -330,7 +330,7 @@ export default function PowerPointRibbon(props: Props) {
             <Group label="Set Up">
               <Btn icon={Timer} label="Rehearse" large onClick={() => {}} />
               <Btn icon={Mic} label="Record" large onClick={() => {}} />
-              <Btn icon={Settings as any} label="Setup" large onClick={() => {}} />
+              <Btn icon={SettingsIcon} label="Setup" large onClick={() => {}} />
             </Group>
             <Group label="Monitors">
               <Btn icon={MonitorPlay} label="Resolution" large onClick={() => {}} />
