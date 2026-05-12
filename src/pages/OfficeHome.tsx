@@ -60,7 +60,7 @@ const OfficeHome = ({ type }: OfficeHomeProps) => {
   const { projectId } = useParams();
   const c = config[type];
 
-  if (projectId) {
+  if (projectId && type === 'spreadsheets') {
     return (
       <div className="flex h-screen w-full overflow-hidden bg-background">
         <OfficeEditor />
@@ -75,15 +75,20 @@ const OfficeHome = ({ type }: OfficeHomeProps) => {
     time: p.updatedAt,
   }));
 
-  const newPath = type === 'documents' ? '/office/documents/new' : `/office/new?mode=${c.mode}`;
+  const newPath =
+    type === 'documents' ? '/office/documents/new' :
+    type === 'presentations' ? '/office/presentations/new' :
+    `/office/new?mode=${c.mode}`;
   const createPath = (prompt?: string) => {
-    if (type !== 'documents') return newPath;
+    if (type === 'spreadsheets') return newPath;
     return prompt?.trim() ? `${newPath}?prompt=${encodeURIComponent(prompt.trim())}` : newPath;
   };
   const documentTemplateIds = new Set(demoTemplates.documents.map(t => t.id));
+  const presentationTemplateIds = new Set(demoTemplates.presentations.map(t => t.id));
   const openPath = (id: string) => {
-    if (type !== 'documents') return `/office/${type}/${id}?mode=${c.mode}`;
-    return documentTemplateIds.has(id) ? `/office/documents/doc-${Date.now()}?template=${id}` : `/office/documents/${id}`;
+    if (type === 'documents') return documentTemplateIds.has(id) ? `/office/documents/doc-${Date.now()}?template=${id}` : `/office/documents/${id}`;
+    if (type === 'presentations') return presentationTemplateIds.has(id) ? `/office/presentations/pres-${Date.now()}?template=${id}` : `/office/presentations/${id}`;
+    return `/office/${type}/${id}?mode=${c.mode}`;
   };
 
   return (
