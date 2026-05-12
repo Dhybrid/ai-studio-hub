@@ -44,10 +44,10 @@ const demoTemplates: Record<OfficeType, Template[]> = {
     { id: 'st-4', name: 'Grade Book', description: 'Student grade tracking and averages.', author: 'Community', category: 'Education' },
   ],
   presentations: [
-    { id: 'pt-1', name: 'Pitch Deck', description: 'Startup pitch deck with 10 slides.', author: 'COXMOX', category: 'Business' },
-    { id: 'pt-2', name: 'Lesson Plan', description: 'Educational presentation template.', author: 'Community', category: 'Education' },
-    { id: 'pt-3', name: 'Product Launch', description: 'Product launch announcement slides.', author: 'COXMOX', category: 'Marketing' },
-    { id: 'pt-4', name: 'Portfolio', description: 'Creative portfolio showcase.', author: 'Community', category: 'Creative' },
+    { id: 'pitch-deck', name: 'Pitch Deck', description: 'Startup pitch deck with 10 slides.', author: 'COXMOX', category: 'Business' },
+    { id: 'lesson-plan', name: 'Lesson Plan', description: 'Educational presentation template.', author: 'Community', category: 'Education' },
+    { id: 'product-launch', name: 'Product Launch', description: 'Product launch announcement slides.', author: 'COXMOX', category: 'Marketing' },
+    { id: 'portfolio', name: 'Portfolio', description: 'Creative portfolio showcase.', author: 'Community', category: 'Creative' },
   ],
 };
 
