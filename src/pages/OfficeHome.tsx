@@ -37,10 +37,10 @@ const demoTemplates: Record<OfficeType, Template[]> = {
     { id: 'letter', name: 'Letter', description: 'Formal business letter template.', author: 'COXMOX', category: 'Business' },
   ],
   spreadsheets: [
-    { id: 'st-1', name: 'Budget Planner', description: 'Monthly budget with auto-calculations.', author: 'COXMOX', category: 'Finance' },
-    { id: 'st-2', name: 'Invoice', description: 'Professional invoice with totals.', author: 'COXMOX', category: 'Business' },
-    { id: 'st-3', name: 'Project Tracker', description: 'Task tracking with progress bars.', author: 'Community', category: 'Project' },
-    { id: 'st-4', name: 'Grade Book', description: 'Student grade tracking and averages.', author: 'Community', category: 'Education' },
+    { id: 'budget', name: 'Budget Planner', description: 'Monthly budget with auto-calculations.', author: 'COXMOX', category: 'Finance' },
+    { id: 'invoice', name: 'Invoice', description: 'Professional invoice with totals.', author: 'COXMOX', category: 'Business' },
+    { id: 'project-tracker', name: 'Project Tracker', description: 'Task tracking with progress.', author: 'Community', category: 'Work' },
+    { id: 'gradebook', name: 'Grade Book', description: 'Student grade tracking and averages.', author: 'Community', category: 'Education' },
   ],
   presentations: [
     { id: 'pitch-deck', name: 'Pitch Deck', description: 'Startup pitch deck with 10 slides.', author: 'COXMOX', category: 'Business' },
