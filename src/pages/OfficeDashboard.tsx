@@ -56,25 +56,22 @@ const OfficeDashboard = () => {
   }
 
   const handleCreate = (type: OfficeType) => {
-    if (type === 'document') {
-      navigate('/office/documents/new');
-      return;
-    }
-    navigate(`/office/new?mode=${type}`);
+    if (type === 'document') return navigate('/office/documents/new');
+    if (type === 'spreadsheet') return navigate('/office/spreadsheets/new');
+    if (type === 'presentation') return navigate('/office/presentations/new');
   };
 
   const handleGenerate = () => {
     if (!prompt.trim()) return;
     setIsGenerating(true);
     const type = selectedType || 'document';
+    const q = encodeURIComponent(prompt.trim());
     setTimeout(() => {
       setIsGenerating(false);
-      if (type === 'document') {
-        navigate(`/office/documents/new?prompt=${encodeURIComponent(prompt.trim())}`);
-        return;
-      }
-      navigate(`/office/new?mode=${type}`);
-    }, 1500);
+      if (type === 'document') return navigate(`/office/documents/new?prompt=${q}`);
+      if (type === 'spreadsheet') return navigate(`/office/spreadsheets/new?prompt=${q}`);
+      if (type === 'presentation') return navigate(`/office/presentations/new?prompt=${q}`);
+    }, 800);
   };
 
   return (

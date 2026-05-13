@@ -19,6 +19,8 @@ import DocumentTemplatePicker from "./pages/DocumentTemplatePicker";
 import WordWorkspace from "./pages/WordWorkspace";
 import PresentationTemplatePicker from "./pages/PresentationTemplatePicker";
 import PowerPointWorkspace from "./pages/PowerPointWorkspace";
+import SpreadsheetTemplatePicker from "./pages/SpreadsheetTemplatePicker";
+import ExcelWorkspace from "./pages/ExcelWorkspace";
 import AllTools from "./pages/AllTools";
 import Settings from "./pages/Settings";
 import Projects from "./pages/Projects";
@@ -77,7 +79,8 @@ const App = () => (
             <Route path="/office/documents/new" element={<DocumentTemplatePicker />} />
             <Route path="/office/documents/:projectId" element={<WordWorkspace />} />
             <Route path="/office/spreadsheets" element={<OfficeHome type="spreadsheets" />} />
-            <Route path="/office/spreadsheets/:projectId" element={<OfficeHome type="spreadsheets" />} />
+            <Route path="/office/spreadsheets/new" element={<SpreadsheetTemplatePicker />} />
+            <Route path="/office/spreadsheets/:projectId" element={<ExcelWorkspace />} />
             <Route path="/office/presentations" element={<OfficeHome type="presentations" />} />
             <Route path="/office/presentations/new" element={<PresentationTemplatePicker />} />
             <Route path="/office/presentations/:projectId" element={<PowerPointWorkspace />} />
