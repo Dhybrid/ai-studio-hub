@@ -59,14 +59,6 @@ const OfficeHome = ({ type }: OfficeHomeProps) => {
   const { projectId } = useParams();
   const c = config[type];
 
-  if (projectId && type === 'spreadsheets') {
-    return (
-      <div className="flex h-screen w-full overflow-hidden bg-background">
-        <OfficeEditor />
-      </div>
-    );
-  }
-
   const sidebarItems = demoProjects[type].map(p => ({
     id: p.id,
     name: p.name,
@@ -77,17 +69,16 @@ const OfficeHome = ({ type }: OfficeHomeProps) => {
   const newPath =
     type === 'documents' ? '/office/documents/new' :
     type === 'presentations' ? '/office/presentations/new' :
-    `/office/new?mode=${c.mode}`;
-  const createPath = (prompt?: string) => {
-    if (type === 'spreadsheets') return newPath;
-    return prompt?.trim() ? `${newPath}?prompt=${encodeURIComponent(prompt.trim())}` : newPath;
-  };
+    '/office/spreadsheets/new';
+  const createPath = (prompt?: string) =>
+    prompt?.trim() ? `${newPath}?prompt=${encodeURIComponent(prompt.trim())}` : newPath;
   const documentTemplateIds = new Set(demoTemplates.documents.map(t => t.id));
   const presentationTemplateIds = new Set(demoTemplates.presentations.map(t => t.id));
+  const spreadsheetTemplateIds = new Set(demoTemplates.spreadsheets.map(t => t.id));
   const openPath = (id: string) => {
     if (type === 'documents') return documentTemplateIds.has(id) ? `/office/documents/doc-${Date.now()}?template=${id}` : `/office/documents/${id}`;
     if (type === 'presentations') return presentationTemplateIds.has(id) ? `/office/presentations/pres-${Date.now()}?template=${id}` : `/office/presentations/${id}`;
-    return `/office/${type}/${id}?mode=${c.mode}`;
+    return spreadsheetTemplateIds.has(id) ? `/office/spreadsheets/sheet-${Date.now()}?template=${id}` : `/office/spreadsheets/${id}`;
   };
 
   return (
