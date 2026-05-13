@@ -19,6 +19,8 @@ import DocumentTemplatePicker from "./pages/DocumentTemplatePicker";
 import WordWorkspace from "./pages/WordWorkspace";
 import PresentationTemplatePicker from "./pages/PresentationTemplatePicker";
 import PowerPointWorkspace from "./pages/PowerPointWorkspace";
+import SpreadsheetTemplatePicker from "./pages/SpreadsheetTemplatePicker";
+import ExcelWorkspace from "./pages/ExcelWorkspace";
 import AllTools from "./pages/AllTools";
 import Settings from "./pages/Settings";
 import Projects from "./pages/Projects";
