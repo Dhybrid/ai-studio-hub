@@ -2,7 +2,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ProjectDashboard, Project, Template } from '@/components/shared/ProjectDashboard';
 import { FileText, FileSpreadsheet, Presentation } from 'lucide-react';
 import { WorkspaceSidebar } from '@/components/layout/WorkspaceSidebar';
-import OfficeEditor from './OfficeEditor';
 
 type OfficeType = 'documents' | 'spreadsheets' | 'presentations';
 
