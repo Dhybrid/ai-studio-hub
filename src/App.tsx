@@ -79,7 +79,8 @@ const App = () => (
             <Route path="/office/documents/new" element={<DocumentTemplatePicker />} />
             <Route path="/office/documents/:projectId" element={<WordWorkspace />} />
             <Route path="/office/spreadsheets" element={<OfficeHome type="spreadsheets" />} />
-            <Route path="/office/spreadsheets/:projectId" element={<OfficeHome type="spreadsheets" />} />
+            <Route path="/office/spreadsheets/new" element={<SpreadsheetTemplatePicker />} />
+            <Route path="/office/spreadsheets/:projectId" element={<ExcelWorkspace />} />
             <Route path="/office/presentations" element={<OfficeHome type="presentations" />} />
             <Route path="/office/presentations/new" element={<PresentationTemplatePicker />} />
             <Route path="/office/presentations/:projectId" element={<PowerPointWorkspace />} />
