@@ -901,9 +901,11 @@ export default function ExcelWorkspace() {
           </div>
         </div>
 
-        {/* AI Panel */}
+        {/* AI Panel - overlay on mobile */}
         {aiOpen && (
-          <aside className="flex w-72 sm:w-80 border-l border-border bg-card flex-col flex-shrink-0">
+          <>
+            <button aria-label="Close AI panel" onClick={() => setAiOpen(false)} className="md:hidden fixed inset-0 z-30 bg-background/60 backdrop-blur-sm" />
+          <aside className="fixed md:relative inset-y-0 right-0 z-40 w-[85vw] max-w-[20rem] md:w-72 lg:w-80 border-l border-border bg-card flex flex-col flex-shrink-0 shadow-2xl md:shadow-none">
             <div className="h-10 flex items-center justify-between px-3 border-b border-border">
               <div className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-accent" /><span className="text-sm font-semibold">AI Assistant</span></div>
               <button onClick={() => setAiOpen(false)} className="w-7 h-7 rounded hover:bg-surface-hover flex items-center justify-center"><X className="w-4 h-4" /></button>
