@@ -140,6 +140,13 @@ export default function WordWorkspace() {
   const [voice, setVoice] = useState(false);
   const [showMini, setShowMini] = useState(false);
   const [miniPos, setMiniPos] = useState({ x: 0, y: 0 });
+  const aiTaRef = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    const el = aiTaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+  }, [aiPrompt]);
 
   // Multi-page state — each page has its own HTML
   const [pages, setPages] = useState<string[]>([tpl.html]);
