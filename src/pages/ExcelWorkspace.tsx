@@ -936,6 +936,7 @@ export default function ExcelWorkspace() {
               </div>
             </div>
           </aside>
+          </>
         )}
       </div>
     </div>
