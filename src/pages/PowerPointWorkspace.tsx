@@ -430,6 +430,9 @@ export default function PowerPointWorkspace() {
           <button onClick={() => setShowAI(!showAI)} className={cn("flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs", showAI ? "bg-accent/10 text-accent" : "text-muted-foreground hover:bg-surface-hover")} title="Toggle AI">
             <Sparkles className="w-3.5 h-3.5" /> <span className="hidden sm:inline">AI</span>
           </button>
+          <button onClick={toggleTheme} title="Toggle theme" className="w-8 h-8 rounded-lg hover:bg-surface-hover flex items-center justify-center text-muted-foreground">
+            {appTheme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
         </div>
       </div>
 
