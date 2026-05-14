@@ -531,6 +531,7 @@ export default function WordWorkspace() {
               </div>
             </div>
           </aside>
+          </>
         )}
       </div>
 
