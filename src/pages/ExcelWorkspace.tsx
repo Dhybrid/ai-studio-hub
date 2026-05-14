@@ -3,9 +3,10 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft, FileSpreadsheet, Cloud, CloudOff, Save, Share2, Search, Undo2, Redo2,
   Printer, Download, FilePlus, FolderOpen, FileDown, Home, X, Sparkles, Loader2, Send,
-  Plus, Trash2, ChevronDown, PanelRight, PanelRightClose, Menu as MenuIcon,
+  Plus, Trash2, ChevronDown, PanelRight, PanelRightClose, Menu as MenuIcon, Sun, Moon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useWorkspace } from '@/hooks/useWorkspace';
 import ExcelRibbon, { ExcelTab } from '@/components/office/ExcelRibbon';
 
 // ============ Types ============
