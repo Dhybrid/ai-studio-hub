@@ -327,6 +327,9 @@ export default function WordWorkspace() {
           <button onClick={() => setShowAI(!showAI)} className={cn("flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs", showAI ? "bg-accent/10 text-accent" : "text-muted-foreground hover:bg-surface-hover")}>
             <Sparkles className="w-3.5 h-3.5" /> <span className="hidden sm:inline">AI</span>
           </button>
+          <button onClick={toggleTheme} title="Toggle theme" className="w-8 h-8 rounded-lg hover:bg-surface-hover flex items-center justify-center text-muted-foreground">
+            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
           <button className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs hover:bg-surface-hover">
             <Share2 className="w-3.5 h-3.5" /> Share
           </button>
