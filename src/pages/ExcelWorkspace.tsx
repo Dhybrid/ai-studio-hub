@@ -935,12 +935,13 @@ export default function ExcelWorkspace() {
             <div className="p-2 border-t border-border">
               <div className="flex items-end gap-1">
                 <textarea
+                  ref={aiTaRef}
                   value={aiPrompt}
                   onChange={(e) => setAiPrompt(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAi(); } }}
-                  rows={2}
+                  rows={1}
                   placeholder="Ask AI to build a formula or summarize..."
-                  className="flex-1 text-xs bg-surface border border-border rounded-lg p-2 outline-none focus:border-accent resize-none"
+                  className="flex-1 text-xs bg-surface border border-border rounded-lg p-2 outline-none focus:border-accent resize-none min-h-[36px] max-h-40 overflow-y-auto"
                 />
                 <button onClick={handleAi} disabled={aiBusy || !aiPrompt.trim()} className="w-8 h-8 rounded-lg bg-foreground text-background flex items-center justify-center disabled:opacity-30">
                   {aiBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
