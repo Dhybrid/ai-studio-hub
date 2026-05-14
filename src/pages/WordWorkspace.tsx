@@ -414,7 +414,7 @@ export default function WordWorkspace() {
           )}
 
           {/* Doc canvas — multi-page with gaps */}
-          <div className="flex-1 overflow-auto py-6 px-4">
+          <div className="flex-1 overflow-auto py-4 sm:py-6 px-2 sm:px-4">
             <div className="flex flex-col items-center gap-6">
               {pages.map((html, idx) => (
                 <div key={idx} className="relative group">
