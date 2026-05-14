@@ -620,6 +620,7 @@ export default function PowerPointWorkspace() {
               </div>
             </div>
           </aside>
+          </>
         )}
       </div>
 
