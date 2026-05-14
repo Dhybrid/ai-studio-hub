@@ -4,9 +4,10 @@ import {
   ArrowLeft, FileText, Cloud, CloudOff, Save, Share2, ChevronDown, Search, MoreHorizontal,
   Undo2, Redo2, Printer, Download, FilePlus, FolderOpen, FileDown, Home, X,
   Mic, Sparkles, Wand2, Loader2, ChevronRight, MessageSquare, Send, Bold, Italic, Underline,
-  Type, PaintBucket, Languages, BookOpen, ListChecks
+  Type, PaintBucket, Languages, BookOpen, ListChecks, Sun, Moon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useWorkspace } from '@/hooks/useWorkspace';
 import WordRibbon, { RibbonTab } from '@/components/office/WordRibbon';
 
 const templateContent: Record<string, { name: string; html: string }> = {
