@@ -726,6 +726,9 @@ export default function ExcelWorkspace() {
           <button onClick={() => setAiOpen(o => !o)} className="w-7 h-7 rounded hover:bg-white/15 flex items-center justify-center" title="Toggle AI">
             {aiOpen ? <PanelRightClose className="w-4 h-4" /> : <PanelRight className="w-4 h-4" />}
           </button>
+          <button onClick={toggleTheme} title="Toggle theme" className="w-7 h-7 rounded hover:bg-white/15 flex items-center justify-center">
+            {appTheme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
         </div>
       </div>
 
