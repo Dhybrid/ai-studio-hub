@@ -541,17 +541,22 @@ export default function PowerPointWorkspace() {
 
       {/* Body */}
       <div className="flex-1 flex min-h-0 overflow-hidden">
-        {/* Slide sidebar */}
+        {/* Slide sidebar - overlay on mobile, side panel on desktop */}
         {showSlideList && (
-          <aside className="w-44 sm:w-52 border-r border-border bg-surface/40 flex flex-col flex-shrink-0">
+          <>
+            <button aria-label="Close slides" onClick={() => setShowSlideList(false)} className="md:hidden fixed inset-0 z-30 bg-background/60 backdrop-blur-sm" />
+          <aside className="fixed md:relative inset-y-0 left-0 z-40 w-44 sm:w-52 border-r border-border bg-card md:bg-surface/40 flex flex-col flex-shrink-0 shadow-2xl md:shadow-none animate-in slide-in-from-left md:animate-none">
             <div className="h-9 px-2 flex items-center justify-between border-b border-border flex-shrink-0">
               <span className="text-[11px] font-medium text-muted-foreground">Slides ({slides.length})</span>
-              <button onClick={addSlide} title="New slide" className="w-6 h-6 rounded hover:bg-surface-hover flex items-center justify-center"><Plus className="w-3.5 h-3.5" /></button>
+              <div className="flex items-center gap-1">
+                <button onClick={addSlide} title="New slide" className="w-6 h-6 rounded hover:bg-surface-hover flex items-center justify-center"><Plus className="w-3.5 h-3.5" /></button>
+                <button onClick={() => setShowSlideList(false)} title="Hide" className="md:hidden w-6 h-6 rounded hover:bg-surface-hover flex items-center justify-center"><X className="w-3.5 h-3.5" /></button>
+              </div>
             </div>
             <div className="flex-1 overflow-auto p-2 space-y-2">
               {slides.map((s, i) => (
                 <div key={s.id} className="relative group">
-                  <button onClick={() => setCurrentIdx(i)}
+                  <button onClick={() => { setCurrentIdx(i); if (window.innerWidth < 768) setShowSlideList(false); }}
                     className={cn("w-full aspect-video rounded-md overflow-hidden border-2 transition-all relative",
                       i === currentIdx ? "border-accent shadow-md" : "border-border hover:border-accent/50")}>
                     {renderSlide(s, { small: true })}
@@ -567,6 +572,7 @@ export default function PowerPointWorkspace() {
               ))}
             </div>
           </aside>
+          </>
         )}
 
         {/* Canvas + notes */}
