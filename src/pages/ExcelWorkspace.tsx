@@ -345,6 +345,7 @@ function buildSheetFromTemplate(tpl: keyof typeof templates): Sheet {
 
 // ============ Main Component ============
 export default function ExcelWorkspace() {
+  const { theme: appTheme, toggleTheme } = useWorkspace();
   const navigate = useNavigate();
   const { projectId } = useParams();
   const [searchParams] = useSearchParams();
