@@ -4,9 +4,10 @@ import {
   ArrowLeft, FileText, Cloud, CloudOff, Save, Share2, ChevronDown, Search, MoreHorizontal,
   Undo2, Redo2, Printer, Download, FilePlus, FolderOpen, FileDown, Home, X,
   Mic, Sparkles, Wand2, Loader2, ChevronRight, MessageSquare, Send, Bold, Italic, Underline,
-  Type, PaintBucket, Languages, BookOpen, ListChecks
+  Type, PaintBucket, Languages, BookOpen, ListChecks, Sun, Moon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useWorkspace } from '@/hooks/useWorkspace';
 import WordRibbon, { RibbonTab } from '@/components/office/WordRibbon';
 
 const templateContent: Record<string, { name: string; html: string }> = {
@@ -114,6 +115,7 @@ const templateContent: Record<string, { name: string; html: string }> = {
 };
 
 export default function WordWorkspace() {
+  const { theme, toggleTheme } = useWorkspace();
   const navigate = useNavigate();
   const { projectId } = useParams();
   const [search] = useSearchParams();
@@ -325,6 +327,9 @@ export default function WordWorkspace() {
           <button onClick={() => setShowAI(!showAI)} className={cn("flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs", showAI ? "bg-accent/10 text-accent" : "text-muted-foreground hover:bg-surface-hover")}>
             <Sparkles className="w-3.5 h-3.5" /> <span className="hidden sm:inline">AI</span>
           </button>
+          <button onClick={toggleTheme} title="Toggle theme" className="w-8 h-8 rounded-lg hover:bg-surface-hover flex items-center justify-center text-muted-foreground">
+            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
           <button className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs hover:bg-surface-hover">
             <Share2 className="w-3.5 h-3.5" /> Share
           </button>
@@ -475,9 +480,11 @@ export default function WordWorkspace() {
           </div>
         </div>
 
-        {/* AI Right panel */}
+        {/* AI Right panel - overlay on mobile, side panel on desktop */}
         {showAI && (
-          <aside className="flex w-72 sm:w-80 border-l border-border bg-card flex-col flex-shrink-0">
+          <>
+            <button aria-label="Close AI panel" onClick={() => setShowAI(false)} className="md:hidden fixed inset-0 z-30 bg-background/60 backdrop-blur-sm" />
+          <aside className="fixed md:relative inset-y-0 right-0 z-40 w-[85vw] max-w-[20rem] md:w-72 lg:w-80 border-l border-border bg-card flex flex-col flex-shrink-0 shadow-2xl md:shadow-none animate-in slide-in-from-right md:animate-none">
             <div className="h-10 border-b border-border flex items-center justify-between px-3 flex-shrink-0">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-accent" />
@@ -529,6 +536,7 @@ export default function WordWorkspace() {
               </div>
             </div>
           </aside>
+          </>
         )}
       </div>
 

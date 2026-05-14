@@ -46,8 +46,8 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   React.useEffect(() => {
-    document.documentElement.classList.add('dark');
-  }, []);
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  }, [theme]);
 
   return (
     <WorkspaceContext.Provider value={{ mode, setMode, model, setModel, sidebarOpen, setSidebarOpen, theme, toggleTheme, chatKey, startNewChat }}>

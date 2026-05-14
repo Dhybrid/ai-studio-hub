@@ -4,9 +4,10 @@ import {
   ArrowLeft, Presentation as PresentationIcon, Cloud, CloudOff, Save, Share2, Search, Undo2, Redo2,
   Printer, Download, FilePlus, FolderOpen, FileDown, Home, X, Sparkles, Mic, Loader2, Send,
   Wand2, BookOpen, Languages, ListChecks, Plus, Trash2, Copy as CopyIcon, Play, MonitorPlay,
-  ChevronLeft, ChevronRight, StickyNote, PanelRightClose, PanelRight, Menu as MenuIcon
+  ChevronLeft, ChevronRight, StickyNote, PanelRightClose, PanelRight, Menu as MenuIcon, Sun, Moon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useWorkspace } from '@/hooks/useWorkspace';
 import PowerPointRibbon, { PptRibbonTab } from '@/components/office/PowerPointRibbon';
 
 type SlideTheme = {
@@ -112,6 +113,7 @@ const templateSlides: Record<string, { name: string; theme: string; slides: Part
 };
 
 export default function PowerPointWorkspace() {
+  const { theme: appTheme, toggleTheme } = useWorkspace();
   const navigate = useNavigate();
   const { projectId } = useParams();
   const [search] = useSearchParams();
@@ -428,6 +430,9 @@ export default function PowerPointWorkspace() {
           <button onClick={() => setShowAI(!showAI)} className={cn("flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs", showAI ? "bg-accent/10 text-accent" : "text-muted-foreground hover:bg-surface-hover")} title="Toggle AI">
             <Sparkles className="w-3.5 h-3.5" /> <span className="hidden sm:inline">AI</span>
           </button>
+          <button onClick={toggleTheme} title="Toggle theme" className="w-8 h-8 rounded-lg hover:bg-surface-hover flex items-center justify-center text-muted-foreground">
+            {appTheme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
         </div>
       </div>
 
@@ -567,9 +572,11 @@ export default function PowerPointWorkspace() {
           </div>
         </div>
 
-        {/* AI panel */}
+        {/* AI panel - overlay on mobile */}
         {showAI && (
-          <aside className="hidden md:flex w-72 lg:w-80 border-l border-border bg-card flex-col flex-shrink-0">
+          <>
+            <button aria-label="Close AI panel" onClick={() => setShowAI(false)} className="md:hidden fixed inset-0 z-30 bg-background/60 backdrop-blur-sm" />
+          <aside className="fixed md:relative inset-y-0 right-0 z-40 w-[85vw] max-w-[20rem] md:w-72 lg:w-80 border-l border-border bg-card flex flex-col flex-shrink-0 shadow-2xl md:shadow-none">
             <div className="h-10 border-b border-border flex items-center justify-between px-3 flex-shrink-0">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-accent" />
@@ -618,6 +625,7 @@ export default function PowerPointWorkspace() {
               </div>
             </div>
           </aside>
+          </>
         )}
       </div>
 
