@@ -648,11 +648,12 @@ export default function PowerPointWorkspace() {
             <div className="border-t border-border p-2.5 flex-shrink-0">
               <div className="bg-surface border border-border rounded-xl p-2">
                 <textarea
+                  ref={aiTaRef}
                   value={aiPrompt}
                   onChange={(e) => setAiPrompt(e.target.value)}
                   placeholder="Ask AI to design slides..."
-                  rows={2}
-                  className="w-full bg-transparent outline-none resize-none text-xs px-2 py-1 max-h-32"
+                  rows={1}
+                  className="w-full bg-transparent outline-none resize-none text-xs px-2 py-1 min-h-[36px] max-h-40 overflow-y-auto"
                 />
                 <div className="flex items-center justify-between px-1 pt-1">
                   <button onClick={() => setVoice(!voice)} className={cn("w-7 h-7 rounded-full flex items-center justify-center", voice ? "bg-accent text-white" : "hover:bg-surface-hover text-muted-foreground")} title="Voice input">
