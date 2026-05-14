@@ -465,7 +465,7 @@ export default function WordWorkspace() {
 
               <button onClick={() => addPage(pages.length - 1)}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg border border-dashed border-border hover:border-accent hover:bg-accent/5 text-xs text-muted-foreground hover:text-accent transition-all"
-                style={{ width: `${(816 * zoom) / 100}px` }}>
+                style={{ width: `min(${(816 * zoom) / 100}px, calc(100vw - 1rem))` }}>
                 <FilePlus className="w-3.5 h-3.5" /> Add a new page
               </button>
             </div>
