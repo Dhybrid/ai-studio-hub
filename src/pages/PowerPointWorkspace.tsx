@@ -4,9 +4,10 @@ import {
   ArrowLeft, Presentation as PresentationIcon, Cloud, CloudOff, Save, Share2, Search, Undo2, Redo2,
   Printer, Download, FilePlus, FolderOpen, FileDown, Home, X, Sparkles, Mic, Loader2, Send,
   Wand2, BookOpen, Languages, ListChecks, Plus, Trash2, Copy as CopyIcon, Play, MonitorPlay,
-  ChevronLeft, ChevronRight, StickyNote, PanelRightClose, PanelRight, Menu as MenuIcon
+  ChevronLeft, ChevronRight, StickyNote, PanelRightClose, PanelRight, Menu as MenuIcon, Sun, Moon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useWorkspace } from '@/hooks/useWorkspace';
 import PowerPointRibbon, { PptRibbonTab } from '@/components/office/PowerPointRibbon';
 
 type SlideTheme = {
