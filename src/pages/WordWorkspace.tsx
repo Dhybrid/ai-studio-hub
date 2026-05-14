@@ -115,6 +115,7 @@ const templateContent: Record<string, { name: string; html: string }> = {
 };
 
 export default function WordWorkspace() {
+  const { theme, toggleTheme } = useWorkspace();
   const navigate = useNavigate();
   const { projectId } = useParams();
   const [search] = useSearchParams();
