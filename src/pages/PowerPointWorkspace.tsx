@@ -147,6 +147,41 @@ export default function PowerPointWorkspace() {
   const bodyRef = useRef<HTMLDivElement>(null);
   const notesRef = useRef<HTMLTextAreaElement>(null);
   const saveTimer = useRef<ReturnType<typeof setTimeout>>();
+  const aiTaRef = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    const el = aiTaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+  }, [aiPrompt]);
+
+  // Edge-swipe to open/close the slide list on mobile
+  useEffect(() => {
+    let startX = 0, startY = 0, tracking = false;
+    const onStart = (e: TouchEvent) => {
+      if (window.innerWidth >= 768) return;
+      const t = e.touches[0];
+      startX = t.clientX; startY = t.clientY;
+      tracking = startX < 24 || showSlideList;
+    };
+    const onEnd = (e: TouchEvent) => {
+      if (!tracking) return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - startX;
+      const dy = Math.abs(t.clientY - startY);
+      if (dy < 60 && Math.abs(dx) > 50) {
+        if (dx > 0 && !showSlideList) setShowSlideList(true);
+        else if (dx < 0 && showSlideList) setShowSlideList(false);
+      }
+      tracking = false;
+    };
+    window.addEventListener('touchstart', onStart, { passive: true });
+    window.addEventListener('touchend', onEnd, { passive: true });
+    return () => {
+      window.removeEventListener('touchstart', onStart);
+      window.removeEventListener('touchend', onEnd);
+    };
+  }, [showSlideList]);
 
   const current = slides[currentIdx];
   const theme = themes[current?.themeId || 'office'];
