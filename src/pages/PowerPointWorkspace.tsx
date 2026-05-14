@@ -113,6 +113,7 @@ const templateSlides: Record<string, { name: string; theme: string; slides: Part
 };
 
 export default function PowerPointWorkspace() {
+  const { theme, toggleTheme } = useWorkspace();
   const navigate = useNavigate();
   const { projectId } = useParams();
   const [search] = useSearchParams();
