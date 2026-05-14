@@ -376,6 +376,13 @@ export default function ExcelWorkspace() {
   const editInputRef = useRef<HTMLInputElement>(null);
   const dragRef = useRef<{ active: boolean }>({ active: false });
   const fileMenuRef = useRef<HTMLDivElement>(null);
+  const aiTaRef = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    const el = aiTaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+  }, [aiPrompt]);
 
   const activeSheet = sheets.find(s => s.id === activeSheetId)!;
   const cells = activeSheet.cells;
