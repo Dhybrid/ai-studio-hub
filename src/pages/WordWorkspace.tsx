@@ -140,6 +140,13 @@ export default function WordWorkspace() {
   const [voice, setVoice] = useState(false);
   const [showMini, setShowMini] = useState(false);
   const [miniPos, setMiniPos] = useState({ x: 0, y: 0 });
+  const aiTaRef = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    const el = aiTaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+  }, [aiPrompt]);
 
   // Multi-page state — each page has its own HTML
   const [pages, setPages] = useState<string[]>([tpl.html]);
@@ -407,7 +414,7 @@ export default function WordWorkspace() {
           )}
 
           {/* Doc canvas — multi-page with gaps */}
-          <div className="flex-1 overflow-auto py-6 px-4">
+          <div className="flex-1 overflow-auto py-4 sm:py-6 px-2 sm:px-4">
             <div className="flex flex-col items-center gap-6">
               {pages.map((html, idx) => (
                 <div key={idx} className="relative group">
@@ -420,9 +427,9 @@ export default function WordWorkspace() {
                       </button>
                     )}
                   </div>
-                  <div className={cn("bg-card border shadow-sm rounded-sm transition-all",
+                  <div className={cn("bg-card border shadow-sm rounded-sm transition-all w-full",
                     activePage === idx ? "border-accent/40" : "border-border")}
-                    style={{ width: `${(816 * zoom) / 100}px`, minHeight: `${(1056 * zoom) / 100}px`, padding: `${(96 * zoom) / 100}px ${(72 * zoom) / 100}px` }}>
+                    style={{ width: `min(${(816 * zoom) / 100}px, calc(100vw - 1rem))`, minHeight: `${(1056 * zoom) / 100}px`, padding: `clamp(20px, 6vw, ${(96 * zoom) / 100}px) clamp(16px, 5vw, ${(72 * zoom) / 100}px)` }}>
                     <div
                       ref={(el) => { pageRefs.current[idx] = el; }}
                       contentEditable
@@ -458,7 +465,7 @@ export default function WordWorkspace() {
 
               <button onClick={() => addPage(pages.length - 1)}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg border border-dashed border-border hover:border-accent hover:bg-accent/5 text-xs text-muted-foreground hover:text-accent transition-all"
-                style={{ width: `${(816 * zoom) / 100}px` }}>
+                style={{ width: `min(${(816 * zoom) / 100}px, calc(100vw - 1rem))` }}>
                 <FilePlus className="w-3.5 h-3.5" /> Add a new page
               </button>
             </div>
@@ -518,11 +525,12 @@ export default function WordWorkspace() {
             <div className="border-t border-border p-2.5 flex-shrink-0">
               <div className="bg-surface border border-border rounded-xl p-2">
                 <textarea
+                  ref={aiTaRef}
                   value={aiPrompt}
                   onChange={(e) => setAiPrompt(e.target.value)}
                   placeholder="Ask AI to write or edit..."
-                  rows={2}
-                  className="w-full bg-transparent outline-none resize-none text-xs px-2 py-1 max-h-32"
+                  rows={1}
+                  className="w-full bg-transparent outline-none resize-none text-xs px-2 py-1 min-h-[36px] max-h-40 overflow-y-auto"
                 />
                 <div className="flex items-center justify-between px-1 pt-1">
                   <button onClick={() => setVoice(!voice)} className={cn("w-7 h-7 rounded-full flex items-center justify-center", voice ? "bg-accent text-white" : "hover:bg-surface-hover text-muted-foreground")} title="Voice input">

@@ -128,7 +128,7 @@ export default function PowerPointWorkspace() {
   const [zoom, setZoom] = useState(100);
   const [showAI, setShowAI] = useState(true);
   const [showFile, setShowFile] = useState(false);
-  const [showSlideList, setShowSlideList] = useState(true);
+  const [showSlideList, setShowSlideList] = useState(() => typeof window === 'undefined' ? true : window.innerWidth >= 768);
   const [showNotes, setShowNotes] = useState(false);
   const [aiPrompt, setAiPrompt] = useState(initialPrompt);
   const [aiBusy, setAiBusy] = useState(false);
@@ -147,6 +147,41 @@ export default function PowerPointWorkspace() {
   const bodyRef = useRef<HTMLDivElement>(null);
   const notesRef = useRef<HTMLTextAreaElement>(null);
   const saveTimer = useRef<ReturnType<typeof setTimeout>>();
+  const aiTaRef = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    const el = aiTaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+  }, [aiPrompt]);
+
+  // Edge-swipe to open/close the slide list on mobile
+  useEffect(() => {
+    let startX = 0, startY = 0, tracking = false;
+    const onStart = (e: TouchEvent) => {
+      if (window.innerWidth >= 768) return;
+      const t = e.touches[0];
+      startX = t.clientX; startY = t.clientY;
+      tracking = startX < 24 || showSlideList;
+    };
+    const onEnd = (e: TouchEvent) => {
+      if (!tracking) return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - startX;
+      const dy = Math.abs(t.clientY - startY);
+      if (dy < 60 && Math.abs(dx) > 50) {
+        if (dx > 0 && !showSlideList) setShowSlideList(true);
+        else if (dx < 0 && showSlideList) setShowSlideList(false);
+      }
+      tracking = false;
+    };
+    window.addEventListener('touchstart', onStart, { passive: true });
+    window.addEventListener('touchend', onEnd, { passive: true });
+    return () => {
+      window.removeEventListener('touchstart', onStart);
+      window.removeEventListener('touchend', onEnd);
+    };
+  }, [showSlideList]);
 
   const current = slides[currentIdx];
   const theme = themes[current?.themeId || 'office'];
@@ -506,17 +541,22 @@ export default function PowerPointWorkspace() {
 
       {/* Body */}
       <div className="flex-1 flex min-h-0 overflow-hidden">
-        {/* Slide sidebar */}
+        {/* Slide sidebar - overlay on mobile, side panel on desktop */}
         {showSlideList && (
-          <aside className="w-44 sm:w-52 border-r border-border bg-surface/40 flex flex-col flex-shrink-0">
+          <>
+            <button aria-label="Close slides" onClick={() => setShowSlideList(false)} className="md:hidden fixed inset-0 z-30 bg-background/60 backdrop-blur-sm" />
+          <aside className="fixed md:relative inset-y-0 left-0 z-40 w-44 sm:w-52 border-r border-border bg-card md:bg-surface/40 flex flex-col flex-shrink-0 shadow-2xl md:shadow-none animate-in slide-in-from-left md:animate-none">
             <div className="h-9 px-2 flex items-center justify-between border-b border-border flex-shrink-0">
               <span className="text-[11px] font-medium text-muted-foreground">Slides ({slides.length})</span>
-              <button onClick={addSlide} title="New slide" className="w-6 h-6 rounded hover:bg-surface-hover flex items-center justify-center"><Plus className="w-3.5 h-3.5" /></button>
+              <div className="flex items-center gap-1">
+                <button onClick={addSlide} title="New slide" className="w-6 h-6 rounded hover:bg-surface-hover flex items-center justify-center"><Plus className="w-3.5 h-3.5" /></button>
+                <button onClick={() => setShowSlideList(false)} title="Hide" className="md:hidden w-6 h-6 rounded hover:bg-surface-hover flex items-center justify-center"><X className="w-3.5 h-3.5" /></button>
+              </div>
             </div>
             <div className="flex-1 overflow-auto p-2 space-y-2">
               {slides.map((s, i) => (
                 <div key={s.id} className="relative group">
-                  <button onClick={() => setCurrentIdx(i)}
+                  <button onClick={() => { setCurrentIdx(i); if (window.innerWidth < 768) setShowSlideList(false); }}
                     className={cn("w-full aspect-video rounded-md overflow-hidden border-2 transition-all relative",
                       i === currentIdx ? "border-accent shadow-md" : "border-border hover:border-accent/50")}>
                     {renderSlide(s, { small: true })}
@@ -532,6 +572,7 @@ export default function PowerPointWorkspace() {
               ))}
             </div>
           </aside>
+          </>
         )}
 
         {/* Canvas + notes */}
@@ -607,11 +648,12 @@ export default function PowerPointWorkspace() {
             <div className="border-t border-border p-2.5 flex-shrink-0">
               <div className="bg-surface border border-border rounded-xl p-2">
                 <textarea
+                  ref={aiTaRef}
                   value={aiPrompt}
                   onChange={(e) => setAiPrompt(e.target.value)}
                   placeholder="Ask AI to design slides..."
-                  rows={2}
-                  className="w-full bg-transparent outline-none resize-none text-xs px-2 py-1 max-h-32"
+                  rows={1}
+                  className="w-full bg-transparent outline-none resize-none text-xs px-2 py-1 min-h-[36px] max-h-40 overflow-y-auto"
                 />
                 <div className="flex items-center justify-between px-1 pt-1">
                   <button onClick={() => setVoice(!voice)} className={cn("w-7 h-7 rounded-full flex items-center justify-center", voice ? "bg-accent text-white" : "hover:bg-surface-hover text-muted-foreground")} title="Voice input">
