@@ -128,7 +128,7 @@ export default function PowerPointWorkspace() {
   const [zoom, setZoom] = useState(100);
   const [showAI, setShowAI] = useState(true);
   const [showFile, setShowFile] = useState(false);
-  const [showSlideList, setShowSlideList] = useState(true);
+  const [showSlideList, setShowSlideList] = useState(() => typeof window === 'undefined' ? true : window.innerWidth >= 768);
   const [showNotes, setShowNotes] = useState(false);
   const [aiPrompt, setAiPrompt] = useState(initialPrompt);
   const [aiBusy, setAiBusy] = useState(false);
