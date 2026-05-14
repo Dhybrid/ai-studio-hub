@@ -427,9 +427,9 @@ export default function WordWorkspace() {
                       </button>
                     )}
                   </div>
-                  <div className={cn("bg-card border shadow-sm rounded-sm transition-all",
+                  <div className={cn("bg-card border shadow-sm rounded-sm transition-all w-full",
                     activePage === idx ? "border-accent/40" : "border-border")}
-                    style={{ width: `${(816 * zoom) / 100}px`, minHeight: `${(1056 * zoom) / 100}px`, padding: `${(96 * zoom) / 100}px ${(72 * zoom) / 100}px` }}>
+                    style={{ width: `min(${(816 * zoom) / 100}px, calc(100vw - 1rem))`, minHeight: `${(1056 * zoom) / 100}px`, padding: `clamp(20px, 6vw, ${(96 * zoom) / 100}px) clamp(16px, 5vw, ${(72 * zoom) / 100}px)` }}>
                     <div
                       ref={(el) => { pageRefs.current[idx] = el; }}
                       contentEditable
