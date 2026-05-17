@@ -9,6 +9,8 @@ import {
 import { cn } from '@/lib/utils';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import PowerPointRibbon, { PptRibbonTab } from '@/components/office/PowerPointRibbon';
+import { buildTableHTML } from '@/components/office/TableGridPicker';
+import EditorContextMenu from '@/components/office/EditorContextMenu';
 
 type SlideTheme = {
   id: string;
@@ -270,15 +272,18 @@ export default function PowerPointWorkspace() {
   const insertShape = (_shape: string) => {
     exec('insertHTML', '<span style="display:inline-block;width:60px;height:40px;background:hsl(var(--accent));margin:4px;border-radius:6px"></span>');
   };
-  const insertTable = () => {
-    const rows = parseInt(prompt('Rows:', '3') || '0');
-    const cols = parseInt(prompt('Columns:', '3') || '0');
-    if (rows > 0 && cols > 0) {
-      let h = '<table style="border-collapse:collapse;margin:8px 0"><tbody>';
-      for (let r = 0; r < rows; r++) { h += '<tr>'; for (let c = 0; c < cols; c++) h += `<td style="border:1px solid currentColor;padding:6px;min-width:60px">${r === 0 ? `H${c + 1}` : ''}</td>`; h += '</tr>'; }
-      h += '</tbody></table>';
-      exec('insertHTML', h);
-    }
+  const insertTable = (rows: number, cols: number, opts: { header: boolean; bordered: boolean }) => {
+    bodyRef.current?.focus();
+    exec('insertHTML', buildTableHTML(rows, cols, opts));
+  };
+
+  const handleSlideDrop = (e: React.DragEvent) => {
+    const f = Array.from(e.dataTransfer?.files || []).find(x => x.type.startsWith('image/'));
+    if (!f) return;
+    e.preventDefault();
+    const r = new FileReader();
+    r.onload = (ev) => { bodyRef.current?.focus(); document.execCommand('insertImage', false, ev.target?.result as string); markUnsaved(); };
+    r.readAsDataURL(f);
   };
   const insertChart = () => {
     exec('insertHTML', `<div style="display:inline-flex;align-items:flex-end;gap:6px;height:80px;padding:6px;border:1px dashed currentColor;border-radius:6px">
@@ -577,11 +582,13 @@ export default function PowerPointWorkspace() {
 
         {/* Canvas + notes */}
         <div className="flex-1 flex flex-col min-w-0 bg-muted/30 overflow-hidden">
-          <div className="flex-1 overflow-auto p-3 sm:p-6 flex items-center justify-center">
-            <div className="w-full max-w-[1200px] aspect-video bg-card rounded-lg shadow-2xl overflow-hidden border border-border" style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'center' }}>
+          <EditorContextMenu exec={exec} onAI={aiGenerate} onAction={markUnsaved}
+            className="flex-1 overflow-auto p-3 sm:p-6 flex items-center justify-center"
+          >
+            <SlideCanvas zoom={zoom} onDrop={handleSlideDrop}>
               {current && renderSlide(current, { editable: true })}
-            </div>
-          </div>
+            </SlideCanvas>
+          </EditorContextMenu>
 
           {showNotes && (
             <div className="border-t border-border bg-card flex-shrink-0">
@@ -682,3 +689,39 @@ export default function PowerPointWorkspace() {
     </div>
   );
 }
+
+/**
+ * Responsive slide canvas: scales a fixed 960×540 stage proportionally
+ * so all text and absolute children shrink together on small screens.
+ */
+function SlideCanvas({ children, zoom, onDrop }: { children: React.ReactNode; zoom: number; onDrop: (e: React.DragEvent) => void }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      const w = el.clientWidth;
+      setScale(w / 960);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const s = scale * (zoom / 100);
+  return (
+    <div
+      ref={ref}
+      className="w-full max-w-[1200px] bg-card rounded-lg shadow-2xl overflow-hidden border border-border relative"
+      style={{ aspectRatio: '16 / 9' }}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={onDrop}
+    >
+      <div
+        style={{ width: 960, height: 540, transform: `scale(${s})`, transformOrigin: 'top left' }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+

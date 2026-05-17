@@ -11,6 +11,7 @@ import {
   Square, Circle, Triangle, ArrowRight, Star, Maximize, Wand, Settings as SettingsIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import TableGridPicker from './TableGridPicker';
 
 export type PptRibbonTab = 'home' | 'insert' | 'draw' | 'design' | 'transitions' | 'animations' | 'slideshow' | 'review' | 'view' | 'help';
 
@@ -25,7 +26,7 @@ interface Props {
   onInsertImage: () => void;
   onInsertText: () => void;
   onInsertShape: (shape: string) => void;
-  onInsertTable: () => void;
+  onInsertTable: (rows: number, cols: number, opts: { header: boolean; bordered: boolean }) => void;
   onInsertChart: () => void;
   onApplyTheme: (id: string) => void;
   onApplyTransition: (id: string) => void;
@@ -196,7 +197,7 @@ export default function PowerPointRibbon(props: Props) {
               <Btn icon={Plus} label="New Slide" large onClick={onAddSlide} />
             </Group>
             <Group label="Tables">
-              <Btn icon={TableIcon} label="Table" large onClick={onInsertTable} />
+              <TableGridPicker onInsert={onInsertTable} />
             </Group>
             <Group label="Images">
               <Btn icon={ImageIcon} label="Pictures" large onClick={onInsertImage} />

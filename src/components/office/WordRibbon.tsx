@@ -12,6 +12,7 @@ import {
   HelpCircle, Lightbulb, Maximize2, Columns, FileImage, Frame
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import TableGridPicker from './TableGridPicker';
 
 export type RibbonTab = 'home' | 'insert' | 'draw' | 'design' | 'layout' | 'references' | 'mailings' | 'review' | 'view' | 'help';
 
@@ -21,7 +22,7 @@ interface WordRibbonProps {
   exec: (cmd: string, value?: string) => void;
   activeFormats: Set<string>;
   onInsertImage: () => void;
-  onInsertTable: () => void;
+  onInsertTable: (rows: number, cols: number, opts: { header: boolean; bordered: boolean }) => void;
   onInsertLink: () => void;
   onAIRewrite: () => void;
   onAddPage?: () => void;
@@ -208,7 +209,7 @@ export default function WordRibbon(props: WordRibbonProps) {
               <Btn icon={SplitSquareHorizontal} label="Page Break" large onClick={() => onAddPage?.()} />
             </Group>
             <Group label="Tables">
-              <Btn icon={TableIcon} label="Table" large onClick={onInsertTable} />
+              <TableGridPicker onInsert={onInsertTable} />
             </Group>
             <Group label="Illustrations">
               <Btn icon={ImageIcon} label="Pictures" large onClick={onInsertImage} />
