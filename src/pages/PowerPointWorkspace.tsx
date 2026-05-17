@@ -9,6 +9,8 @@ import {
 import { cn } from '@/lib/utils';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import PowerPointRibbon, { PptRibbonTab } from '@/components/office/PowerPointRibbon';
+import { buildTableHTML } from '@/components/office/TableGridPicker';
+import EditorContextMenu from '@/components/office/EditorContextMenu';
 
 type SlideTheme = {
   id: string;
@@ -270,15 +272,18 @@ export default function PowerPointWorkspace() {
   const insertShape = (_shape: string) => {
     exec('insertHTML', '<span style="display:inline-block;width:60px;height:40px;background:hsl(var(--accent));margin:4px;border-radius:6px"></span>');
   };
-  const insertTable = () => {
-    const rows = parseInt(prompt('Rows:', '3') || '0');
-    const cols = parseInt(prompt('Columns:', '3') || '0');
-    if (rows > 0 && cols > 0) {
-      let h = '<table style="border-collapse:collapse;margin:8px 0"><tbody>';
-      for (let r = 0; r < rows; r++) { h += '<tr>'; for (let c = 0; c < cols; c++) h += `<td style="border:1px solid currentColor;padding:6px;min-width:60px">${r === 0 ? `H${c + 1}` : ''}</td>`; h += '</tr>'; }
-      h += '</tbody></table>';
-      exec('insertHTML', h);
-    }
+  const insertTable = (rows: number, cols: number, opts: { header: boolean; bordered: boolean }) => {
+    bodyRef.current?.focus();
+    exec('insertHTML', buildTableHTML(rows, cols, opts));
+  };
+
+  const handleSlideDrop = (e: React.DragEvent) => {
+    const f = Array.from(e.dataTransfer?.files || []).find(x => x.type.startsWith('image/'));
+    if (!f) return;
+    e.preventDefault();
+    const r = new FileReader();
+    r.onload = (ev) => { bodyRef.current?.focus(); document.execCommand('insertImage', false, ev.target?.result as string); markUnsaved(); };
+    r.readAsDataURL(f);
   };
   const insertChart = () => {
     exec('insertHTML', `<div style="display:inline-flex;align-items:flex-end;gap:6px;height:80px;padding:6px;border:1px dashed currentColor;border-radius:6px">
