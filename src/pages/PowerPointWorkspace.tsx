@@ -582,11 +582,13 @@ export default function PowerPointWorkspace() {
 
         {/* Canvas + notes */}
         <div className="flex-1 flex flex-col min-w-0 bg-muted/30 overflow-hidden">
-          <div className="flex-1 overflow-auto p-3 sm:p-6 flex items-center justify-center">
-            <div className="w-full max-w-[1200px] aspect-video bg-card rounded-lg shadow-2xl overflow-hidden border border-border" style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'center' }}>
+          <EditorContextMenu exec={exec} onAI={aiGenerate} onAction={markUnsaved}
+            className="flex-1 overflow-auto p-3 sm:p-6 flex items-center justify-center"
+          >
+            <SlideCanvas zoom={zoom} onDrop={handleSlideDrop}>
               {current && renderSlide(current, { editable: true })}
-            </div>
-          </div>
+            </SlideCanvas>
+          </EditorContextMenu>
 
           {showNotes && (
             <div className="border-t border-border bg-card flex-shrink-0">
