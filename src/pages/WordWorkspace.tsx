@@ -9,6 +9,8 @@ import {
 import { cn } from '@/lib/utils';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import WordRibbon, { RibbonTab } from '@/components/office/WordRibbon';
+import { buildTableHTML } from '@/components/office/TableGridPicker';
+import EditorContextMenu from '@/components/office/EditorContextMenu';
 
 const templateContent: Record<string, { name: string; html: string }> = {
   blank: { name: 'Untitled Document', html: '<p><br></p>' },
@@ -254,15 +256,24 @@ export default function WordWorkspace() {
     i.click();
   };
 
-  const handleInsertTable = () => {
-    const rows = parseInt(prompt('Rows:', '3') || '0');
-    const cols = parseInt(prompt('Columns:', '3') || '0');
-    if (rows > 0 && cols > 0) {
-      let h = '<table style="border-collapse:collapse;width:100%;margin:8px 0"><tbody>';
-      for (let r = 0; r < rows; r++) { h += '<tr>'; for (let c = 0; c < cols; c++) h += `<td style="border:1px solid #ddd;padding:6px;min-width:60px">${r === 0 ? `Header ${c + 1}` : ''}</td>`; h += '</tr>'; }
-      h += '</tbody></table><p><br></p>';
-      exec('insertHTML', h);
-    }
+  const handleInsertTable = (rows: number, cols: number, opts: { header: boolean; bordered: boolean }) => {
+    editorRef.current?.focus();
+    exec('insertHTML', buildTableHTML(rows, cols, opts));
+  };
+
+  const handleEditorDrop = (e: React.DragEvent) => {
+    const files = Array.from(e.dataTransfer?.files || []);
+    const img = files.find(f => f.type.startsWith('image/'));
+    if (!img) return;
+    e.preventDefault();
+    const r = new FileReader();
+    r.onload = (ev) => {
+      const target = e.target as HTMLElement;
+      const page = target.closest('[data-page-editor]') as HTMLElement | null;
+      page?.focus();
+      exec('insertImage', ev.target?.result as string);
+    };
+    r.readAsDataURL(img);
   };
 
   const handleInsertLink = () => { const u = prompt('URL:'); if (u) exec('createLink', u); };
