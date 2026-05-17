@@ -689,3 +689,39 @@ export default function PowerPointWorkspace() {
     </div>
   );
 }
+
+/**
+ * Responsive slide canvas: scales a fixed 960×540 stage proportionally
+ * so all text and absolute children shrink together on small screens.
+ */
+function SlideCanvas({ children, zoom, onDrop }: { children: React.ReactNode; zoom: number; onDrop: (e: React.DragEvent) => void }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      const w = el.clientWidth;
+      setScale(w / 960);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const s = scale * (zoom / 100);
+  return (
+    <div
+      ref={ref}
+      className="w-full max-w-[1200px] bg-card rounded-lg shadow-2xl overflow-hidden border border-border relative"
+      style={{ aspectRatio: '16 / 9' }}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={onDrop}
+    >
+      <div
+        style={{ width: 960, height: 540, transform: `scale(${s})`, transformOrigin: 'top left' }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
