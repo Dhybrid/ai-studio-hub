@@ -425,8 +425,13 @@ export default function WordWorkspace() {
           )}
 
           {/* Doc canvas — multi-page with gaps */}
-          <div className="flex-1 overflow-auto py-4 sm:py-6 px-2 sm:px-4">
-            <div className="flex flex-col items-center gap-6">
+          <EditorContextMenu exec={exec} onAI={handleAIRewrite} onAction={markUnsaved}
+            className="flex-1 overflow-auto py-4 sm:py-6 px-2 sm:px-4"
+          >
+            <div className="flex flex-col items-center gap-6"
+              onDragOver={(e) => { e.preventDefault(); }}
+              onDrop={handleEditorDrop}
+            >
               {pages.map((html, idx) => (
                 <div key={idx} className="relative group">
                   <div className="absolute -left-12 top-2 hidden lg:flex flex-col items-center gap-1 text-[10px] text-muted-foreground select-none">
@@ -438,10 +443,11 @@ export default function WordWorkspace() {
                       </button>
                     )}
                   </div>
-                  <div className={cn("bg-card border shadow-sm rounded-sm transition-all w-full",
+                  <div className={cn("bg-card border shadow-sm rounded-sm transition-all w-full relative",
                     activePage === idx ? "border-accent/40" : "border-border")}
                     style={{ width: `min(${(816 * zoom) / 100}px, calc(100vw - 1rem))`, minHeight: `${(1056 * zoom) / 100}px`, padding: `clamp(20px, 6vw, ${(96 * zoom) / 100}px) clamp(16px, 5vw, ${(72 * zoom) / 100}px)` }}>
                     <div
+                      data-page-editor
                       ref={(el) => { pageRefs.current[idx] = el; }}
                       contentEditable
                       suppressContentEditableWarning
@@ -453,16 +459,17 @@ export default function WordWorkspace() {
                         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); addPage(idx); }
                       }}
                       style={{ fontSize: `${(11 * zoom) / 100}pt`, fontFamily: 'Calibri, sans-serif', lineHeight: 1.5 }}
-                      className="outline-none text-foreground min-h-[200px]
+                      className="outline-none text-foreground min-h-[200px] relative
                         [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:mb-3 [&_h1]:mt-4
                         [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:mb-2 [&_h2]:mt-4
                         [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mb-2 [&_h3]:mt-3
                         [&_blockquote]:border-l-4 [&_blockquote]:border-accent/40 [&_blockquote]:pl-4 [&_blockquote]:italic
                         [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6
                         [&_a]:text-accent [&_a]:underline
-                        [&_table]:border-collapse [&_table]:w-full
+                        [&_table]:border-collapse [&_table]:my-2
+                        [&_th]:border [&_th]:border-border [&_th]:p-1.5 [&_th]:bg-muted/40
                         [&_td]:border [&_td]:border-border [&_td]:p-1.5
-                        [&_img]:max-w-full [&_img]:my-2"
+                        [&_img]:max-w-full [&_img]:my-2 [&_img]:resize [&_img]:overflow-auto"
                       dangerouslySetInnerHTML={{ __html: html }}
                     />
                   </div>
@@ -480,7 +487,7 @@ export default function WordWorkspace() {
                 <FilePlus className="w-3.5 h-3.5" /> Add a new page
               </button>
             </div>
-          </div>
+          </EditorContextMenu>
 
           {/* Status bar */}
           <div className="h-6 border-t border-border flex items-center justify-between px-3 bg-surface/40 text-[10px] text-muted-foreground flex-shrink-0 flex-wrap gap-x-4">
