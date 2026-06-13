@@ -92,7 +92,7 @@ const OfficeHome = ({ type }: OfficeHomeProps) => {
         onNewItem={() => navigate(createPath())}
         newItemLabel={`New ${c.title.slice(0, -1)}`}
         searchPlaceholder={`Search ${type}...`}
-        basePath={`/office/${type}`}
+        basePath="/office"
       />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <ProjectDashboard

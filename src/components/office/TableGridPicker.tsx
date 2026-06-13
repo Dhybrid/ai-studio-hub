@@ -19,23 +19,37 @@ export default function TableGridPicker({ onInsert, trigger, triggerClass }: Pro
   const [dCols, setDCols] = useState(3);
   const [header, setHeader] = useState(true);
   const [bordered, setBordered] = useState(true);
+  const [popPos, setPopPos] = useState({ top: 0, left: 0 });
   const popRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!open) return;
     const onDoc = (e: MouseEvent) => {
-      if (!popRef.current?.contains(e.target as Node)) setOpen(false);
+      if (!popRef.current?.contains(e.target as Node) && !buttonRef.current?.contains(e.target as Node)) setOpen(false);
     };
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
   }, [open]);
 
+  // Calculate popover position when opened
+  useEffect(() => {
+    if (!open || !buttonRef.current) return;
+    const rect = buttonRef.current.getBoundingClientRect();
+    setPopPos({
+      top: rect.bottom + 8, // Position BELOW the button with 8px gap
+      left: rect.left + rect.width / 2 - 120, // Center horizontally (popover is 240px wide)
+    });
+  }, [open]);
+
   return (
     <div className="relative inline-block">
       <button
+        ref={buttonRef}
         type="button"
         onMouseDown={(e) => e.preventDefault()}
-        onClick={() => setOpen(v => !v)}
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => !dialog && setOpen(false)}
         title="Insert Table"
         className={triggerClass || "flex flex-col items-center justify-center rounded gap-0.5 px-2 py-1.5 min-w-[56px] h-[60px] text-foreground hover:bg-surface-hover"}
       >
@@ -43,7 +57,13 @@ export default function TableGridPicker({ onInsert, trigger, triggerClass }: Pro
       </button>
 
       {open && (
-        <div ref={popRef} className="absolute left-0 top-full mt-1 z-50 bg-card border border-border rounded-lg shadow-2xl p-3 w-[240px]">
+        <div 
+          ref={popRef} 
+          className="fixed z-50 bg-card border border-border rounded-lg shadow-2xl p-3 w-[240px] pointer-events-auto"
+          style={{ top: `${popPos.top}px`, left: `${popPos.left}px` }}
+          onMouseEnter={() => setOpen(true)}
+          onMouseLeave={() => !dialog && setOpen(false)}
+        >
           <div className="text-[10px] text-muted-foreground mb-2">
             {hover.r > 0 ? `${hover.r} × ${hover.c} Table` : 'Insert Table'}
           </div>
@@ -123,8 +143,10 @@ export default function TableGridPicker({ onInsert, trigger, triggerClass }: Pro
 
 export function buildTableHTML(rows: number, cols: number, opts: { header: boolean; bordered: boolean }) {
   const border = opts.bordered ? '1px solid hsl(var(--border))' : '0';
-  let h = `<table data-rich-table="1" style="border-collapse:collapse;margin:8px 0;table-layout:fixed" contenteditable="true"><colgroup>`;
-  for (let c = 0; c < cols; c++) h += `<col style="width:${Math.floor(100 / cols)}%">`;
+  const tableId = 'table-' + Math.random().toString(36).substr(2, 9);
+  let h = `<div data-table-container="${tableId}" style="position:relative;display:inline-block;margin:8px 0;user-select:none" contenteditable="false">
+    <table data-rich-table="1" data-table-id="${tableId}" style="border-collapse:collapse;margin:0;table-layout:fixed;user-select:none;border:2px solid transparent;transition:border-color 0.2s;cursor:move;width:auto" contenteditable="true"><colgroup>`;
+  for (let c = 0; c < cols; c++) h += `<col style="width:${Math.floor(600 / cols)}px">`;
   h += `</colgroup><tbody>`;
   for (let r = 0; r < rows; r++) {
     h += '<tr>';
@@ -136,6 +158,8 @@ export function buildTableHTML(rows: number, cols: number, opts: { header: boole
     }
     h += '</tr>';
   }
-  h += '</tbody></table><p><br></p>';
+  h += `</tbody></table>
+    <div data-resize-handle="${tableId}" style="position:absolute;bottom:-5px;right:-5px;width:16px;height:16px;background:hsl(var(--accent));border:1px solid hsl(var(--accent))/0.5;border-radius:2px;cursor:nwse-resize;opacity:0;transition:opacity 0.2s;display:none" contenteditable="false"></div>
+  </div><p><br></p>`;
   return h;
 }

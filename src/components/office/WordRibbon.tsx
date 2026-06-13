@@ -30,6 +30,10 @@ interface WordRibbonProps {
   setZoom: (z: number) => void;
   showRuler: boolean;
   setShowRuler: (b: boolean) => void;
+  pageSize?: 'letter' | 'a4' | 'a3' | 'tabloid' | 'legal';
+  setPageSize?: (size: 'letter' | 'a4' | 'a3' | 'tabloid' | 'legal') => void;
+  columns?: number;
+  setColumns?: (cols: number) => void;
 }
 
 const tabs: { id: RibbonTab; label: string }[] = [
@@ -84,7 +88,7 @@ const SmallStack = ({ children }: { children: React.ReactNode }) => (
 );
 
 export default function WordRibbon(props: WordRibbonProps) {
-  const { activeTab, onTabChange, exec, activeFormats, onInsertImage, onInsertTable, onInsertLink, onAIRewrite, onAddPage, zoom, setZoom, showRuler, setShowRuler } = props;
+  const { activeTab, onTabChange, exec, activeFormats, onInsertImage, onInsertTable, onInsertLink, onAIRewrite, onAddPage, zoom, setZoom, showRuler, setShowRuler, pageSize = 'letter', setPageSize, columns = 1, setColumns } = props;
   const [font, setFont] = useState('Calibri');
   const [size, setSize] = useState('11');
 
@@ -282,12 +286,31 @@ export default function WordRibbon(props: WordRibbonProps) {
         {activeTab === 'layout' && (
           <>
             <Group label="Page Setup">
-              <Btn icon={Frame} label="Margins" large onClick={() => {}} />
-              <Btn icon={RotateCw} label="Orientation" large onClick={() => {}} />
-              <Btn icon={FileImage} label="Size" large onClick={() => {}} />
-              <Btn icon={Columns} label="Columns" large onClick={() => {}} />
-              <Btn icon={SplitSquareHorizontal} label="Breaks" large onClick={() => onAddPage?.()} />
-              <Btn icon={Hash} label="Line #" large onClick={() => {}} />
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-0.5">
+                  <select value={pageSize} onChange={(e) => setPageSize?.(e.target.value as any)}
+                    title="Page Size"
+                    className="text-xs bg-card border border-border rounded px-1.5 py-0.5 outline-none">
+                    <option value="letter">Letter</option>
+                    <option value="a4">A4</option>
+                    <option value="a3">A3</option>
+                    <option value="tabloid">Tabloid</option>
+                    <option value="legal">Legal</option>
+                  </select>
+                  <select value={columns} onChange={(e) => setColumns?.(+e.target.value)}
+                    title="Columns"
+                    className="text-xs bg-card border border-border rounded px-1.5 py-0.5 outline-none">
+                    <option value={1}>1 Column</option>
+                    <option value={2}>2 Columns</option>
+                    <option value={3}>3 Columns</option>
+                  </select>
+                </div>
+                <div className="flex items-center gap-0.5">
+                  <Btn icon={Frame} label="Margins" onClick={() => {}} />
+                  <Btn icon={RotateCw} label="Orientation" onClick={() => {}} />
+                  <Btn icon={Hash} label="Line #" onClick={() => {}} />
+                </div>
+              </div>
             </Group>
             <Group label="Paragraph">
               <Btn icon={Indent} label="Indent +" onClick={() => exec('indent')} />

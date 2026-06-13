@@ -8,11 +8,6 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import Index from "./pages/Index";
 import Chat from "./pages/Chat";
 import Cereva from "./pages/Cereva";
-import WebBuilderDashboard from "./pages/WebBuilderDashboard";
-import MobileBuilderDashboard from "./pages/MobileBuilderDashboard";
-import ImageStudioDashboard from "./pages/ImageStudioDashboard";
-import VideoStudioDashboard from "./pages/VideoStudioDashboard";
-import AudioStudioDashboard from "./pages/AudioStudioDashboard";
 import OfficeDashboard from "./pages/OfficeDashboard";
 import OfficeHome from "./pages/OfficeHome";
 import DocumentTemplatePicker from "./pages/DocumentTemplatePicker";
@@ -23,8 +18,6 @@ import SpreadsheetTemplatePicker from "./pages/SpreadsheetTemplatePicker";
 import ExcelWorkspace from "./pages/ExcelWorkspace";
 import AllTools from "./pages/AllTools";
 import Settings from "./pages/Settings";
-import Projects from "./pages/Projects";
-import History from "./pages/History";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,10 +33,9 @@ const App = () => (
             {/* Landing page - no sidebar */}
             <Route path="/" element={<Index />} />
 
-            {/* Standalone pages - own layout with back button */}
+            {/* Standalone pages */}
             <Route path="/settings" element={<Settings />} />
-            <Route path="/projects" element={<Projects />} />
-            <Route path="/history" element={<History />} />
+            <Route path="/settings/:tab" element={<Settings />} />
             <Route path="/all-tools" element={<AllTools />} />
 
             {/* AI Chat with sidebar */}
@@ -51,24 +43,9 @@ const App = () => (
               <Route path="/chat" element={<Chat />} />
             </Route>
 
-            {/* Independent workspaces */}
+            {/* Cereva - standalone app */}
             <Route path="/cereva" element={<Cereva />} />
             <Route path="/cereva/:chatId" element={<Cereva />} />
-
-            <Route path="/web-builder" element={<WebBuilderDashboard />} />
-            <Route path="/web-builder/:projectId" element={<WebBuilderDashboard />} />
-
-            <Route path="/mobile-builder" element={<MobileBuilderDashboard />} />
-            <Route path="/mobile-builder/:projectId" element={<MobileBuilderDashboard />} />
-
-            <Route path="/image-studio" element={<ImageStudioDashboard />} />
-            <Route path="/image-studio/:projectId" element={<ImageStudioDashboard />} />
-
-            <Route path="/video-studio" element={<VideoStudioDashboard />} />
-            <Route path="/video-studio/:projectId" element={<VideoStudioDashboard />} />
-
-            <Route path="/audio-studio" element={<AudioStudioDashboard />} />
-            <Route path="/audio-studio/:projectId" element={<AudioStudioDashboard />} />
 
             {/* Office Suite */}
             <Route path="/office" element={<OfficeDashboard />} />

@@ -1,6 +1,5 @@
-import { Sun, Moon, Bell, ChevronDown, User, Coins } from 'lucide-react';
+import { Sun, Moon, Bell, ChevronDown, User } from 'lucide-react';
 import { useWorkspace } from '@/hooks/useWorkspace';
-import { ModelSelector } from '@/components/shared/ModelSelector';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,9 +16,7 @@ export const Topbar = () => {
         <h1 className="text-sm font-medium text-foreground">AI Chat</h1>
       </div>
 
-      <div className="flex items-center">
-        <ModelSelector />
-      </div>
+      <div className="flex items-center" />
 
       <div className="flex items-center gap-1">
         <button

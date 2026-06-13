@@ -1,16 +1,17 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
-  Send, Paperclip, Square, Copy, Check, Coins, Zap,
-  PanelRightClose, PanelRightOpen
+  Send, Paperclip, Square, Mic, Sparkles, Image, Edit, Search, X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useWorkspace } from '@/hooks/useWorkspace';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { routeAgent } from '@/lib/agentApi';
+import { estimateTokens, extractCodeSnippets } from '@/lib/markdown';
+import RichMarkdown from '@/components/chat/RichMarkdown';
+import CodeSidePanel from '@/components/chat/CodeSidePanel';
+import OfficeSidePanel from '@/components/chat/OfficeSidePanel';
 
 interface Message {
   id: string;
@@ -20,166 +21,217 @@ interface Message {
   tokens?: number;
 }
 
-const CodeBlock = ({ language, children }: { language?: string; children: string }) => {
-  const [copied, setCopied] = useState(false);
-  const copy = () => {
-    navigator.clipboard.writeText(children);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-  return (
-    <div className="relative group rounded-lg overflow-hidden my-3 border border-border">
-      <div className="flex items-center justify-between px-4 py-2 bg-code-bg border-b border-border">
-        <span className="text-xs text-muted-foreground font-mono">{language || 'code'}</span>
-        <button onClick={copy} className="text-muted-foreground hover:text-foreground transition-colors">
-          {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-        </button>
-      </div>
-      <SyntaxHighlighter
-        language={language || 'text'}
-        style={oneDark}
-        customStyle={{ margin: 0, padding: '1rem', background: 'hsl(var(--code-bg))', fontSize: '13px' }}
-      >
-        {children}
-      </SyntaxHighlighter>
-    </div>
-  );
-};
-
-const sampleMessages: Message[] = [
-  {
-    id: '1',
-    role: 'user',
-    content: 'Explain how React hooks work with a code example.',
-    timestamp: new Date(Date.now() - 60000),
-    tokens: 12,
-  },
-  {
-    id: '2',
-    role: 'assistant',
-    content: `React Hooks are functions that let you use state and other React features in functional components.
-
-## useState
-
-The most basic hook is \`useState\`, which lets you add state to functional components:
-
-\`\`\`typescript
-import { useState } from 'react';
-
-function Counter() {
-  const [count, setCount] = useState(0);
-
-  return (
-    <div>
-      <p>Count: {count}</p>
-      <button onClick={() => setCount(count + 1)}>
-        Increment
-      </button>
-    </div>
-  );
+interface ImageAttachment {
+  id: string;
+  name: string;
+  type: string;
+  url: string;
 }
-\`\`\`
-
-## useEffect
-
-\`useEffect\` lets you perform side effects in components:
-
-\`\`\`typescript
-useEffect(() => {
-  document.title = \`Count: \${count}\`;
-}, [count]); // Only re-run when count changes
-\`\`\`
-
-### Key Rules
-1. Only call hooks at the **top level**
-2. Only call hooks from **React functions**
-3. Custom hooks must start with \`use\`
-
-| Hook | Purpose |
-|------|---------|
-| useState | State management |
-| useEffect | Side effects |
-| useContext | Context access |
-| useRef | Mutable references |`,
-    timestamp: new Date(),
-    tokens: 284,
-  },
-];
-
-const TOKEN_LIMIT = 128000;
 
 const ChatPage = () => {
-  const { chatKey } = useWorkspace();
-  const [messages, setMessages] = useState<Message[]>(sampleMessages);
+  const { chats, addChat, updateChatMessages, chatKey } = useWorkspace();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const chatId = searchParams.get('id');
+
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
+  const [imageAttachments, setImageAttachments] = useState<ImageAttachment[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
-  const [tokenPanelOpen, setTokenPanelOpen] = useState(true);
+  const [codePanelOpen, setCodePanelOpen] = useState(false);
+  const [selectedCodeId, setSelectedCodeId] = useState<string | undefined>();
+  
+  // Office View Panel states
+  const [officePanelOpen, setOfficePanelOpen] = useState(false);
+  const [officePanelType, setOfficePanelType] = useState<'document' | 'spreadsheet' | 'presentation'>('document');
+  const [officePanelTitle, setOfficePanelTitle] = useState('');
+  const [officePanelContent, setOfficePanelContent] = useState<any>(null);
+
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const centerTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const initialPromptRun = useRef(false);
   const isMobile = useIsMobile();
+
+  // Load chat from history
+  useEffect(() => {
+    if (chatId) {
+      const chat = chats.find((c) => c.id === chatId);
+      if (chat) {
+        setMessages(chat.messages || []);
+        setOfficePanelOpen(false);
+      }
+    } else {
+      setMessages([]);
+      setOfficePanelOpen(false);
+    }
+  }, [chatId, chats]);
 
   // Reset chat when chatKey changes (New Chat clicked)
   useEffect(() => {
     if (chatKey > 0) {
+      setSearchParams({});
       setMessages([]);
       setInput('');
+      setImageAttachments([]);
       setIsStreaming(false);
+      setOfficePanelOpen(false);
     }
   }, [chatKey]);
 
-  const totalTokens = messages.reduce((sum, m) => sum + (m.tokens || 0), 0);
-  const tokenPct = Math.min((totalTokens / TOKEN_LIMIT) * 100, 100);
-
-  // Hide token panel on mobile by default
-  useEffect(() => {
-    if (isMobile) setTokenPanelOpen(false);
-  }, [isMobile]);
+  const codeSnippets = messages.flatMap((message) =>
+    message.role === 'assistant' ? extractCodeSnippets(message.content) : []
+  );
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  // Resize textareas
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (el) {
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+    }
+  }, [input]);
+
+  useEffect(() => {
+    const el = centerTextareaRef.current;
+    if (el) {
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+    }
+  }, [input]);
+
+  const handleSend = async (overrideText?: string) => {
+    const text = (overrideText ?? input).trim();
+    if (!text || isStreaming) return;
+    const attachedImages = imageAttachments;
+
     const userMsg: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: input.trim(),
+      content: attachedImages.length ? `${text}\n\n[${attachedImages.length} image${attachedImages.length === 1 ? '' : 's'} attached]` : text,
       timestamp: new Date(),
-      tokens: Math.ceil(input.trim().split(' ').length * 1.3),
+      tokens: estimateTokens(text),
     };
-    setMessages((prev) => [...prev, userMsg]);
-    setInput('');
-    setIsStreaming(true);
+
+    const assistantId = (Date.now() + 1).toString();
     const aiMsg: Message = {
-      id: (Date.now() + 1).toString(),
+      id: assistantId,
       role: 'assistant',
       content: '',
       timestamp: new Date(),
       tokens: 0,
     };
-    setMessages((prev) => [...prev, aiMsg]);
-    const response =
-      "I understand your question. Let me think about this...\n\nThis is a simulated response demonstrating the streaming effect. In a production environment, this would connect to an actual AI model API like GPT-4 or Claude.";
-    let i = 0;
-    const interval = setInterval(() => {
-      if (i < response.length) {
-        setMessages((prev) => {
-          const updated = [...prev];
-          const last = updated[updated.length - 1];
-          if (last.role === 'assistant') {
-            last.content = response.slice(0, i + 1);
-            last.tokens = Math.ceil((i + 1) / 4);
-          }
-          return [...updated];
-        });
-        i++;
+
+    const nextMessages = [...messages, userMsg, aiMsg];
+    setMessages(nextMessages);
+    setInput('');
+    setImageAttachments([]);
+    setIsStreaming(true);
+
+    let activeChatId = chatId;
+    if (!activeChatId) {
+      // Create new chat session
+      const title = text.slice(0, 30) + (text.length > 30 ? '...' : '');
+      activeChatId = addChat(title, nextMessages);
+      setSearchParams({ id: activeChatId });
+    }
+
+    try {
+      const result = await routeAgent(text, {
+        images: attachedImages.map((img) => ({
+          url: img.url,
+          name: img.name,
+          type: img.type,
+          detail: 'high',
+        })),
+      }); // Route naturally
+      const route = result.route;
+      const content = result.generated_content || {};
+
+      let reply = '';
+      if (route === 'office-document') {
+        reply = `I have generated the document **"${result.title}"** for you. You can preview, edit, and download it in the side panel.`;
+        setOfficePanelType('document');
+        setOfficePanelTitle(result.title);
+        setOfficePanelContent(content);
+        setOfficePanelOpen(true);
+        setCodePanelOpen(false);
+      } else if (route === 'office-spreadsheet') {
+        reply = `I have generated the spreadsheet **"${result.title}"** for you. You can preview, edit, and download it in the side panel.`;
+        setOfficePanelType('spreadsheet');
+        setOfficePanelTitle(result.title);
+        setOfficePanelContent(content);
+        setOfficePanelOpen(true);
+        setCodePanelOpen(false);
+      } else if (route === 'office-presentation') {
+        reply = `I have generated the presentation **"${result.title}"** for you. You can preview, edit, and download it in the side panel.`;
+        setOfficePanelType('presentation');
+        setOfficePanelTitle(result.title);
+        setOfficePanelContent(content);
+        setOfficePanelOpen(true);
+        setCodePanelOpen(false);
       } else {
-        clearInterval(interval);
-        setIsStreaming(false);
+        reply = String(content.reply || content.markdown || content.html || 'I could not generate a response.');
+        setOfficePanelOpen(false);
       }
-    }, 15);
+
+      const updatedMessages = nextMessages.map((message) =>
+        message.id === assistantId ? { ...message, content: reply, tokens: estimateTokens(reply) } : message
+      );
+
+      setMessages(updatedMessages);
+      updateChatMessages(activeChatId, updatedMessages);
+
+      if (route === 'chat') {
+        const snippets = extractCodeSnippets(reply);
+        if (snippets.length) {
+          setSelectedCodeId(snippets[0].id);
+          setCodePanelOpen(true);
+        }
+      }
+    } catch {
+      const errorText = 'I could not reach the backend agent. Make sure the backend is running on `http://localhost:8000`, then try again.';
+      const updatedMessages = nextMessages.map((message) =>
+        message.id === assistantId ? { ...message, content: errorText, tokens: estimateTokens(errorText) } : message
+      );
+      setMessages(updatedMessages);
+      updateChatMessages(activeChatId, updatedMessages);
+    } finally {
+      setIsStreaming(false);
+    }
   };
+
+  const handleImageFiles = (files: FileList | null) => {
+    const selected = Array.from(files || []).filter((file) => /image\/(png|jpe?g)/i.test(file.type));
+    if (!selected.length) return;
+
+    selected.slice(0, 8 - imageAttachments.length).forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const url = String(reader.result || '');
+        if (!url) return;
+        setImageAttachments((current) => [
+          ...current,
+          { id: `${Date.now()}-${file.name}`, name: file.name, type: file.type, url },
+        ]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const openImagePicker = () => fileInputRef.current?.click();
+
+  useEffect(() => {
+    const routedPrompt = searchParams.get('prompt') || '';
+    if (!routedPrompt.trim() || initialPromptRun.current) return;
+    initialPromptRun.current = true;
+    handleSend(routedPrompt);
+  }, [searchParams]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -188,129 +240,162 @@ const ChatPage = () => {
     }
   };
 
+  const openCode = (snippet: CodeSnippet) => {
+    const existing = codeSnippets.find((item) => item.language === snippet.language && item.code === snippet.code);
+    setSelectedCodeId(existing?.id || snippet.id);
+    setCodePanelOpen(true);
+    setOfficePanelOpen(false);
+  };
+
   return (
-    <div className="flex h-full">
+    <div className="flex h-full bg-[#070708] text-white">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/png,image/jpeg"
+        multiple
+        className="hidden"
+        onChange={(e) => {
+          handleImageFiles(e.target.files);
+          e.target.value = '';
+        }}
+      />
       {/* Center Chat */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 h-full relative">
+        {/* Background Grid */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.008)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.008)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
+
         {messages.length === 0 ? (
-          /* Empty state */
-          <div className="flex-1 flex flex-col items-center justify-center px-6">
+          /* Empty State - Centered Input */
+          <div className="flex-1 flex flex-col items-center justify-center px-6 overflow-y-auto">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-              className="text-center max-w-lg"
+              transition={{ duration: 0.5 }}
+              className="w-full max-w-2xl text-center"
             >
-              <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-5">
-                <Zap className="w-6 h-6 text-accent" />
-              </div>
-              <h2 className="text-xl font-semibold text-foreground mb-2">How can I help you today?</h2>
-              <p className="text-sm text-muted-foreground mb-8">
-                Ask anything — from coding to analysis, writing to data.
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-left">
-                {[
-                  { q: 'Explain React Server Components', sub: 'with code examples' },
-                  { q: 'Write a Python FastAPI endpoint', sub: 'with auth middleware' },
-                  { q: 'Design a PostgreSQL schema', sub: 'for a SaaS app' },
-                  { q: 'Debug this TypeScript error', sub: 'step by step' },
-                ].map((s) => (
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-8">
+                What's on the agenda today?
+              </h2>
+
+              {/* Centered Input Box */}
+              <div className="relative rounded-2xl p-[1px] bg-gradient-to-b from-white/10 to-white/5 focus-within:from-blue-500/50 focus-within:to-indigo-500/20 transition-all duration-500 shadow-xl mb-5">
+                <div className="flex items-end gap-2 bg-[#0b0b0d]/90 backdrop-blur-xl rounded-[15px] p-3">
+                  <button onClick={openImagePicker} className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/5 transition-colors text-muted-foreground hover:text-white" title="Attach image">
+                    <Paperclip className="w-4 h-4" />
+                  </button>
+                  <textarea
+                    ref={centerTextareaRef}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Ask anything..."
+                    rows={1}
+                    className="flex-1 bg-transparent border-none outline-none resize-none text-sm py-2 px-2 text-white placeholder:text-muted-foreground/60 max-h-32 font-light"
+                    style={{ minHeight: '36px' }}
+                  />
+                  <button className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/5 transition-colors text-muted-foreground hover:text-white">
+                    <Mic className="w-4 h-4" />
+                  </button>
                   <button
-                    key={s.q}
-                    onClick={() => setInput(s.q)}
-                    className="p-3 rounded-xl border border-border bg-card hover:border-accent/30 hover:bg-surface-hover transition-all text-left group"
+                    onClick={() => handleSend()}
+                    disabled={!input.trim()}
+                    className="w-9 h-9 flex items-center justify-center rounded-xl transition-all disabled:opacity-20 bg-white text-black hover:scale-105 active:scale-95 flex-shrink-0"
                   >
-                    <p className="text-xs font-medium text-foreground group-hover:text-accent transition-colors">{s.q}</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">{s.sub}</p>
+                    <Send className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              {imageAttachments.length > 0 && (
+                <div className="flex flex-wrap justify-center gap-2 mb-5">
+                  {imageAttachments.map((img) => (
+                    <div key={img.id} className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-2 py-1">
+                      <img src={img.url} alt="" className="w-6 h-6 rounded object-cover" />
+                      <span className="max-w-[140px] truncate text-[10px] text-white/80">{img.name}</span>
+                      <button onClick={() => setImageAttachments((items) => items.filter((item) => item.id !== img.id))} className="text-muted-foreground hover:text-white">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Suggestion Chips */}
+              <div className="flex flex-wrap justify-center gap-2">
+                {[
+                  { icon: Image, label: 'Create an image', text: 'Generate a high quality visual mockup of a login page' },
+                  { icon: Edit, label: 'Write or edit', text: 'Write a professional email proposal to my team' },
+                  { icon: Search, label: 'Look something up', text: 'Explain React Server Components and their benefits' }
+                ].map((chip) => (
+                  <button
+                    key={chip.label}
+                    onClick={() => {
+                      setInput(chip.text);
+                      centerTextareaRef.current?.focus();
+                    }}
+                    className="text-[10px] text-muted-foreground hover:text-white bg-[#0e0e11]/60 hover:bg-[#121216] border border-white/5 hover:border-white/10 rounded-full px-4 py-2 transition-colors flex items-center gap-1.5"
+                  >
+                    <chip.icon className="w-3.5 h-3.5" />
+                    {chip.label}
                   </button>
                 ))}
               </div>
             </motion.div>
           </div>
         ) : (
+          /* Messages Feed */
           <div className="flex-1 overflow-y-auto">
-            <div className="max-w-3xl mx-auto py-6 px-4 space-y-6">
+            <div className="max-w-3xl mx-auto py-8 px-4 space-y-6">
               <AnimatePresence>
                 {messages.map((msg) => (
                   <motion.div
                     key={msg.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className={cn("flex gap-3", msg.role === 'user' ? 'justify-end' : 'justify-start')}
+                    className={cn("flex gap-4", msg.role === 'user' ? 'justify-end' : 'justify-start')}
                   >
                     {msg.role === 'assistant' && (
-                      <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center flex-shrink-0 mt-1">
-                        <span className="text-[10px] font-bold text-accent-foreground">AI</span>
+                      <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-md">
+                        <Sparkles className="w-4 h-4 text-white" />
                       </div>
                     )}
                     <div
                       className={cn(
-                        "rounded-2xl px-4 py-3 max-w-[85%] text-sm leading-relaxed",
-                        msg.role === 'user' ? "bg-chat-user text-foreground" : "bg-transparent text-foreground"
+                        "rounded-2xl px-5 py-4 max-w-[85%] text-sm leading-relaxed border",
+                        msg.role === 'user'
+                          ? "bg-white/5 border-white/10 text-white shadow-sm"
+                          : "bg-transparent border-transparent text-white"
                       )}
                     >
                       {msg.role === 'assistant' ? (
                         <div
                           className={cn(
-                            "prose prose-sm dark:prose-invert max-w-none",
+                            "prose prose-invert prose-sm max-w-none prose-headings:font-bold prose-a:text-blue-400 prose-code:font-mono prose-code:text-xs",
                             isStreaming && msg.id === messages[messages.length - 1]?.id && "streaming-cursor"
                           )}
                         >
-                          <ReactMarkdown
-                            remarkPlugins={[remarkGfm]}
-                            components={{
-                              code({ className, children, ...props }) {
-                                const match = /language-(\w+)/.exec(className || '');
-                                const isInline = !match;
-                                return isInline ? (
-                                  <code className="px-1.5 py-0.5 rounded bg-code-bg text-xs font-mono" {...props}>
-                                    {children}
-                                  </code>
-                                ) : (
-                                  <CodeBlock language={match[1]}>{String(children).replace(/\n$/, '')}</CodeBlock>
-                                );
-                              },
-                              table({ children }) {
-                                return (
-                                  <div className="overflow-x-auto my-3">
-                                    <table className="min-w-full border border-border rounded-lg overflow-hidden">{children}</table>
-                                  </div>
-                                );
-                              },
-                              th({ children }) {
-                                return <th className="px-3 py-2 bg-surface text-left text-xs font-medium text-muted-foreground border-b border-border">{children}</th>;
-                              },
-                              td({ children }) {
-                                return <td className="px-3 py-2 text-sm border-b border-border">{children}</td>;
-                              },
-                            }}
-                          >
-                            {msg.content}
-                          </ReactMarkdown>
+                          <RichMarkdown content={msg.content} onOpenCode={openCode} />
                         </div>
                       ) : (
-                        <p>{msg.content}</p>
-                      )}
-                      {msg.tokens && msg.tokens > 0 && (
-                        <p className="text-[9px] text-muted-foreground/40 mt-2 text-right">{msg.tokens} tokens</p>
+                        <p className="font-light">{msg.content}</p>
                       )}
                     </div>
                     {msg.role === 'user' && (
-                      <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center flex-shrink-0 mt-1 text-xs font-medium">
-                        JD
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-500 flex items-center justify-center flex-shrink-0 mt-0.5 text-xs font-bold text-white shadow-md">
+                        IK
                       </div>
                     )}
                   </motion.div>
                 ))}
               </AnimatePresence>
               {isStreaming && (
-                <div className="flex items-center gap-2 text-muted-foreground text-xs ml-10">
-                  <div className="flex gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground typing-dot" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground typing-dot" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground typing-dot" />
+                <div className="flex items-center gap-2.5 text-muted-foreground text-xs ml-12">
+                  <div className="flex gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500/80 typing-dot" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500/80 typing-dot" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500/80 typing-dot" />
                   </div>
-                  <span>Generating...</span>
+                  <span className="font-light">Compiling response...</span>
                 </div>
               )}
               <div ref={bottomRef} />
@@ -318,139 +403,84 @@ const ChatPage = () => {
           </div>
         )}
 
-        {/* Input */}
-        <div className="border-t border-border p-4">
-          <div className="max-w-3xl mx-auto">
-            <div className="flex items-end gap-2 bg-surface rounded-2xl border border-border p-2">
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-hover transition-colors text-muted-foreground">
-                <Paperclip className="w-4 h-4" />
-              </button>
-              <textarea
-                ref={textareaRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Message COXMOX..."
-                rows={1}
-                className="flex-1 bg-transparent border-none outline-none resize-none text-sm py-2 px-1 text-foreground placeholder:text-muted-foreground max-h-32"
-                style={{ minHeight: '36px' }}
-              />
-              {isStreaming ? (
-                <button
-                  onClick={() => setIsStreaming(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-destructive text-destructive-foreground hover:opacity-90 transition-opacity"
-                >
-                  <Square className="w-3.5 h-3.5" />
-                </button>
-              ) : (
-                <button
-                  onClick={handleSend}
-                  disabled={!input.trim()}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-foreground text-background hover:opacity-90 transition-opacity disabled:opacity-30"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-            <p className="text-[11px] text-muted-foreground text-center mt-2">
-              COXMOX can make mistakes. Consider checking important information.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Token Panel - Toggleable */}
-      <AnimatePresence>
-        {tokenPanelOpen && (
-          <motion.div
-            initial={{ width: 0, opacity: 0 }}
-            animate={{ width: 220, opacity: 1 }}
-            exit={{ width: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="flex-shrink-0 border-l border-border flex flex-col bg-sidebar overflow-hidden"
-          >
-            <div className="p-3 border-b border-sidebar-border">
-              <div className="flex items-center gap-2">
-                <Coins className="w-4 h-4 text-accent" />
-                <span className="text-xs font-semibold text-foreground">Token Usage</span>
-              </div>
-            </div>
-
-            <div className="flex-1 p-3 space-y-4 overflow-y-auto">
-              {/* Context window */}
-              <div>
-                <div className="flex justify-between items-center mb-1.5">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Context Window</span>
-                  <span className="text-[10px] font-mono text-muted-foreground">{tokenPct.toFixed(1)}%</span>
-                </div>
-                <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                  <motion.div
-                    className={cn(
-                      "h-full rounded-full",
-                      tokenPct > 80 ? "bg-destructive" : tokenPct > 50 ? "bg-warning" : "bg-accent"
-                    )}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${tokenPct}%` }}
-                    transition={{ duration: 0.5 }}
+        {/* Input Bar (Only shown when messages exist) */}
+        {messages.length > 0 && (
+          <div className="border-t border-white/5 p-4 bg-[#070708]/80 backdrop-blur-md">
+            <div className="max-w-3xl mx-auto">
+              <div className="relative rounded-2xl p-[1px] bg-gradient-to-b from-white/10 to-white/5 focus-within:from-blue-500/50 focus-within:to-indigo-500/20 transition-all duration-500">
+                <div className="flex items-end gap-2 bg-[#0b0b0d]/90 backdrop-blur-xl rounded-[15px] p-2.5">
+                  <button onClick={openImagePicker} className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/5 transition-colors text-muted-foreground hover:text-white" title="Attach image">
+                    <Paperclip className="w-4 h-4" />
+                  </button>
+                  <textarea
+                    ref={textareaRef}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Message COXMOX..."
+                    rows={1}
+                    className="flex-1 bg-transparent border-none outline-none resize-none text-sm py-2 px-2 text-white placeholder:text-muted-foreground max-h-32 font-light"
+                    style={{ minHeight: '36px' }}
                   />
-                </div>
-                <div className="flex justify-between mt-1">
-                  <span className="text-[9px] text-muted-foreground font-mono">{totalTokens.toLocaleString()}</span>
-                  <span className="text-[9px] text-muted-foreground font-mono">{TOKEN_LIMIT.toLocaleString()}</span>
+                  {isStreaming ? (
+                    <button
+                      onClick={() => setIsStreaming(false)}
+                      className="w-9 h-9 flex items-center justify-center rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 transition-all"
+                    >
+                      <Square className="w-3.5 h-3.5 fill-red-500" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleSend()}
+                      disabled={!input.trim()}
+                      className="w-9 h-9 flex items-center justify-center rounded-xl transition-all disabled:opacity-20 bg-white text-black hover:scale-105 active:scale-95"
+                      style={{
+                        boxShadow: input.trim() ? '0 0 15px rgba(255, 255, 255, 0.2)' : 'none'
+                      }}
+                    >
+                      <Send className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               </div>
-
-              {/* Stats */}
-              <div className="space-y-2">
-                {[
-                  { label: 'Input Tokens', value: messages.filter(m => m.role === 'user').reduce((s, m) => s + (m.tokens || 0), 0) },
-                  { label: 'Output Tokens', value: messages.filter(m => m.role === 'assistant').reduce((s, m) => s + (m.tokens || 0), 0) },
-                  { label: 'Total Messages', value: messages.length },
-                ].map((stat) => (
-                  <div key={stat.label} className="flex justify-between items-center">
-                    <span className="text-[10px] text-muted-foreground">{stat.label}</span>
-                    <span className="text-[10px] font-mono font-medium text-foreground">{stat.value.toLocaleString()}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Per message */}
-              <div>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Per Message</p>
-                <div className="space-y-1.5 max-h-48 overflow-y-auto">
-                  {messages.map((m, i) => (
-                    <div key={m.id} className="flex items-center gap-2">
-                      <div className={cn(
-                        "w-1.5 h-1.5 rounded-full flex-shrink-0",
-                        m.role === 'user' ? "bg-muted-foreground/40" : "bg-accent"
-                      )} />
-                      <span className="text-[9px] text-muted-foreground truncate flex-1">
-                        {m.role === 'user' ? 'You' : 'AI'} #{i + 1}
-                      </span>
-                      <span className="text-[9px] font-mono text-muted-foreground">{m.tokens || 0}</span>
+              {imageAttachments.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {imageAttachments.map((img) => (
+                    <div key={img.id} className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-2 py-1">
+                      <img src={img.url} alt="" className="w-6 h-6 rounded object-cover" />
+                      <span className="max-w-[140px] truncate text-[10px] text-white/80">{img.name}</span>
+                      <button onClick={() => setImageAttachments((items) => items.filter((item) => item.id !== img.id))} className="text-muted-foreground hover:text-white">
+                        <X className="w-3 h-3" />
+                      </button>
                     </div>
                   ))}
                 </div>
-              </div>
-
-              {/* Monthly usage */}
-              <div className="pt-3 border-t border-border">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">This Month</p>
-                <div className="space-y-1">
-                  <div className="flex justify-between">
-                    <span className="text-[10px] text-muted-foreground">Tokens</span>
-                    <span className="text-[10px] font-mono font-medium text-foreground">1.24M</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[10px] text-muted-foreground">Est. Cost</span>
-                    <span className="text-[10px] font-mono font-medium text-foreground">$3.72</span>
-                  </div>
-                </div>
-              </div>
+              )}
+              <p className="text-[10px] text-muted-foreground/50 text-center mt-2.5 font-light">
+                COXMOX Core v2.0 · Local sandbox compilation is fully active.
+              </p>
             </div>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
+      </div>
+
+      {/* Code Sidebar Panel */}
+      <CodeSidePanel
+        open={codePanelOpen}
+        snippets={codeSnippets}
+        selectedId={selectedCodeId}
+        onSelect={setSelectedCodeId}
+        onClose={() => setCodePanelOpen(false)}
+      />
+
+      {/* Office Workspace Sidebar Preview/Editor Panel */}
+      <OfficeSidePanel
+        open={officePanelOpen}
+        onClose={() => setOfficePanelOpen(false)}
+        type={officePanelType}
+        title={officePanelTitle}
+        content={officePanelContent}
+      />
     </div>
   );
 };

@@ -1,14 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Send, Sparkles, Globe, Smartphone, Image, Video, Music,
   FileSpreadsheet, MessageSquare, Sun, Moon, ChevronDown, User, Bell,
-  Zap, Shield, Cpu, Star, ArrowRight, Check, BookOpen,
-  Users, Building2, TrendingUp, Award
+  Zap, Shield, Cpu, Star, Check, Terminal, Code, CpuIcon, Layers, Play
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useWorkspace } from '@/hooks/useWorkspace';
+import { ThreeDGeometry } from '@/components/ui/ThreeDGeometry';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,50 +17,38 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 const tools = [
-  { id: 'chat', icon: MessageSquare, label: 'AI Chat', path: '/chat', color: 'text-accent' },
-  { id: 'image', icon: Image, label: 'Image', path: '/image-studio', color: 'text-pink-500' },
-  { id: 'video', icon: Video, label: 'Video', path: '/video-studio', color: 'text-purple-500' },
-  { id: 'audio', icon: Music, label: 'Audio', path: '/audio-studio', color: 'text-orange-500' },
-  { id: 'web', icon: Globe, label: 'Web', path: '/web-builder', color: 'text-cyan-500' },
-  { id: 'mobile', icon: Smartphone, label: 'Mobile', path: '/mobile-builder', color: 'text-green-500' },
-  { id: 'office', icon: FileSpreadsheet, label: 'Office', path: '/office', color: 'text-yellow-500' },
+  { id: 'chat', icon: MessageSquare, label: 'AI Chat', path: '/chat', color: '#3b82f6', active: true, badge: 'active' },
+  { id: 'cereva', icon: Sparkles, label: 'Cereva', path: '/cereva', color: '#10b981', active: true, badge: 'teacher' },
+  { id: 'office', icon: FileSpreadsheet, label: 'Office', path: '/office', color: '#eab308', active: true, badge: 'studio' },
+  { id: 'web', icon: Globe, label: 'Web Builder', path: '/web-builder', color: '#06b6d4', active: false, badge: 'sandbox' },
+  { id: 'mobile', icon: Smartphone, label: 'Mobile Builder', path: '/mobile-builder', color: '#22c55e', active: false, badge: 'sandbox' },
+  { id: 'image', icon: Image, label: 'Image Studio', path: '/image-studio', color: '#ec4899', active: false, badge: 'sandbox' },
 ];
 
 const suggestedPrompts: Record<string, string[]> = {
   chat: ['Explain quantum computing in simple terms', 'Write a Python script to scrape a website', 'Help me plan a marketing strategy'],
-  image: ['A futuristic city at sunset, cyberpunk neon lights', 'Minimalist logo for a coffee brand', 'Oil painting of a serene mountain lake'],
-  video: ['30-second product demo with motion graphics', 'Cinematic drone shot of a coastal town', 'Animated explainer for a SaaS product'],
-  audio: ['Professional voiceover for a podcast intro', 'Upbeat lo-fi background music, 60 seconds', 'Dramatic cinematic trailer sound effects'],
-  web: ['Modern SaaS landing page with pricing section', 'Portfolio website with dark theme and animations', 'E-commerce product page with reviews'],
-  mobile: ['Fitness tracker app with dashboard and charts', 'Food delivery app with real-time order tracking', 'Social media app with stories and messaging'],
-  office: ['Q4 investor pitch deck with financial charts', 'Project status report with KPI dashboard', 'Marketing budget spreadsheet with forecasts'],
+  cereva: ['Explain photosynethis with chloroplast diagram', 'Teach me quadratic equations step by step', 'How do neural networks learn? Visual explanation'],
+  office: ['Create a Q4 business budget sheet with formulas', 'Draft an executive business proposal document', 'Design a 10-slide pitch deck presentation outline'],
 };
 
-const features = [
-  { icon: Zap, title: 'Lightning Fast', desc: 'Generate code, images, and content in seconds with state-of-the-art AI models.' },
-  { icon: Shield, title: 'Secure & Private', desc: 'Your data stays yours. Enterprise-grade security with end-to-end encryption.' },
-  { icon: Cpu, title: 'Multi-Model', desc: 'Choose from GPT-4, Claude, Gemini and more. Bring your own API keys.' },
-];
-
 const stats = [
-  { value: '50K+', label: 'Active Users' },
-  { value: '2M+', label: 'Generations' },
-  { value: '99.9%', label: 'Uptime' },
-  { value: '4.9★', label: 'Rating' },
+  { value: '50K+', label: 'Active Developers', glow: 'from-blue-500/10 to-transparent' },
+  { value: '2M+', label: 'AI Compilation Runs', glow: 'from-emerald-500/10 to-transparent' },
+  { value: '99.99%', label: 'Sandbox Uptime', glow: 'from-yellow-500/10 to-transparent' },
+  { value: '4.9★', label: 'Developer Rating', glow: 'from-purple-500/10 to-transparent' },
 ];
 
-const partners = ['Google Cloud', 'OpenAI', 'Anthropic', 'Stability AI', 'Meta AI', 'Mistral'];
-
-const pricingPlans = [
-  { name: 'Free', price: '$0', period: '/month', features: ['5 AI chats/day', '3 image generations', 'Basic templates', 'Community support'], cta: 'Get Started', popular: false },
-  { name: 'Pro', price: '$19', period: '/month', features: ['Unlimited AI chats', '100 image generations/day', 'All builders access', 'Priority support', 'Custom API keys', 'Advanced models'], cta: 'Start Free Trial', popular: true },
-  { name: 'Enterprise', price: 'Custom', period: '', features: ['Everything in Pro', 'Dedicated infrastructure', 'SSO & team management', 'SLA guarantee', 'Custom integrations', 'White-label option'], cta: 'Contact Sales', popular: false },
+const features = [
+  { icon: CpuIcon, title: 'Multi-Model Routing', desc: 'Queries are dynamically parsed and routed to optimal local or API endpoints based on structural task requirements.', glowColor: 'rgba(59, 130, 246, 0.12)' },
+  { icon: Terminal, title: 'WASM Code Compilation', desc: 'Draft code compiles inside fully-isolated client-side WebAssembly containers for zero-latency execution audits.', glowColor: 'rgba(16, 185, 129, 0.12)' },
+  { icon: Layers, title: 'Shared Segment Memory', desc: 'Exchange context parameters seamlessly between documents, presentations, and AI dialogues using shared memory buffers.', glowColor: 'rgba(234, 179, 8, 0.12)' },
 ];
 
-const blogPosts = [
-  { title: 'How AI is Revolutionizing Web Development', category: 'Engineering', date: 'Mar 28, 2026', image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=250&fit=crop' },
-  { title: 'Building Stunning Presentations with AI in Minutes', category: 'Product', date: 'Mar 22, 2026', image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=250&fit=crop' },
-  { title: 'The Future of AI-Powered Content Creation', category: 'AI Research', date: 'Mar 15, 2026', image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=250&fit=crop' },
+const mockLogs = [
+  'Initializing Coxmox multi-model router...',
+  'Connecting local compilation agent at port 8000: SUCCESS',
+  'WASM client sandboxes loaded: 3/3 active',
+  'Ready. Listening for user instructions...'
 ];
 
 const IndexPage = () => {
@@ -69,6 +57,48 @@ const IndexPage = () => {
   const [input, setInput] = useState('');
   const [activeTool, setActiveTool] = useState('chat');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  
+  // Parallax mouse position
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [targetMousePos, setTargetMousePos] = useState({ x: 0, y: 0 });
+  
+  // Dynamic terminal logs simulator
+  const [terminalLogs, setTerminalLogs] = useState<string[]>(mockLogs);
+  const [activeTab, setActiveTab] = useState<'terminal' | 'config'>('terminal');
+
+  // Parallax mouse tracking
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const x = (e.clientX / window.innerWidth) * 2 - 1;
+      const y = (e.clientY / window.innerHeight) * 2 - 1;
+      setTargetMousePos({ x, y });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  // Smooth mouse interpolation loop
+  useEffect(() => {
+    let animationId: number;
+    const update = () => {
+      setMousePos((current) => ({
+        x: current.x + (targetMousePos.x - current.x) * 0.08,
+        y: current.y + (targetMousePos.y - current.y) * 0.08,
+      }));
+      animationId = requestAnimationFrame(update);
+    };
+    update();
+    return () => cancelAnimationFrame(animationId);
+  }, [targetMousePos]);
+
+  // Terminal log ticking simulator
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const newLog = `[SYSTEM LOG - ${new Date().toLocaleTimeString()}]: ping local agent... ok (${Math.floor(Math.random() * 12 + 8)}ms) | buffer usage: ${(Math.random() * 5 + 2).toFixed(2)}MB`;
+      setTerminalLogs(prev => [...prev.slice(-6), newLog]);
+    }, 4500);
+    return () => clearInterval(interval);
+  }, []);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -82,7 +112,15 @@ const IndexPage = () => {
   const handleSubmit = () => {
     if (!input.trim()) return;
     const tool = tools.find(t => t.id === activeTool);
-    if (tool) navigate(tool.path);
+    if (tool) {
+      if (tool.id === 'cereva') {
+        navigate(`/cereva?prompt=${encodeURIComponent(input.trim())}`);
+      } else if (tool.id === 'office') {
+        navigate(`/office?prompt=${encodeURIComponent(input.trim())}`);
+      } else {
+        navigate(`/chat?prompt=${encodeURIComponent(input.trim())}`);
+      }
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -92,264 +130,309 @@ const IndexPage = () => {
     }
   };
 
+  const currentToolColor = tools.find(t => t.id === activeTool)?.color || '#3b82f6';
+
+  const configCode = `import { cosmox } from '@cosmox/core';
+
+export default cosmox.defineWorkspace({
+  engine: 'multi-model-router',
+  sandbox: 'wasm-rust-v8',
+  modules: [
+    'cereva-classroom',
+    'office-studio'
+  ],
+  server: {
+    port: 8000,
+    api: 'fastapi-orchestrator'
+  }
+});`;
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#070708] text-white font-sans overflow-x-hidden selection:bg-blue-500/30 selection:text-white relative">
+      {/* Visual background repeating grid */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.012)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.012)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_0%,#000_80%,transparent_100%)] pointer-events-none z-0" />
+      <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] bg-radial-gradient [background:radial-gradient(circle_at_center,rgba(59,130,246,0.08)_0%,transparent_70%)] pointer-events-none z-0" />
+
       {/* Header */}
-      <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-sm">
-        <div className="max-w-6xl mx-auto flex items-center justify-between h-14 px-4 sm:px-6">
-          <div className="flex items-center gap-2">
-            <img src="/favicon.png" alt="COXMOX" className="w-8 h-8" />
-            <span className="text-sm font-bold text-foreground tracking-tight">COXMOX</span>
+      <header className="sticky top-0 z-40 w-full transition-all border-b bg-[#070708]/85 backdrop-blur-md border-white/5 py-3.5">
+        <div className="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6">
+          <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
+            <div className="relative w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-gradient-to-br from-blue-600 to-indigo-600 shadow-[0_0_15px_rgba(59,130,246,0.4)]">
+              <img src="/favicon.png" alt="COXMOX" className="w-5 h-5 object-contain" />
+            </div>
+            <span className="text-sm font-bold tracking-wider text-white uppercase">COXMOX</span>
           </div>
-          <nav className="hidden md:flex items-center gap-6">
-            <button onClick={() => navigate('/chat')} className="text-sm text-muted-foreground hover:text-foreground transition-colors">AI Chat</button>
-            <a href="/cereva" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Cereva</a>
-            <button onClick={() => navigate('/all-tools')} className="text-sm text-muted-foreground hover:text-foreground transition-colors">Tools</button>
-            <button onClick={() => navigate('/projects')} className="text-sm text-muted-foreground hover:text-foreground transition-colors">Projects</button>
-            <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
+
+          <nav className="hidden md:flex items-center gap-8">
+            <button onClick={() => navigate('/chat')} className="text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-white transition-colors">AI Chat</button>
+            <a href="/cereva" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-white transition-colors">Cereva</a>
+            <button onClick={() => navigate('/office')} className="text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-white transition-colors">Office</button>
+            <button onClick={() => navigate('/settings')} className="text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-white transition-colors">Settings</button>
           </nav>
-          <div className="flex items-center gap-1">
-            <button onClick={toggleTheme} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-surface-hover transition-colors text-muted-foreground">
+
+          <div className="flex items-center gap-2">
+            <button onClick={toggleTheme} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-white/5 border border-white/5 bg-[#0e0e11]/40 transition-colors text-muted-foreground hover:text-white">
               {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
-            <button className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-surface-hover transition-colors text-muted-foreground relative">
+            <button className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-white/5 border border-white/5 bg-[#0e0e11]/40 transition-colors text-muted-foreground hover:text-white relative">
               <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-accent" />
+              <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full bg-blue-500 ring-4 ring-[#070708]" />
             </button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 ml-1 px-2 py-1 rounded-lg hover:bg-surface-hover transition-colors">
-                  <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-xs font-medium">U</div>
-                  <ChevronDown className="w-3 h-3 text-muted-foreground hidden sm:block" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem><User className="w-4 h-4 mr-2" /> Profile</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/settings')}>Settings</DropdownMenuItem>
-                <DropdownMenuItem>Sign out</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="px-4 sm:px-6 pt-16 sm:pt-24 pb-8">
-        <div className="max-w-3xl mx-auto text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <h1 className="text-3xl sm:text-5xl font-bold text-foreground tracking-tight mb-4">
-              What can I help you<br className="hidden sm:block" /> build today?
-            </h1>
-            <p className="text-muted-foreground text-sm sm:text-base mb-8 max-w-xl mx-auto">
-              Chat, generate images, build websites, create videos — all powered by AI.
-            </p>
-          </motion.div>
+      {/* Hero Section */}
+      <section className="relative px-4 sm:px-6 pt-16 sm:pt-28 pb-16 z-10 flex flex-col items-center">
+        {/* Responsive 3D geometry background orbiting with mouse following */}
+        <div 
+          className="absolute top-[-30px] left-1/2 -translate-x-1/2 w-full max-w-5xl h-[400px] sm:h-[480px] pointer-events-none z-0 overflow-hidden opacity-85"
+          style={{
+            transform: `translateX(-50%) translate3d(${mousePos.x * 20}px, ${mousePos.y * 20}px, 0)`,
+            transition: 'transform 0.1s ease-out'
+          }}
+        >
+          <ThreeDGeometry mode="sphere" color={currentToolColor} opacity={0.35} interactive={true} />
+        </div>
 
-          {/* Input */}
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.4 }}>
-            <div className="bg-surface border border-border rounded-2xl p-2 max-w-2xl mx-auto shadow-lg">
-              <textarea
-                ref={textareaRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Describe what you want to create..."
-                rows={1}
-                className="w-full bg-transparent border-none outline-none resize-none text-sm sm:text-base py-2 px-3 text-foreground placeholder:text-muted-foreground min-h-[40px] max-h-[160px] overflow-y-auto"
-              />
-              <div className="flex items-center justify-between px-1">
-                <div className="flex items-center gap-1 flex-wrap">
-                  {tools.map((tool) => (
-                    <button
-                      key={tool.id}
-                      onClick={() => setActiveTool(tool.id)}
-                      className={cn(
-                        "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all",
-                        activeTool === tool.id
-                          ? "bg-accent/10 text-accent border border-accent/20"
-                          : "text-muted-foreground hover:bg-surface-hover border border-transparent"
-                      )}
-                    >
-                      <tool.icon className="w-3 h-3" />
-                      <span className="hidden sm:inline">{tool.label}</span>
-                    </button>
-                  ))}
+        {/* Dynamic Parallax Hero Content */}
+        <div 
+          className="max-w-4xl mx-auto text-center relative z-10"
+          style={{
+            transform: `perspective(1000px) rotateX(${-mousePos.y * 5}deg) rotateY(${mousePos.x * 5}deg) translate3d(${mousePos.x * 5}px, ${mousePos.y * 5}px, 0)`,
+            transition: 'transform 0.1s ease-out'
+          }}
+        >
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-[#0e0e11]/60 backdrop-blur-md text-xs font-semibold tracking-wide text-white mb-8 shadow-[0_4px_25px_rgba(0,0,0,0.6)]">
+            <Sparkles className="w-3.5 h-3.5 text-blue-400 animate-pulse" />
+            <span>Experience Cosmox Workspace v2.0</span>
+          </div>
+
+          {/* Heading */}
+          <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white mb-6 leading-[1.12]">
+            What can I help you<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-200 to-purple-400">
+              build today?
+            </span>
+          </h1>
+          <p className="text-muted-foreground text-sm sm:text-lg mb-12 max-w-xl mx-auto font-light leading-relaxed">
+            Compose formal documents, formulate automated spreadsheets, design presentations, or study concepts inside a dedicated development workspace.
+          </p>
+
+          {/* Prompt Capsule */}
+          <div className="w-full max-w-2xl mx-auto mb-6">
+            <div className="relative rounded-2xl p-[1px] bg-gradient-to-b from-white/10 to-white/5 focus-within:from-blue-500/50 focus-within:to-indigo-500/20 transition-all duration-500 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.8)]">
+              <div className="bg-[#0b0b0d]/95 backdrop-blur-xl rounded-[15px] p-3">
+                <textarea
+                  ref={textareaRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Describe your project, template, or visual notes..."
+                  rows={1}
+                  className="w-full bg-transparent border-none outline-none resize-none text-sm sm:text-base py-2.5 px-3 text-white placeholder:text-muted-foreground min-h-[50px] max-h-[160px] overflow-y-auto font-light"
+                />
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-white/5 px-2">
+                  {/* Active tools selectors */}
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {tools.map((tool) => {
+                      const isActive = activeTool === tool.id;
+                      return (
+                        <button
+                          key={tool.id}
+                          onClick={() => tool.active && setActiveTool(tool.id)}
+                          disabled={!tool.active}
+                          className={cn(
+                            "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-300 border relative",
+                            isActive
+                              ? "text-white bg-white/5 border-white/15"
+                              : "text-muted-foreground border-transparent hover:text-white hover:bg-white/5",
+                            !tool.active && "opacity-40 cursor-not-allowed hover:bg-transparent"
+                          )}
+                          style={{
+                            boxShadow: isActive ? `0 0 20px -5px ${tool.color}44` : undefined,
+                            borderColor: isActive ? `${tool.color}55` : undefined
+                          }}
+                        >
+                          <tool.icon className="w-3.5 h-3.5" style={{ color: tool.color }} />
+                          <span>{tool.label}</span>
+                          {!tool.active && (
+                            <span className="text-[7.5px] uppercase tracking-wider font-extrabold text-muted-foreground/60 px-1 bg-white/5 rounded">
+                              {tool.badge}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Send button */}
+                  <button
+                    onClick={handleSubmit}
+                    disabled={!input.trim()}
+                    className="self-end sm:self-auto w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 disabled:opacity-20 bg-white text-black hover:scale-105 active:scale-95 group/btn"
+                    style={{
+                      boxShadow: input.trim() ? '0 0 25px rgba(255,255,255,0.2)' : 'none'
+                    }}
+                  >
+                    <Send className="w-4 h-4 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform duration-300" />
+                  </button>
                 </div>
-                <button
-                  onClick={handleSubmit}
-                  disabled={!input.trim()}
-                  className="w-8 h-8 rounded-lg bg-foreground text-background flex items-center justify-center hover:opacity-90 transition-opacity disabled:opacity-30 flex-shrink-0"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
               </div>
             </div>
 
-            {/* Suggested prompts */}
-            <div className="mt-4 flex flex-wrap justify-center gap-2 max-w-2xl mx-auto">
-              {(suggestedPrompts[activeTool] || []).map((p, i) => (
-                <button
-                  key={i}
-                  onClick={() => setInput(p)}
-                  className="text-xs text-muted-foreground hover:text-foreground bg-surface hover:bg-surface-hover border border-border rounded-full px-3 py-1.5 transition-colors truncate max-w-[280px]"
-                >
-                  {p}
-                </button>
-              ))}
+            {/* Suggested prompts list */}
+            <div className="mt-5 flex flex-wrap justify-center gap-2 max-w-2xl mx-auto">
+              <AnimatePresence mode="wait">
+                {(suggestedPrompts[activeTool] || []).map((p, i) => (
+                  <motion.button
+                    key={`${activeTool}-${i}`}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.25, delay: i * 0.05 }}
+                    onClick={() => setInput(p)}
+                    className="text-xs text-muted-foreground hover:text-white bg-[#0e0e11]/60 hover:bg-[#121216] border border-white/5 hover:border-white/10 rounded-full px-4 py-2 transition-all truncate max-w-[280px] font-light"
+                  >
+                    {p}
+                  </motion.button>
+                ))}
+              </AnimatePresence>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="px-4 sm:px-6 py-12">
-        <div className="max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-6">
+      {/* Developer Terminal & Config Mockup Section */}
+      <section className="px-4 sm:px-6 py-10 relative z-10 max-w-4xl mx-auto">
+        <div className="rounded-2xl border border-white/5 bg-[#0b0b0d]/90 backdrop-blur-xl shadow-2xl overflow-hidden">
+          {/* Header Tab panel */}
+          <div className="flex items-center justify-between px-4 py-3 bg-[#08080a] border-b border-white/5">
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
+              <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
+              <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
+              <span className="text-[10px] text-muted-foreground font-mono ml-2">coxmox-compilation-sandbox.log</span>
+            </div>
+            
+            <div className="flex items-center gap-1.5 p-0.5 rounded-md bg-[#131317]">
+              <button 
+                onClick={() => setActiveTab('terminal')}
+                className={cn("flex items-center gap-1.5 px-3 py-1 rounded text-[10px] font-mono transition-colors", activeTab === 'terminal' ? 'bg-white/5 text-white' : 'text-muted-foreground hover:text-white')}
+              >
+                <Terminal className="w-3 h-3" /> Console
+              </button>
+              <button 
+                onClick={() => setActiveTab('config')}
+                className={cn("flex items-center gap-1.5 px-3 py-1 rounded text-[10px] font-mono transition-colors", activeTab === 'config' ? 'bg-white/5 text-white' : 'text-muted-foreground hover:text-white')}
+              >
+                <Code className="w-3 h-3" /> Config
+              </button>
+            </div>
+          </div>
+
+          {/* Active Terminal Content */}
+          <div className="p-5 font-mono text-[11px] leading-relaxed min-h-[180px] bg-[#070708]/60 overflow-y-auto">
+            {activeTab === 'terminal' ? (
+              <div className="space-y-1 text-neutral-400">
+                {terminalLogs.map((log, index) => (
+                  <div key={index} className="flex gap-2">
+                    <span className="text-blue-500 select-none">&gt;</span>
+                    <span>{log}</span>
+                  </div>
+                ))}
+                <div className="flex items-center gap-1">
+                  <span className="text-blue-500 select-none">&gt;</span>
+                  <span className="w-2 h-4 bg-white animate-pulse" />
+                </div>
+              </div>
+            ) : (
+              <pre className="text-emerald-400 select-text text-left font-mono">
+                {configCode}
+              </pre>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="px-4 sm:px-6 py-16 relative z-10 border-t border-white/5 bg-[#09090b]/40">
+        <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8">
           {stats.map((s) => (
-            <div key={s.label} className="text-center">
-              <p className="text-2xl sm:text-3xl font-bold text-foreground">{s.value}</p>
-              <p className="text-xs text-muted-foreground mt-1">{s.label}</p>
+            <div key={s.label} className="relative rounded-2xl border border-white/5 bg-[#0b0b0d]/50 p-6 text-center group overflow-hidden">
+              <div className={cn("absolute inset-0 bg-gradient-to-tr opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none", s.glow)} />
+              <p className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight relative z-10">{s.value}</p>
+              <p className="text-[10px] text-muted-foreground mt-2 uppercase tracking-widest font-bold relative z-10">{s.label}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Features */}
-      <section className="px-4 sm:px-6 py-16 border-t border-border bg-surface">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground text-center mb-10">Built for creators & developers</h2>
+      {/* Detailed Technical Grid */}
+      <section className="px-4 sm:px-6 py-24 relative z-10 border-t border-white/5">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-2xl sm:text-4xl font-bold text-white tracking-tight mb-4">
+              Architected for Enterprise Sandboxes
+            </h2>
+            <p className="text-muted-foreground text-sm sm:text-base max-w-lg mx-auto font-light">
+              Unified design, secure local runtimes, and multi-model routing protocols.
+            </p>
+          </div>
+
           <div className="grid sm:grid-cols-3 gap-6">
             {features.map((f) => (
-              <div key={f.title} className="text-center p-6">
-                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mx-auto mb-4">
-                  <f.icon className="w-6 h-6 text-accent" />
+              <div 
+                key={f.title} 
+                className="group relative rounded-2xl border border-white/5 bg-[#0b0b0d]/40 p-8 transition-all hover:border-white/10 hover:-translate-y-1 duration-300"
+              >
+                <div 
+                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                  style={{
+                    background: `radial-gradient(circle at 50% 10%, ${f.glowColor}, transparent 55%)`
+                  }}
+                />
+                
+                <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 relative z-10 group-hover:scale-105 transition-transform duration-300">
+                  <f.icon className="w-5.5 h-5.5 text-white" />
                 </div>
-                <h3 className="text-sm font-semibold text-foreground mb-2">{f.title}</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
+                
+                <h3 className="text-sm font-bold text-white mb-3 relative z-10 uppercase tracking-wider">{f.title}</h3>
+                <p className="text-xs sm:text-[13px] text-muted-foreground leading-relaxed font-light relative z-10">{f.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
-
-      {/* Partners */}
-      <section className="px-4 sm:px-6 py-12 border-t border-border">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-6">Trusted by industry leaders</p>
-          <div className="flex flex-wrap justify-center gap-6 sm:gap-10">
-            {partners.map((p) => (
-              <span key={p} className="text-sm font-semibold text-muted-foreground/60">{p}</span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing */}
-      <section id="pricing" className="px-4 sm:px-6 py-16 border-t border-border bg-surface">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground text-center mb-3">Simple, transparent pricing</h2>
-          <p className="text-sm text-muted-foreground text-center mb-10 max-w-md mx-auto">Start free, upgrade when you need more power.</p>
-          <div className="grid sm:grid-cols-3 gap-4 sm:gap-6">
-            {pricingPlans.map((plan) => (
-              <div key={plan.name} className={cn("rounded-2xl border p-6 flex flex-col", plan.popular ? "border-accent bg-accent/5 ring-1 ring-accent/20 relative" : "border-border bg-background")}>
-                {plan.popular && <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-accent-foreground text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Most Popular</span>}
-                <h3 className="text-lg font-bold text-foreground">{plan.name}</h3>
-                <div className="mt-3 mb-5">
-                  <span className="text-3xl font-bold text-foreground">{plan.price}</span>
-                  <span className="text-sm text-muted-foreground">{plan.period}</span>
-                </div>
-                <ul className="space-y-2.5 flex-1">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-xs text-muted-foreground">
-                      <Check className="w-3.5 h-3.5 text-accent mt-0.5 flex-shrink-0" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <button className={cn("mt-6 w-full py-2.5 rounded-xl text-sm font-medium transition-colors", plan.popular ? "bg-accent text-accent-foreground hover:opacity-90" : "bg-foreground text-background hover:opacity-90")}>
-                  {plan.cta}
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Blog */}
-      <section className="px-4 sm:px-6 py-16 border-t border-border">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-xl sm:text-2xl font-bold text-foreground">From the blog</h2>
-            <button className="text-xs text-accent font-medium flex items-center gap-1 hover:underline">View all <ArrowRight className="w-3 h-3" /></button>
-          </div>
-          <div className="grid sm:grid-cols-3 gap-4 sm:gap-6">
-            {blogPosts.map((post) => (
-              <div key={post.title} className="group cursor-pointer">
-                <div className="aspect-[16/10] rounded-xl overflow-hidden bg-muted mb-3">
-                  <img src={post.image} alt={post.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                </div>
-                <p className="text-[10px] font-medium text-accent uppercase tracking-wider mb-1">{post.category}</p>
-                <h3 className="text-sm font-semibold text-foreground group-hover:text-accent transition-colors leading-snug">{post.title}</h3>
-                <p className="text-[10px] text-muted-foreground mt-1">{post.date}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="px-4 sm:px-6 py-16 border-t border-border bg-foreground text-background">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-xl sm:text-2xl font-bold mb-3">Ready to build something amazing?</h2>
-          <p className="text-sm opacity-70 mb-6">Join 50,000+ creators already using COXMOX.</p>
-          <button onClick={() => navigate('/chat')} className="bg-accent text-accent-foreground px-6 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity">
-            Get Started Free
+      
+      {/* Dynamic CTA */}
+      <section className="px-4 sm:px-6 py-24 border-t border-white/5 bg-gradient-to-b from-[#09090b] to-black relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_70%,rgba(59,130,246,0.08),transparent_60%)] pointer-events-none" />
+        
+        <div className="max-w-3xl mx-auto text-center relative z-10">
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-white mb-4 tracking-tight leading-tight">Ready to compile?</h2>
+          <p className="text-muted-foreground text-sm sm:text-base mb-8 max-w-md mx-auto font-light">
+            Deploy your code, compile templates, and consult visual nodes inside a secure, high-performance sandbox.
+          </p>
+          <button 
+            onClick={() => navigate('/chat')} 
+            className="px-8 py-3.5 rounded-xl text-xs sm:text-sm font-semibold uppercase tracking-wider bg-white text-black hover:bg-neutral-100 hover:shadow-2xl transition-all hover:scale-105 active:scale-95"
+          >
+            Enter Workspace Free
           </button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="px-4 sm:px-6 py-10 border-t border-border">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <img src="/favicon.png" alt="COXMOX" className="w-6 h-6" />
-                <span className="text-xs font-bold text-foreground">COXMOX</span>
-              </div>
-              <p className="text-[10px] text-muted-foreground leading-relaxed">AI-powered workspace for creators, developers, and teams.</p>
-            </div>
-            <div>
-              <h4 className="text-xs font-semibold text-foreground mb-3">Product</h4>
-              <div className="space-y-2">
-                <button onClick={() => navigate('/chat')} className="block text-[11px] text-muted-foreground hover:text-foreground">AI Chat</button>
-                <button onClick={() => navigate('/all-tools')} className="block text-[11px] text-muted-foreground hover:text-foreground">All Tools</button>
-                <a href="#pricing" className="block text-[11px] text-muted-foreground hover:text-foreground">Pricing</a>
-              </div>
-            </div>
-            <div>
-              <h4 className="text-xs font-semibold text-foreground mb-3">Resources</h4>
-              <div className="space-y-2">
-                <button className="block text-[11px] text-muted-foreground hover:text-foreground">Documentation</button>
-                <button className="block text-[11px] text-muted-foreground hover:text-foreground">Blog</button>
-                <button className="block text-[11px] text-muted-foreground hover:text-foreground">Changelog</button>
-              </div>
-            </div>
-            <div>
-              <h4 className="text-xs font-semibold text-foreground mb-3">Company</h4>
-              <div className="space-y-2">
-                <button className="block text-[11px] text-muted-foreground hover:text-foreground">About</button>
-                <button className="block text-[11px] text-muted-foreground hover:text-foreground">Careers</button>
-                <button className="block text-[11px] text-muted-foreground hover:text-foreground">Contact</button>
-              </div>
-            </div>
-          </div>
-          <div className="border-t border-border pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-[10px] text-muted-foreground">© 2026 COXMOX. All rights reserved.</p>
-            <div className="flex gap-4">
-              <button className="text-[10px] text-muted-foreground hover:text-foreground">Privacy</button>
-              <button className="text-[10px] text-muted-foreground hover:text-foreground">Terms</button>
-              <button onClick={() => navigate('/settings')} className="text-[10px] text-muted-foreground hover:text-foreground">Settings</button>
-            </div>
+      <footer className="px-4 sm:px-6 py-12 border-t border-white/5 bg-black text-muted-foreground">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-[10px] font-light">© 2026 COXMOX. Engineered for compiling layouts.</p>
+          <div className="flex gap-6">
+            <button onClick={() => navigate('/chat')} className="text-[10px] hover:text-white transition-colors">Workspace</button>
+            <button onClick={() => navigate('/cereva')} className="text-[10px] hover:text-white transition-colors">Cereva App</button>
+            <button onClick={() => navigate('/office')} className="text-[10px] hover:text-white transition-colors">Office Studio</button>
           </div>
         </div>
       </footer>

@@ -1,0 +1,412 @@
+Ok, lets continue form where we stop, make sure all our plan below is complete
+
+OK, let continue form where we stop +ed for this our agentic AI system for our office
+
+
+
+Agentic AI and Real Office Exporters for Word, PowerPoint, and Excel
+
+This plan outlines the architecture and implementation steps to build a premium, multi-agent Agentic AI system for COXMOX.
+
+Multi-Agent Office Pipeline
+
+To achieve corporate-level document quality rather than simple chatbot output, we will implement a multi-agent workflow inside the dedicated `office_agent` and `search_agent` directories:
+
+```mermaid
+
+graph TD
+
+    UserPrompt[User Prompt] --> PlannerAgent[1. Planner Agent]
+
+    PlannerAgent -->|Task Breakdown & Outline| ResearchAgent[2. Research Agent]
+
+    ResearchAgent -->|Web Search & Scraped Facts| OfficeAgent[3. Document/Spreadsheet/Presentation Agent]
+
+    OfficeAgent -->|Draft Office Structure| DesignAgent[4. Design Agent]
+
+    DesignAgent -->|Themes, Layouts, Image Ranking/Placement| ReviewAgent[5. Review Agent]
+
+    ReviewAgent -->|Final Polished JSON Payload| UIRenderer[Frontend Workspace UI]
+
+```
+
+Planner Agent: Breaks down the user prompt into structural requirements (e.g. section count, layout ideas, spreadsheet design).
+
+Research Agent: Decides if current information is needed. Runs search queries, reads web pages, and selects the most relevant, reliable facts.
+
+Office Specialist Agents (Document / Spreadsheet / Presentation): Converts outline & facts into structured templates and raw data.
+
+Design Agent:
+
+PowerPoint: Handles theme selection, fonts, colors, layout styling, and animations. Executes the image search and download loop: searches for images, ranks them by relevance/quality, downloads the best, and places them in the slide content.
+
+Word: Adds cover page, table of contents (TOC) draft, margins, headers, footers, citations, and reference structures.
+
+Excel: Organizes the workspace into multiple sheets (Dashboard, Analysis, Raw Data) with clean gridlines, bold headers, cells, and formula calculations.
+
+Review Agent: Performs self-correction, verifies that all requested files match the user prompt, removes placeholders, checks spelling, and returns clean, usable JSON payload.
+
+---
+
+User Review Required
+
+> [!IMPORTANT]
+
+> **Hugging Face Model Configuration:** We will default the Hugging Face provider model to **`Qwen/Qwen2.5-32B-Instruct`** (or let the user select any Hugging Face model from settings). Hugging Face API key configured in local storage will be passed to call these open-weights models.
+
+> **Spreadsheet Multipage Support:** We will update the React frontend (`ExcelWorkspace.tsx`) to support displaying multiple sheets generated from the backend (Dashboard, Analysis, Raw Data).
+
+---
+
+Proposed Changes
+
+1. Python Dependencies
+
+[MODIFY] requirements.txt
+
+Add compiling and parsing dependencies:
+
+`python-docx`
+
+`python-pptx`
+
+`openpyxl`
+
+`beautifulsoup4`
+
+`xhtml2pdf`
+
+---
+
+2. Search Agent System
+
+[NEW] init.py
+
+Initialize package.
+
+[NEW] tools.py
+
+Free, API-keyless scraping tools:
+
+`web_search(query: str) -> List[Dict[str, str]]`: Scrapes text results from DuckDuckGo HTML search.
+
+`web_scrape(url: str) -> str`: Scrapes page text and returns a cleaned summary.
+
+`download_image(query: str, expected_context: str) -> str`: Scrapes DuckDuckGo Images, ranks them by relevance to `expected_context`, downloads the highest-ranking image, saves it to `agents-backend/static/images/`, and returns its local HTTP URL.
+
+[NEW] agent.py
+
+`SearchAgent` class to orchestrate web research.
+
+---
+
+3. Office Agent System and Multi-Agent Workflow
+
+[NEW] init.py
+
+Initialize package.
+
+[NEW] agents.py
+
+Multi-agent execution logic:
+
+`PlannerAgent`, `ResearchAgent`, `DocumentAgent`, `SpreadsheetAgent`, `PresentationAgent`, `DesignAgent`, `ReviewAgent` classes.
+
+Chained generation loops that pass data sequentially (e.g., prompt -> Planner -> Research -> Specialist -> Design -> Review).
+
+[NEW] word_generator.py
+
+Converts HTML into a clean DOCX document using `python-docx` (injecting cover page, Table of Contents, page headers/footers, styled tables, and embedded local images).
+
+[NEW] ppt_generator.py
+
+Converts slide list JSON into a `.pptx` presentation using `python-pptx` (maps layouts, injects theme backgrounds and fonts, inserts images, and adds speaker notes).
+
+[NEW] excel_generator.py
+
+Converts multiple sheet list JSON into a `.xlsx` workbook using `openpyxl` (creates Sheets for Dashboard, Analysis, Raw Data; writes cells, styling, bold headers, and formula keys).
+
+[NEW] pdf_generator.py
+
+Converts document HTML, slide decks, or spreadsheets into styled PDFs using `xhtml2pdf`.
+
+---
+
+4. Backend Server Routing & Configuration
+
+[MODIFY] agent_config.py
+
+Add `Qwen/Qwen2.5-32B-Instruct` as the default Hugging Face model in the `MODEL_REGISTRY`.
+
+[MODIFY] provider_clients.py
+
+Enhance client routing for Hugging Face or Gemini to dynamically route prompt sequences or native tools.
+
+[MODIFY] main.py
+
+Mount `/static` to serve images.
+
+Implement endpoints:
+
+`POST /api/export/docx`
+
+`POST /api/export/pptx`
+
+`POST /api/export/xlsx`
+
+`POST /api/export/pdf`
+
+---
+
+5. Frontend UI Integration
+
+[MODIFY] agentApi.ts
+
+Add API triggers for `exportDocx`, `exportPptx`, `exportXlsx`, and `exportPdf`.
+
+[MODIFY] WordWorkspace.tsx
+
+Connect file options to call `exportDocx` / `exportPdf`.
+
+[MODIFY] PowerPointWorkspace.tsx
+
+Connect file options to call `exportPptx` / `exportPdf`.
+
+[MODIFY] ExcelWorkspace.tsx
+
+Update `applyAgentSpreadsheet` to check for `content.sheets` and render multiple sheets.
+
+Connect file options to call `exportXlsx` / `exportPdf`.
+
+---
+
+Verification Plan
+
+Automated Tests
+
+Run validation scripts for `python-docx`, `python-pptx`, `openpyxl`, and `xhtml2pdf`.
+
+Manual Verification
+
+Input: "Write a marketing report on modern Tesla EVs with a relevant image of a Tesla Model S."
+
+Verify that the search agent ranks DDG images, downloads the Model S image, and embeds it in the DOCX/PDF export.
+
+Generate a spreadsheet for "financial budget". Check that Excel Workspace shows Dashboard, Analysis, and Raw Data sheets, and exports to a valid `.xlsx` file.
+
+Export PowerPoint deck and verify Slide layout, colors, and images compile properly in `.pptx`.
+
+
+
+
+
+so has we built and completed this not that this is internationally standard project is it is for an organisation
+
+
+
+have you work on all the tools
+
+
+
+React Frontend
+
+       ↓
+
+API (FastAPI)
+
+       ↓
+
+Agentic System (Python)
+
+       ↓
+
+LLM Models
+
+       ↓
+
+Tools
+
+       ├─ Word Generator
+
+       ├─ PowerPoint Generator
+
+       ├─ Excel Generator
+
+       ├─ Web Search
+
+       ├─ Image Search
+
+       ├─ Database
+
+       └─ File Storage
+
+
+
+and all that i have note metioned, is everything ready?
+
+also for the templete that the agent will use for building the templete will be just like a guide but it shuld have a simple canvas fall back if none so your to crete a folder for the office  templete and seperete folders for each office to hold and thiere catogories so even word to have it own cateogies and make sure even if the user cateogy does not fully mach it sues a related one for it, it will just ack as the starting point, so it can manipulate and chage palce hoslder and sturcture to fit the user demand and not jsut act like it feeling the blank,, this are some catogories
+
+WORD TEMPLATE CATEGORIES
+Business Documents
+Business Report
+Executive Report
+Annual Report
+Quarterly Report
+Monthly Report
+Project Report
+Status Report
+Feasibility Study
+Business Proposal
+Partnership Proposal
+Company Profile
+Business Plan
+Strategic Plan
+Operational Plan
+Marketing Plan
+Sales Plan
+Research & Analysis
+Research Report
+Market Research Report
+Industry Analysis
+Competitor Analysis
+Case Study
+White Paper
+Technical Report
+Survey Report
+Policy Analysis
+Data Analysis Report
+Education & Training
+Training Manual
+Course Material
+Workshop Guide
+Lesson Plan
+Student Handbook
+Instructor Guide
+Study Guide
+Learning Module
+HR & Administration
+Employee Handbook
+Job Description
+Performance Review
+Employee Evaluation
+Onboarding Guide
+Company Policy
+Procedure Manual
+Meeting Minutes
+Internal Memo
+Legal & Compliance
+Terms and Conditions
+Privacy Policy
+Compliance Report
+Audit Report
+Risk Assessment
+Legal Brief
+Contract Template
+Service Agreement
+Project Management
+Project Charter
+Project Plan
+Project Proposal
+Project Closure Report
+Requirements Document
+Scope Document
+Technical Specification
+POWERPOINT TEMPLATE CATEGORIES
+Corporate Presentations
+Company Profile
+Corporate Overview
+Board Meeting
+Executive Briefing
+Quarterly Business Review
+Annual Review
+Investor Pitch
+Investor Update
+Stakeholder Presentation
+Sales & Marketing
+Sales Pitch
+Marketing Proposal
+Product Launch
+Campaign Strategy
+Brand Presentation
+Customer Presentation
+Business Development Pitch
+Startup Templates
+Startup Pitch Deck
+Seed Funding Deck
+Series A Deck
+Growth Strategy Deck
+Business Model Deck
+Product Vision Deck
+Research & Analysis
+Research Findings
+Market Analysis
+Industry Trends
+Survey Results
+Case Study Presentation
+Data Insights Presentation
+Education & Training
+Lecture Slides
+Training Deck
+Workshop Slides
+Certification Program
+Seminar Presentation
+Course Presentation
+Consulting Style
+Executive Summary Deck
+Problem-Solution Deck
+Transformation Strategy
+Roadmap Presentation
+Gap Analysis Deck
+Performance Review Deck
+Operations
+Project Update
+Status Review
+Risk Review
+Operational Dashboard
+Implementation Plan
+Progress Report
+EXCEL TEMPLATE CATEGORIES
+Finance
+Budget Planner
+Expense Tracker
+Revenue Tracker
+Profit & Loss Statement
+Cash Flow Dashboard
+Financial Forecast
+Investment Tracker
+Financial KPI Dashboard
+Sales
+Sales Dashboard
+Sales Pipeline
+Lead Tracker
+Revenue Dashboard
+Customer Analytics
+Sales Forecast
+Project Management
+Project Tracker
+Task Tracker
+Resource Planner
+Timeline Tracker
+Risk Register
+Project Budget Tracker
+HR
+Employee Database
+Attendance Tracker
+Leave Management
+Payroll Tracker
+Recruitment Tracker
+Performance Dashboard
+Operations
+Inventory Tracker
+Asset Management
+Procurement Tracker
+Logistics Dashboard
+Operations Dashboard
+Analytics
+KPI Dashboard
+Executive Dashboard
+Business Intelligence Dashboard
+Performance Dashboard
+Data Analysis Workbook
+
+creat the folder lave the create of the word the power pont and the excel templete for me jsut create the folder i will create them and copy them to the folders repectly dont wast time doing that, create the folders accordingly, not that the its templet and should use it for desing a d referenceing and You should think of templates as starting points, not rigid forms.

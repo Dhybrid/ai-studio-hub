@@ -6,6 +6,7 @@ import {
   Plus, Trash2, ChevronDown, PanelRight, PanelRightClose, Menu as MenuIcon, Sun, Moon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { routeAgent, exportXlsx, exportPdf } from '@/lib/agentApi';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import ExcelRibbon, { ExcelTab } from '@/components/office/ExcelRibbon';
 
@@ -343,6 +344,19 @@ function buildSheetFromTemplate(tpl: keyof typeof templates): Sheet {
   return { id: 's1', name: 'Sheet1', cells };
 }
 
+function normalizeAgentCells(raw: unknown): Record<string, Cell> {
+  if (!raw || typeof raw !== 'object') return {};
+  return Object.fromEntries(
+    Object.entries(raw as Record<string, any>).map(([ref, cell]) => [
+      ref.toUpperCase(),
+      {
+        v: String(typeof cell === 'object' && cell !== null ? cell.v ?? '' : cell ?? ''),
+        f: typeof cell === 'object' && cell !== null && typeof cell.f === 'object' ? cell.f : undefined,
+      },
+    ])
+  );
+}
+
 // ============ Main Component ============
 export default function ExcelWorkspace() {
   const { theme: appTheme, toggleTheme } = useWorkspace();
@@ -372,11 +386,17 @@ export default function ExcelWorkspace() {
   const [showGridlines, setShowGridlines] = useState(true);
   const [showHeadings, setShowHeadings] = useState(true);
 
+  const colW = (COL_WIDTH * zoom) / 100;
+  const rowH = (ROW_HEIGHT * zoom) / 100;
+  const headerH = (HEADER_H * zoom) / 100;
+  const headerW = (HEADER_W * zoom) / 100;
+
   const gridRef = useRef<HTMLDivElement>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
   const dragRef = useRef<{ active: boolean }>({ active: false });
   const fileMenuRef = useRef<HTMLDivElement>(null);
   const aiTaRef = useRef<HTMLTextAreaElement>(null);
+  const initialAgentRun = useRef(false);
   useEffect(() => {
     const el = aiTaRef.current;
     if (!el) return;
@@ -400,6 +420,45 @@ export default function ExcelWorkspace() {
     const t = setTimeout(() => { setSaveStatus('saving'); setTimeout(() => setSaveStatus('saved'), 600); }, 1500);
     return () => clearTimeout(t);
   }, [saveStatus]);
+
+  const applyAgentSpreadsheet = useCallback(async (promptText: string) => {
+    const result = await routeAgent(promptText, { routeHint: 'office-spreadsheet' });
+    const content = result.generated_content || {};
+
+    if (content.sheets && Array.isArray(content.sheets)) {
+      const parsedSheets = content.sheets.map((s: any, idx: number) => ({
+        id: `s_${Date.now()}_${idx}`,
+        name: s.name || `Sheet${idx + 1}`,
+        cells: normalizeAgentCells(s.cells)
+      }));
+      if (parsedSheets.length > 0) {
+        setSheets(parsedSheets);
+        setActiveSheetId(parsedSheets[0].id);
+        setDocName(result.title || 'AI Workbook');
+        setAiHistory(h => [...h, { role: 'ai', text: `Built "${result.title}" with ${parsedSheets.length} sheets.` }]);
+        markUnsaved();
+        return;
+      }
+    }
+
+    const nextCells = normalizeAgentCells(content.cells);
+    if (!Object.keys(nextCells).length) throw new Error('Agent returned no spreadsheet cells');
+
+    setSheets(prev => prev.map(s => s.id === activeSheetId ? { ...s, cells: nextCells } : s));
+    setDocName(result.title || 'AI Workbook');
+    setAiHistory(h => [...h, { role: 'ai', text: `Built "${result.title}" with ${Object.keys(nextCells).length} cells.` }]);
+    markUnsaved();
+  }, [activeSheetId, markUnsaved]);
+
+  useEffect(() => {
+    if (!initialPrompt.trim() || initialAgentRun.current) return;
+    initialAgentRun.current = true;
+    setAiBusy(true);
+    setAiHistory(h => [...h, { role: 'user', text: initialPrompt }]);
+    applyAgentSpreadsheet(initialPrompt)
+      .catch(() => setAiHistory(h => [...h, { role: 'ai', text: 'Could not reach the agent backend, so the selected template stayed in place.' }]))
+      .finally(() => setAiBusy(false));
+  }, [applyAgentSpreadsheet, initialPrompt]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -668,15 +727,19 @@ export default function ExcelWorkspace() {
     inp.click();
   };
 
-  const handleAi = () => {
+  const handleAi = async () => {
     if (!aiPrompt.trim() || aiBusy) return;
+    const promptText = aiPrompt;
     setAiBusy(true);
-    setAiHistory(h => [...h, { role: 'user', text: aiPrompt }]);
-    setTimeout(() => {
+    setAiHistory(h => [...h, { role: 'user', text: promptText }]);
+    try {
+      await applyAgentSpreadsheet(promptText);
+    } catch {
       setAiHistory(h => [...h, { role: 'ai', text: 'Generated suggestions based on your sheet. Try =SUM(A1:A10) or apply currency formatting.' }]);
+    } finally {
       setAiBusy(false);
       setAiPrompt('');
-    }, 900);
+    }
   };
 
   // Mouse selection
@@ -702,7 +765,7 @@ export default function ExcelWorkspace() {
       {/* Top bar */}
       <div className="h-10 flex items-center justify-between px-2 sm:px-3 border-b border-border bg-emerald-700 text-white flex-shrink-0">
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          <button onClick={() => navigate('/office/spreadsheets')} className="w-7 h-7 rounded hover:bg-white/15 flex items-center justify-center" title="Spreadsheets Home">
+          <button onClick={() => navigate('/office')} className="w-7 h-7 rounded hover:bg-white/15 flex items-center justify-center" title="Office Home">
             <FileSpreadsheet className="w-4 h-4" />
           </button>
           {editingName ? (
@@ -744,8 +807,7 @@ export default function ExcelWorkspace() {
         <button onClick={() => setFileMenu(f => !f)} className={cn("px-2 py-0.5 rounded", fileMenu && "bg-accent/15 text-accent")}>File</button>
         {fileMenu && (
           <div className="absolute top-full left-2 mt-0.5 bg-card border border-border rounded-lg shadow-xl z-50 py-1 w-56">
-            <button onClick={() => { navigate('/office/spreadsheets'); setFileMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-surface-hover"><Home className="w-3.5 h-3.5" /> Spreadsheets Home</button>
-            <button onClick={() => { navigate('/office'); setFileMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-surface-hover"><FolderOpen className="w-3.5 h-3.5" /> Office Home</button>
+            <button onClick={() => { navigate('/office'); setFileMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-surface-hover"><Home className="w-3.5 h-3.5" /> Office Home</button>
             <div className="h-px bg-border my-1" />
             <button onClick={() => { navigate('/office/spreadsheets/new'); setFileMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-surface-hover"><FilePlus className="w-3.5 h-3.5" /> New</button>
             <button onClick={() => { importFile(); setFileMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-surface-hover"><FolderOpen className="w-3.5 h-3.5" /> Import...</button>
@@ -788,25 +850,25 @@ export default function ExcelWorkspace() {
       <div className="flex-1 flex min-h-0 overflow-hidden">
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white dark:bg-zinc-900">
           <div ref={gridRef} className="flex-1 overflow-auto" style={{ fontSize: `${zoom}%` }}>
-            <div className="relative" style={{ width: HEADER_W + NUM_COLS * COL_WIDTH, minHeight: HEADER_H + NUM_ROWS * ROW_HEIGHT }}>
+            <div className="relative" style={{ width: headerW + NUM_COLS * colW, minHeight: headerH + NUM_ROWS * rowH }}>
               {/* corner */}
               {showHeadings && (
-                <div className="sticky top-0 left-0 z-30 bg-zinc-100 dark:bg-zinc-800 border-r border-b border-zinc-300 dark:border-zinc-700" style={{ width: HEADER_W, height: HEADER_H, position: 'sticky' }} />
+                <div className="sticky top-0 left-0 z-30 bg-zinc-100 dark:bg-zinc-800 border-r border-b border-zinc-300 dark:border-zinc-700" style={{ width: headerW, height: headerH, position: 'sticky' }} />
               )}
               {/* col headers */}
               {showHeadings && (
-                <div className="sticky top-0 z-20 flex bg-zinc-100 dark:bg-zinc-800 border-b border-zinc-300 dark:border-zinc-700" style={{ marginLeft: HEADER_W, height: HEADER_H, width: NUM_COLS * COL_WIDTH, marginTop: -HEADER_H }}>
+                <div className="sticky top-0 z-20 flex bg-zinc-100 dark:bg-zinc-800 border-b border-zinc-300 dark:border-zinc-700" style={{ marginLeft: headerW, height: headerH, width: NUM_COLS * colW, marginTop: -headerH }}>
                   {Array.from({ length: NUM_COLS }).map((_, c) => (
-                    <div key={c} className={cn("text-[10px] flex items-center justify-center border-r border-zinc-300 dark:border-zinc-700 select-none", c >= selBox.c1 && c <= selBox.c2 ? "bg-emerald-200/70 dark:bg-emerald-700/40 text-emerald-900 dark:text-emerald-100 font-semibold" : "text-zinc-600 dark:text-zinc-400")} style={{ width: COL_WIDTH }}>{colName(c)}</div>
+                    <div key={c} className={cn("text-[10px] flex items-center justify-center border-r border-zinc-300 dark:border-zinc-700 select-none", c >= selBox.c1 && c <= selBox.c2 ? "bg-emerald-200/70 dark:bg-emerald-700/40 text-emerald-900 dark:text-emerald-100 font-semibold" : "text-zinc-600 dark:text-zinc-400")} style={{ width: colW }}>{colName(c)}</div>
                   ))}
                 </div>
               )}
               {/* rows */}
-              <div className="flex flex-col" style={{ marginLeft: showHeadings ? HEADER_W : 0 }}>
+              <div className="flex flex-col" style={{ marginLeft: showHeadings ? headerW : 0 }}>
                 {Array.from({ length: NUM_ROWS }).map((_, r) => (
-                  <div key={r} className="flex" style={{ height: ROW_HEIGHT }}>
+                  <div key={r} className="flex" style={{ height: rowH }}>
                     {showHeadings && (
-                      <div className={cn("sticky left-0 z-10 text-[10px] flex items-center justify-center border-r border-b border-zinc-300 dark:border-zinc-700 select-none", r >= selBox.r1 && r <= selBox.r2 ? "bg-emerald-200/70 dark:bg-emerald-700/40 text-emerald-900 dark:text-emerald-100 font-semibold" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400")} style={{ width: HEADER_W, marginLeft: -HEADER_W }}>{r + 1}</div>
+                      <div className={cn("sticky left-0 z-10 text-[10px] flex items-center justify-center border-r border-b border-zinc-300 dark:border-zinc-700 select-none", r >= selBox.r1 && r <= selBox.r2 ? "bg-emerald-200/70 dark:bg-emerald-700/40 text-emerald-900 dark:text-emerald-100 font-semibold" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400")} style={{ width: headerW, marginLeft: -headerW }}>{r + 1}</div>
                     )}
                     {Array.from({ length: NUM_COLS }).map((_, c) => {
                       const id = cellId(r, c);
@@ -829,12 +891,12 @@ export default function ExcelWorkspace() {
                             anchor && "outline outline-2 outline-emerald-600 z-10",
                           )}
                           style={{
-                            width: COL_WIDTH,
-                            height: ROW_HEIGHT,
+                            width: colW,
+                            height: rowH,
                             backgroundColor: f.bg || undefined,
                             color: f.color,
                             fontFamily: f.fontFamily,
-                            fontSize: f.fontSize ? `${f.fontSize}px` : undefined,
+                            fontSize: f.fontSize ? `${(f.fontSize * zoom) / 100}px` : undefined,
                             fontWeight: f.bold ? 600 : undefined,
                             fontStyle: f.italic ? 'italic' : undefined,
                             textDecoration: [f.underline && 'underline', f.strike && 'line-through'].filter(Boolean).join(' ') || undefined,
@@ -853,7 +915,8 @@ export default function ExcelWorkspace() {
                               onChange={(e) => setEditing({ ...editing!, v: e.target.value })}
                               onBlur={() => commitEdit()}
                               onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commitEdit('down'); } if (e.key === 'Tab') { e.preventDefault(); commitEdit('right'); } if (e.key === 'Escape') cancelEdit(); }}
-                              className="w-full h-full bg-white dark:bg-zinc-800 outline-none text-xs px-0"
+                              className="w-full h-full bg-white dark:bg-zinc-800 outline-none px-0"
+                              style={{ fontSize: 'inherit' }}
                               autoFocus
                             />
                           ) : v}

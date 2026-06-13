@@ -342,15 +342,42 @@ export default function PowerPointWorkspace() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [presenting, currentIdx]);
 
-  const downloadPDF = () => {
-    const html = slides.map(s => `<section style="page-break-after:always;padding:40px"><h1>${s.title}</h1><div>${s.body}</div></section>`).join('');
-    const blob = new Blob([html], { type: 'application/pdf' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${docName}.pdf`; a.click();
+  const downloadPDF = async () => {
+    setSaveStatus('saving');
+    try {
+      const blob = await exportPdf(docName, 'presentation', slides);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${docName}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      setSaveStatus('saved');
+    } catch (err) {
+      console.error(err);
+      const html = slides.map(s => `<section style="page-break-after:always;padding:40px"><h1>${s.title}</h1><div>${s.body}</div></section>`).join('');
+      const blob = new Blob([html], { type: 'application/pdf' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${docName}.pdf`; a.click();
+    }
   };
-  const downloadPptx = () => {
-    const html = slides.map(s => `<section><h1>${s.title}</h1><div>${s.body}</div></section>`).join('');
-    const blob = new Blob([html], { type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${docName}.pptx`; a.click();
+
+  const downloadPptx = async () => {
+    setSaveStatus('saving');
+    try {
+      const blob = await exportPptx(docName, slides, current?.themeId || 'office');
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${docName}.pptx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      setSaveStatus('saved');
+    } catch (err) {
+      console.error(err);
+      const html = slides.map(s => `<section><h1>${s.title}</h1><div>${s.body}</div></section>`).join('');
+      const blob = new Blob([html], { type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${docName}.pptx`; a.click();
+    }
   };
 
   const renderSlide = (s: SlideObj, opts?: { editable?: boolean; small?: boolean }) => {
