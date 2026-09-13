@@ -53,6 +53,7 @@ const Cereva = () => {
   const [isStreaming, setIsStreaming] = useState(false);
   const [voiceCallMode, setVoiceCallMode] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   
   // App states
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -99,6 +100,15 @@ const Cereva = () => {
   const codeSnippets = messages.flatMap((message) =>
     message.role === 'assistant' ? extractCodeSnippets(message.content) : []
   );
+
+  // Auto-resize textarea
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (el) {
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+    }
+  }, [input]);
 
   useEffect(() => { 
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); 
@@ -623,12 +633,12 @@ const Cereva = () => {
           onClick={() => navigate('/')}
           className="w-full py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-1.5 transition-colors border border-white/5"
         >
-          <Home className="w-3 h-3 text-blue-400" /> Exit to Coxmox
+          <Home className="w-3 h-3 text-blue-400" /> Exit to Cereva
         </button>
         <div className="flex items-center gap-3 mt-1 px-1">
           <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500 flex items-center justify-center text-[10px] text-white font-bold flex-shrink-0">JD</div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-white truncate">IIkiogha</p>
+            <p className="text-xs font-semibold text-white truncate">Ikiogha</p>
             <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold">Student</span>
           </div>
         </div>
@@ -685,7 +695,7 @@ const Cereva = () => {
               <button 
                 onClick={() => navigate('/')}
                 className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-muted-foreground hover:text-white"
-                title="Exit to Coxmox"
+                title="Exit to Cereva"
               >
                 <Home className="w-4 h-4 text-blue-400" />
               </button>
@@ -831,20 +841,21 @@ const Cereva = () => {
                 <div className="flex items-end gap-2 bg-[#0b0b0d]/90 backdrop-blur-xl rounded-[15px] p-2.5">
                   <button
                     onClick={() => setVoiceCallMode(true)}
-                    className="w-8.5 h-8.5 flex items-center justify-center rounded-xl hover:bg-white/5 transition-colors text-muted-foreground hover:text-emerald-400"
+                    className="w-[3rem] h-[2.5rem] flex items-center justify-center rounded-xl hover:bg-white/5 transition-colors text-muted-foreground hover:text-emerald-400"
                     title="Audio call"
                   >
                     <AudioWaveform className="w-4 h-4" />
                   </button>
                   
-                  <textarea 
+                  <textarea
+                    ref={textareaRef}
                     value={input} 
                     onChange={(e) => setInput(e.target.value)} 
                     onKeyDown={handleKeyDown} 
                     placeholder="Ask Cereva to teach a concept..." 
                     rows={1} 
                     className="flex-1 bg-transparent border-none outline-none resize-none text-sm py-2 px-2 text-white placeholder:text-muted-foreground max-h-32 font-light" 
-                    style={{ minHeight: '36px' }} 
+                    style={{ minHeight: '2rem' }} 
                   />
                   
                   {isStreaming ? (
@@ -855,9 +866,10 @@ const Cereva = () => {
                     <button 
                       onClick={() => handleSend()} 
                       disabled={!input.trim()} 
-                      className="w-9.5 h-9.5 flex items-center justify-center rounded-xl transition-all disabled:opacity-20 bg-white text-black hover:scale-105 active:scale-95"
+                      className=" w-[3rem] h-[2.5rem] rounded-[5rem] flex items-center justify-center disabled:opacity-20 bg-white text-black"
+                      // className="w-20 h-20 items-center justify-center rounded-xl transition-all disabled:opacity-20 bg-white text-black hover:scale-105 active:scale-95"
                       style={{
-                        boxShadow: input.trim() ? '0 0 15px rgba(255,255,255,0.2)' : 'none'
+                        boxShadow: input.trim() ? '0 0 15px rgba(153, 150, 150, 0.2)' : 'none'
                       }}
                     >
                       <Send className="w-4 h-4" />

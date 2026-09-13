@@ -20,9 +20,7 @@ const tools = [
   { id: 'chat', icon: MessageSquare, label: 'AI Chat', path: '/chat', color: '#3b82f6', active: true, badge: 'active' },
   { id: 'cereva', icon: Sparkles, label: 'Cereva', path: '/cereva', color: '#10b981', active: true, badge: 'teacher' },
   { id: 'office', icon: FileSpreadsheet, label: 'Office', path: '/office', color: '#eab308', active: true, badge: 'studio' },
-  { id: 'web', icon: Globe, label: 'Web Builder', path: '/web-builder', color: '#06b6d4', active: false, badge: 'sandbox' },
-  { id: 'mobile', icon: Smartphone, label: 'Mobile Builder', path: '/mobile-builder', color: '#22c55e', active: false, badge: 'sandbox' },
-  { id: 'image', icon: Image, label: 'Image Studio', path: '/image-studio', color: '#ec4899', active: false, badge: 'sandbox' },
+  
 ];
 
 const suggestedPrompts: Record<string, string[]> = {
@@ -45,7 +43,7 @@ const features = [
 ];
 
 const mockLogs = [
-  'Initializing Coxmox multi-model router...',
+  'Initializing Eruwa multi-model router...',
   'Connecting local compilation agent at port 8000: SUCCESS',
   'WASM client sandboxes loaded: 3/3 active',
   'Ready. Listening for user instructions...'
@@ -151,7 +149,7 @@ export default cosmox.defineWorkspace({
     <div className="min-h-screen bg-[#070708] text-white font-sans overflow-x-hidden selection:bg-blue-500/30 selection:text-white relative">
       {/* Visual background repeating grid */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.012)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.012)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_0%,#000_80%,transparent_100%)] pointer-events-none z-0" />
-      <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] bg-radial-gradient [background:radial-gradient(circle_at_center,rgba(59,130,246,0.08)_0%,transparent_70%)] pointer-events-none z-0" />
+      <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-full max-w-7xl h-[100vh] bg-radial-gradient [background:radial-gradient(circle_at_center,rgba(59,130,246,0.08)_0%,transparent_70%)] pointer-events-none z-0" />
 
       {/* Header */}
       <header className="sticky top-0 z-40 w-full transition-all border-b bg-[#070708]/85 backdrop-blur-md border-white/5 py-3.5">
@@ -160,7 +158,7 @@ export default cosmox.defineWorkspace({
             <div className="relative w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-gradient-to-br from-blue-600 to-indigo-600 shadow-[0_0_15px_rgba(59,130,246,0.4)]">
               <img src="/favicon.png" alt="COXMOX" className="w-5 h-5 object-contain" />
             </div>
-            <span className="text-sm font-bold tracking-wider text-white uppercase">COXMOX</span>
+            <span className="text-sm font-bold tracking-wider text-white uppercase">Eruwa</span>
           </div>
 
           <nav className="hidden md:flex items-center gap-8">
@@ -186,7 +184,7 @@ export default cosmox.defineWorkspace({
       <section className="relative px-4 sm:px-6 pt-16 sm:pt-28 pb-16 z-10 flex flex-col items-center">
         {/* Responsive 3D geometry background orbiting with mouse following */}
         <div 
-          className="absolute top-[-30px] left-1/2 -translate-x-1/2 w-full max-w-5xl h-[400px] sm:h-[480px] pointer-events-none z-0 overflow-hidden opacity-85"
+          className="absolute top-[-30px] left-1/2 -translate-x-1/2 w-full max-w-5xl h-[400px] sm:h-[480px] pointer-events-none z-0  opacity-85"
           style={{
             transform: `translateX(-50%) translate3d(${mousePos.x * 20}px, ${mousePos.y * 20}px, 0)`,
             transition: 'transform 0.1s ease-out'
@@ -198,15 +196,16 @@ export default cosmox.defineWorkspace({
         {/* Dynamic Parallax Hero Content */}
         <div 
           className="max-w-4xl mx-auto text-center relative z-10"
-          style={{
+          
+        >
+          <div style={{
             transform: `perspective(1000px) rotateX(${-mousePos.y * 5}deg) rotateY(${mousePos.x * 5}deg) translate3d(${mousePos.x * 5}px, ${mousePos.y * 5}px, 0)`,
             transition: 'transform 0.1s ease-out'
-          }}
-        >
-          {/* Badge */}
+          }}>
+            {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-[#0e0e11]/60 backdrop-blur-md text-xs font-semibold tracking-wide text-white mb-8 shadow-[0_4px_25px_rgba(0,0,0,0.6)]">
             <Sparkles className="w-3.5 h-3.5 text-blue-400 animate-pulse" />
-            <span>Experience Cosmox Workspace v2.0</span>
+            <span>Experience Cosmox Workspace</span>
           </div>
 
           {/* Heading */}
@@ -219,11 +218,31 @@ export default cosmox.defineWorkspace({
           <p className="text-muted-foreground text-sm sm:text-lg mb-12 max-w-xl mx-auto font-light leading-relaxed">
             Compose formal documents, formulate automated spreadsheets, design presentations, or study concepts inside a dedicated development workspace.
           </p>
+          </div>
 
           {/* Prompt Capsule */}
           <div className="w-full max-w-2xl mx-auto mb-6">
-            <div className="relative rounded-2xl p-[1px] bg-gradient-to-b from-white/10 to-white/5 focus-within:from-blue-500/50 focus-within:to-indigo-500/20 transition-all duration-500 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.8)]">
-              <div className="bg-[#0b0b0d]/95 backdrop-blur-xl rounded-[15px] p-3">
+            <div className="flex flex-col gap-2 rounded-2xl p-5 bg-[#0b0b0d]/20 backdrop-blur-xl border-[1px] border-[#131313]">
+             {/* Suggested prompts list */}
+            {!input.trim() && <div className="flex flex-wrap justify-start gap-1 max-w-2xl mx-auto">
+              <AnimatePresence mode="wait">
+                {(suggestedPrompts[activeTool] || []).map((p, i) => (
+                  <motion.button
+                    key={`${activeTool}-${i}`}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.25, delay: i * 0.05 }}
+                    onClick={() => setInput(p)}
+                    className="text-xs text-muted-foreground hover:text-white bg-[#0e0e11]/30 hover:bg-[#13182c] border border-white/5 hover:border-white/10 rounded-full px-4 py-2 transition-all truncate max-w-[280px] font-light"
+                  >
+                    {p}
+                  </motion.button>
+                ))}
+              </AnimatePresence>
+            </div>}
+            {/* End of suggested prompts */}
+              <div className="rounded-[15px]">
                 <textarea
                   ref={textareaRef}
                   value={input}
@@ -272,7 +291,7 @@ export default cosmox.defineWorkspace({
                   <button
                     onClick={handleSubmit}
                     disabled={!input.trim()}
-                    className="self-end sm:self-auto w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 disabled:opacity-20 bg-white text-black hover:scale-105 active:scale-95 group/btn"
+                    className="w-[5rem] h-[2.5rem] rounded-[5rem] flex items-center justify-center disabled:opacity-20 bg-white text-black"
                     style={{
                       boxShadow: input.trim() ? '0 0 25px rgba(255,255,255,0.2)' : 'none'
                     }}
@@ -283,85 +302,16 @@ export default cosmox.defineWorkspace({
               </div>
             </div>
 
-            {/* Suggested prompts list */}
-            <div className="mt-5 flex flex-wrap justify-center gap-2 max-w-2xl mx-auto">
-              <AnimatePresence mode="wait">
-                {(suggestedPrompts[activeTool] || []).map((p, i) => (
-                  <motion.button
-                    key={`${activeTool}-${i}`}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.25, delay: i * 0.05 }}
-                    onClick={() => setInput(p)}
-                    className="text-xs text-muted-foreground hover:text-white bg-[#0e0e11]/60 hover:bg-[#121216] border border-white/5 hover:border-white/10 rounded-full px-4 py-2 transition-all truncate max-w-[280px] font-light"
-                  >
-                    {p}
-                  </motion.button>
-                ))}
-              </AnimatePresence>
-            </div>
+           
           </div>
         </div>
       </section>
-
-      {/* Developer Terminal & Config Mockup Section */}
-      <section className="px-4 sm:px-6 py-10 relative z-10 max-w-4xl mx-auto">
-        <div className="rounded-2xl border border-white/5 bg-[#0b0b0d]/90 backdrop-blur-xl shadow-2xl overflow-hidden">
-          {/* Header Tab panel */}
-          <div className="flex items-center justify-between px-4 py-3 bg-[#08080a] border-b border-white/5">
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
-              <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
-              <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
-              <span className="text-[10px] text-muted-foreground font-mono ml-2">coxmox-compilation-sandbox.log</span>
-            </div>
-            
-            <div className="flex items-center gap-1.5 p-0.5 rounded-md bg-[#131317]">
-              <button 
-                onClick={() => setActiveTab('terminal')}
-                className={cn("flex items-center gap-1.5 px-3 py-1 rounded text-[10px] font-mono transition-colors", activeTab === 'terminal' ? 'bg-white/5 text-white' : 'text-muted-foreground hover:text-white')}
-              >
-                <Terminal className="w-3 h-3" /> Console
-              </button>
-              <button 
-                onClick={() => setActiveTab('config')}
-                className={cn("flex items-center gap-1.5 px-3 py-1 rounded text-[10px] font-mono transition-colors", activeTab === 'config' ? 'bg-white/5 text-white' : 'text-muted-foreground hover:text-white')}
-              >
-                <Code className="w-3 h-3" /> Config
-              </button>
-            </div>
-          </div>
-
-          {/* Active Terminal Content */}
-          <div className="p-5 font-mono text-[11px] leading-relaxed min-h-[180px] bg-[#070708]/60 overflow-y-auto">
-            {activeTab === 'terminal' ? (
-              <div className="space-y-1 text-neutral-400">
-                {terminalLogs.map((log, index) => (
-                  <div key={index} className="flex gap-2">
-                    <span className="text-blue-500 select-none">&gt;</span>
-                    <span>{log}</span>
-                  </div>
-                ))}
-                <div className="flex items-center gap-1">
-                  <span className="text-blue-500 select-none">&gt;</span>
-                  <span className="w-2 h-4 bg-white animate-pulse" />
-                </div>
-              </div>
-            ) : (
-              <pre className="text-emerald-400 select-text text-left font-mono">
-                {configCode}
-              </pre>
-            )}
-          </div>
-        </div>
-      </section>
-
+    
       {/* Stats Section */}
-      <section className="px-4 sm:px-6 py-16 relative z-10 border-t border-white/5 bg-[#09090b]/40">
-        <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8">
+      <section className="my-10 px-10 relative z-10">
+        <div className="mx-auto grid grid-cols-1 sm:grid-cols-4 gap-6 sm:gap-8">
           {stats.map((s) => (
-            <div key={s.label} className="relative rounded-2xl border border-white/5 bg-[#0b0b0d]/50 p-6 text-center group overflow-hidden">
+            <div key={s.label} className="relative rounded-2xl p-6 text-center group overflow-hidden">
               <div className={cn("absolute inset-0 bg-gradient-to-tr opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none", s.glow)} />
               <p className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight relative z-10">{s.value}</p>
               <p className="text-[10px] text-muted-foreground mt-2 uppercase tracking-widest font-bold relative z-10">{s.label}</p>

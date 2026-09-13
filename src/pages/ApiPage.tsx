@@ -18,6 +18,7 @@ type ApiKeyEntry = {
 
 const PROVIDERS = [
   { id: 'xai', label: 'xAI Grok', color: 'text-cyan-400', storageKey: 'coxmox_api_key_xai', placeholder: 'xai-...' },
+  { id: 'groq', label: 'Groq', color: 'text-pink-400', storageKey: 'coxmox_api_key_groq', placeholder: 'gsk_...' },
   { id: 'gemini', label: 'Google Gemini', color: 'text-blue-400', storageKey: 'coxmox_api_key_gemini', placeholder: 'AIzaSy...' },
   { id: 'openai', label: 'OpenAI', color: 'text-emerald-400', storageKey: 'coxmox_api_key_openai', placeholder: 'sk-proj-...' },
   { id: 'anthropic', label: 'Anthropic Claude', color: 'text-orange-400', storageKey: 'coxmox_api_key_anthropic', placeholder: 'sk-ant-...' },
@@ -48,6 +49,9 @@ const ApiPage = () => {
     localStorage.setItem('coxmox_provider', providerId);
     if (providerId === 'xai') {
       localStorage.setItem('coxmox_model_name', 'grok-4.3');
+    }
+    if (providerId === 'groq') {
+      localStorage.setItem('coxmox_model_name', 'llama-3.3-70b-versatile');
     }
     setSaved((prev) => ({ ...prev, [providerId]: true }));
     setTimeout(() => setSaved((prev) => ({ ...prev, [providerId]: false })), 2000);

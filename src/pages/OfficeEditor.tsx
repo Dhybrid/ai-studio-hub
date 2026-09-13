@@ -400,7 +400,7 @@ const OfficeEditor = () => {
                   <MenuItem icon={Keyboard} label="Keyboard Shortcuts" onClick={() => setActiveMenu(null)} />
                   <MenuSep />
                   <MenuItem icon={MessageSquare} label="Send Feedback" onClick={() => setActiveMenu(null)} />
-                  <MenuItem icon={Info} label="About COXMOX Office" onClick={() => setActiveMenu(null)} />
+                  <MenuItem icon={Info} label="About Eruwa Office" onClick={() => setActiveMenu(null)} />
                 </MenuDropdown>
               )}
             </div>

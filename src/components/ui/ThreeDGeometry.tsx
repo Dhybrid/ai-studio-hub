@@ -9,7 +9,7 @@ interface ThreeDGeometryProps {
 
 export const ThreeDGeometry = ({
   mode = 'sphere',
-  color = '#3b82f6', // default blue
+  color = '#f6c43b', // default blue
   opacity = 0.35,
   interactive = true,
 }: ThreeDGeometryProps) => {
@@ -49,8 +49,8 @@ export const ThreeDGeometry = ({
       if (!interactive) return;
       const rect = canvas.getBoundingClientRect();
       // Calculate normalized mouse position relative to center (-1 to 1)
-      const x = ((e.clientX - rect.left) / width) * 2 - 1;
-      const y = ((e.clientY - rect.top) / height) * 2 - 1;
+      const x = ((e.clientX - rect.left) / width) * 100 - 1;
+      const y = ((e.clientY - rect.top) / height) * 50 - 1;
       mouseRef.current.targetX = x;
       mouseRef.current.targetY = y;
     };
@@ -70,7 +70,7 @@ export const ThreeDGeometry = ({
     const spherePoints: { x: number; y: number; z: number }[] = [];
     const sphereRings = 12;
     const pointsPerRing = 18;
-    const sphereRadius = 140;
+    const sphereRadius = 360;
 
     for (let i = 0; i < sphereRings; i++) {
       const phi = (Math.PI * (i + 1)) / (sphereRings + 1);

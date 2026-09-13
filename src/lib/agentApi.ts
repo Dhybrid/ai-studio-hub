@@ -24,14 +24,22 @@ export interface RouteAgentOptions {
 }
 
 export async function routeAgent(prompt: string, options: RouteAgentOptions = {}): Promise<AgentResponse> {
+  // const storedProvider = localStorage.getItem('coxmox_provider') || '';
+  // const provider = !storedProvider || storedProvider === 'huggingface-space' || storedProvider === 'grok'
+  //   ? 'xai'
+  //   : storedProvider;
   const storedProvider = localStorage.getItem('coxmox_provider') || '';
   const provider = !storedProvider || storedProvider === 'huggingface-space' || storedProvider === 'grok'
-    ? 'xai'
+    ? 'groq'
     : storedProvider;
   const apiKey = localStorage.getItem(`coxmox_api_key_${provider}`) || '';
+  // const storedModelName = localStorage.getItem('coxmox_model_name') || '';
+  // const modelName = provider === 'xai' && (!storedModelName || storedModelName.startsWith('gpt-') || storedModelName.startsWith('gemini') || storedModelName.startsWith('claude'))
+  //   ? 'grok-4.3'
+  //   : storedModelName;
   const storedModelName = localStorage.getItem('coxmox_model_name') || '';
-  const modelName = provider === 'xai' && (!storedModelName || storedModelName.startsWith('gpt-') || storedModelName.startsWith('gemini') || storedModelName.startsWith('claude'))
-    ? 'grok-4.3'
+  const modelName = provider === 'groq' && (!storedModelName || storedModelName.startsWith('gpt-') || storedModelName.startsWith('gemini') || storedModelName.startsWith('claude') || storedModelName.startsWith('grok'))
+    ? 'llama-3.3-70b-versatile'
     : storedModelName;
 
   const response = await fetch(`${AGENT_API_URL}/api/agent/route`, {

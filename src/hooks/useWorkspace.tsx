@@ -117,7 +117,7 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
 
   const [chats, setChats] = useState<ChatHistoryItem[]>(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('coxmox_chats');
+      const stored = localStorage.getItem('eruwa_chats');
       if (stored) {
         try {
           return JSON.parse(stored);
@@ -130,7 +130,7 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
   });
 
   useEffect(() => {
-    localStorage.setItem('coxmox_chats', JSON.stringify(chats));
+    localStorage.setItem('eruwa_chats', JSON.stringify(chats));
   }, [chats]);
 
   const toggleTheme = () => {

@@ -153,7 +153,7 @@ const SettingsPage = () => {
 
               {activeTab === 'appearance' && (
                 <motion.div key="appearance" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-                  <SectionHead title="Appearance" desc="Customize how COXMOX looks and feels" />
+                  <SectionHead title="Appearance" desc="Customize how Eruwa looks and feels" />
                   <div className="rounded-2xl border border-white/5 bg-[#0b0b0d] divide-y divide-white/5 px-5 mb-4">
                     <Row label="Theme" desc="Light, Dark, or System preference">
                       <div className="flex gap-1">
@@ -217,7 +217,7 @@ const SettingsPage = () => {
                     <Row label="Data training opt-out" desc="Your conversations won't be used to train models">
                       <Toggle value={true} onChange={() => {}} />
                     </Row>
-                    <Row label="Session history" desc="Allow COXMOX to store your chat history">
+                    <Row label="Session history" desc="Allow Eruwa to store your chat history">
                       <Toggle value={true} onChange={() => {}} />
                     </Row>
                     <Row label="Analytics" desc="Help improve the product with anonymous usage data">

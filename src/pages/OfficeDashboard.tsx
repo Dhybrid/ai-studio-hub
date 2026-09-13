@@ -477,7 +477,7 @@ const OfficeDashboard = () => {
 
           {/* Features Detail Grid */}
           <div className="mb-16 relative z-10">
-            <h3 className="text-base font-bold text-center text-white uppercase tracking-wider mb-8">Why Coxmox Office Suite</h3>
+            <h3 className="text-base font-bold text-center text-white uppercase tracking-wider mb-8">Why Eruwa Office Suite</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 { icon: Sparkles, title: 'AI-Powered', desc: 'Draft full sheets & reports with prompt templates.' },

@@ -89,7 +89,7 @@ export const Sidebar = () => {
     <div
       key={chat.id}
       className={cn(
-        "w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition-all border-l-2 border-transparent group relative hover:bg-white/5",
+        "w-full items-center justify-between px-2 py-2 rounded-lg text-left transition-all border-l-2 border-transparent group relative hover:bg-white/5",
         location.search.includes(`id=${chat.id}`) && "bg-white/5 border-l-blue-400"
       )}
     >
@@ -103,9 +103,9 @@ export const Sidebar = () => {
         <p className="text-[11px] text-white font-medium truncate pr-6 group-hover:text-blue-300 transition-colors">
           {chat.title}
         </p>
-        <span className="text-[9px] text-muted-foreground font-light">
+        {/* <span className="text-[9px] text-muted-foreground font-light">
           {new Date(chat.timestamp).toLocaleDateString()}
-        </span>
+        </span> */}
       </button>
 
       <div className="absolute right-2 top-1/2 -translate-y-1/2 hidden group-hover:block z-10">
@@ -158,7 +158,7 @@ export const Sidebar = () => {
               exit={{ opacity: 0, width: 0 }}
               className="overflow-hidden whitespace-nowrap"
             >
-              <p className="text-xs font-bold text-white tracking-widest uppercase">COXMOX</p>
+              <p className="text-xs font-bold text-white tracking-widest uppercase">Eruwa</p>
               <p className="text-[9px] text-muted-foreground uppercase tracking-wider font-semibold">AI Workspace</p>
             </motion.div>
           )}

@@ -91,18 +91,18 @@ const NotFound = () => {
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-foreground text-background text-sm font-medium hover:opacity-90 transition-opacity"
           >
             <Home className="w-4 h-4" />
-            Return to COXMOX
+            Return to Eruwa
           </button>
         </motion.div>
 
-        {/* COXMOX brand */}
+        {/* Eruwa brand */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
           className="mt-16 text-[11px] text-muted-foreground/50 tracking-widest uppercase"
         >
-          COXMOX · AI Workspace
+          Eruwa · AI Workspace
         </motion.p>
       </div>
     </div>

@@ -7,7 +7,7 @@ const tools = [
   {
     icon: MessageSquare,
     label: 'AI Chat',
-    description: 'General-purpose intelligent assistant powered by COXMOX Core. Ask anything, get expert-level answers.',
+    description: 'General-purpose intelligent assistant powered by Eruwa Core. Ask anything, get expert-level answers.',
     path: '/chat',
     color: 'text-blue-400',
     bg: 'bg-blue-500/10',
@@ -59,7 +59,7 @@ const AllTools = () => {
             <div className="w-5 h-5 rounded-md bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center">
               <Sparkles className="w-3 h-3 text-white" />
             </div>
-            <h1 className="text-sm font-semibold text-white">COXMOX Tools</h1>
+            <h1 className="text-sm font-semibold text-white">Eruwa Tools</h1>
           </div>
           <span className="ml-auto text-[10px] text-muted-foreground font-mono border border-white/5 rounded-full px-2 py-0.5">
             3 active modules
@@ -75,7 +75,7 @@ const AllTools = () => {
         >
           <h2 className="text-2xl font-bold text-white tracking-tight">Your Workspace</h2>
           <p className="text-sm text-muted-foreground mt-1 font-light">
-            All active COXMOX modules available in your plan.
+            All active Eruwa modules available in your plan.
           </p>
         </motion.div>
 

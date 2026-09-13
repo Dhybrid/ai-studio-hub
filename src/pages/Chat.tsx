@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { routeAgent } from '@/lib/agentApi';
-import { estimateTokens, extractCodeSnippets } from '@/lib/markdown';
+import { CodeSnippet, estimateTokens, extractCodeSnippets } from '@/lib/markdown';
 import RichMarkdown from '@/components/chat/RichMarkdown';
 import CodeSidePanel from '@/components/chat/CodeSidePanel';
 import OfficeSidePanel from '@/components/chat/OfficeSidePanel';
@@ -195,7 +195,7 @@ const ChatPage = () => {
         }
       }
     } catch {
-      const errorText = 'I could not reach the backend agent. Make sure the backend is running on `http://localhost:8000`, then try again.';
+      const errorText = 'I could not reach the server. Server busy.';
       const updatedMessages = nextMessages.map((message) =>
         message.id === assistantId ? { ...message, content: errorText, tokens: estimateTokens(errorText) } : message
       );
@@ -409,15 +409,30 @@ const ChatPage = () => {
             <div className="max-w-3xl mx-auto">
               <div className="relative rounded-2xl p-[1px] bg-gradient-to-b from-white/10 to-white/5 focus-within:from-blue-500/50 focus-within:to-indigo-500/20 transition-all duration-500">
                 <div className="flex items-end gap-2 bg-[#0b0b0d]/90 backdrop-blur-xl rounded-[15px] p-2.5">
+
+
                   <button onClick={openImagePicker} className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/5 transition-colors text-muted-foreground hover:text-white" title="Attach image">
                     <Paperclip className="w-4 h-4" />
                   </button>
+                  {imageAttachments.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {imageAttachments.map((img) => (
+                        <div key={img.id} className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-2 py-1">
+                          <img src={img.url} alt="" className="w-6 h-6 rounded object-cover" />
+                          {/* <span className="max-w-[140px] truncate text-[10px] text-white/80">{null}</span> */}
+                          <button onClick={() => setImageAttachments((items) => items.filter((item) => item.id !== img.id))} className="text-muted-foreground hover:text-white">
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   <textarea
                     ref={textareaRef}
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Message COXMOX..."
+                    placeholder="Message Eruwa..."
                     rows={1}
                     className="flex-1 bg-transparent border-none outline-none resize-none text-sm py-2 px-2 text-white placeholder:text-muted-foreground max-h-32 font-light"
                     style={{ minHeight: '36px' }}
@@ -443,21 +458,8 @@ const ChatPage = () => {
                   )}
                 </div>
               </div>
-              {imageAttachments.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {imageAttachments.map((img) => (
-                    <div key={img.id} className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-2 py-1">
-                      <img src={img.url} alt="" className="w-6 h-6 rounded object-cover" />
-                      <span className="max-w-[140px] truncate text-[10px] text-white/80">{img.name}</span>
-                      <button onClick={() => setImageAttachments((items) => items.filter((item) => item.id !== img.id))} className="text-muted-foreground hover:text-white">
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
               <p className="text-[10px] text-muted-foreground/50 text-center mt-2.5 font-light">
-                COXMOX Core v2.0 · Local sandbox compilation is fully active.
+                Eruwa AI.
               </p>
             </div>
           </div>

@@ -31,21 +31,21 @@ const demoProjects: Record<OfficeType, Project[]> = {
 
 const demoTemplates: Record<OfficeType, Template[]> = {
   documents: [
-    { id: 'business-report', name: 'Business Report', description: 'Professional business report with charts.', author: 'COXMOX', category: 'Business' },
-    { id: 'meeting-notes', name: 'Meeting Notes', description: 'Structured meeting notes template.', author: 'COXMOX', category: 'Notes' },
+    { id: 'business-report', name: 'Business Report', description: 'Professional business report with charts.', author: 'Eruwa', category: 'Business' },
+    { id: 'meeting-notes', name: 'Meeting Notes', description: 'Structured meeting notes template.', author: 'Eruwa', category: 'Notes' },
     { id: 'resume', name: 'Resume', description: 'Modern resume/CV template.', author: 'Community', category: 'Personal' },
-    { id: 'letter', name: 'Letter', description: 'Formal business letter template.', author: 'COXMOX', category: 'Business' },
+    { id: 'letter', name: 'Letter', description: 'Formal business letter template.', author: 'Eruwa', category: 'Business' },
   ],
   spreadsheets: [
-    { id: 'budget', name: 'Budget Planner', description: 'Monthly budget with auto-calculations.', author: 'COXMOX', category: 'Finance' },
-    { id: 'invoice', name: 'Invoice', description: 'Professional invoice with totals.', author: 'COXMOX', category: 'Business' },
+    { id: 'budget', name: 'Budget Planner', description: 'Monthly budget with auto-calculations.', author: 'Eruwa', category: 'Finance' },
+    { id: 'invoice', name: 'Invoice', description: 'Professional invoice with totals.', author: 'Eruwa', category: 'Business' },
     { id: 'project-tracker', name: 'Project Tracker', description: 'Task tracking with progress.', author: 'Community', category: 'Work' },
     { id: 'gradebook', name: 'Grade Book', description: 'Student grade tracking and averages.', author: 'Community', category: 'Education' },
   ],
   presentations: [
-    { id: 'pitch-deck', name: 'Pitch Deck', description: 'Startup pitch deck with 10 slides.', author: 'COXMOX', category: 'Business' },
+    { id: 'pitch-deck', name: 'Pitch Deck', description: 'Startup pitch deck with 10 slides.', author: 'Eruwa', category: 'Business' },
     { id: 'lesson-plan', name: 'Lesson Plan', description: 'Educational presentation template.', author: 'Community', category: 'Education' },
-    { id: 'product-launch', name: 'Product Launch', description: 'Product launch announcement slides.', author: 'COXMOX', category: 'Marketing' },
+    { id: 'product-launch', name: 'Product Launch', description: 'Product launch announcement slides.', author: 'Eruwa', category: 'Marketing' },
     { id: 'portfolio', name: 'Portfolio', description: 'Creative portfolio showcase.', author: 'Community', category: 'Creative' },
   ],
 };

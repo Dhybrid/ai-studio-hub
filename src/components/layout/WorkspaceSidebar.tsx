@@ -269,7 +269,7 @@ const SidebarContent = ({
         >
           <div className="flex items-center gap-2 mb-1">
             <Share2 className="w-3.5 h-3.5 text-accent" />
-            <span className="text-[11px] font-semibold text-foreground">Share COXMOX</span>
+            <span className="text-[11px] font-semibold text-foreground">Share Eruwa</span>
           </div>
           <p className="text-[10px] text-muted-foreground leading-relaxed">100 credits per paid referral</p>
         </button>
@@ -386,7 +386,7 @@ const SharePopup = ({ open, onClose }: { open: boolean; onClose: () => void }) =
         >
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h3 className="text-lg font-semibold text-foreground">Share COXMOX</h3>
+              <h3 className="text-lg font-semibold text-foreground">Share Eruwa</h3>
               <p className="text-sm text-muted-foreground mt-1">Earn 100 credits for every paid referral</p>
             </div>
             <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
@@ -395,7 +395,7 @@ const SharePopup = ({ open, onClose }: { open: boolean; onClose: () => void }) =
             <div className="p-4 rounded-xl bg-surface border border-border">
               <p className="text-xs text-muted-foreground mb-2">Your referral link</p>
               <div className="flex items-center gap-2">
-                <input readOnly value="https://coxmox.ai/ref/iikiogha" className="flex-1 text-sm bg-transparent text-foreground outline-none font-mono" />
+                <input readOnly value="https://Eruwa.ai/ref/iikiogha" className="flex-1 text-sm bg-transparent text-foreground outline-none font-mono" />
                 <button className="px-3 py-1.5 rounded-lg bg-accent text-accent-foreground text-xs font-medium hover:opacity-90">Copy</button>
               </div>
             </div>
@@ -432,7 +432,7 @@ const UpgradePopup = ({ open, onClose }: { open: boolean; onClose: () => void })
           <div className="flex justify-between items-start mb-6">
             <div>
               <h3 className="text-lg font-semibold text-foreground">Upgrade to Pro</h3>
-              <p className="text-sm text-muted-foreground mt-1">Unlock the full power of COXMOX</p>
+              <p className="text-sm text-muted-foreground mt-1">Unlock the full power of Eruwa</p>
             </div>
             <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
           </div>
