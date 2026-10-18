@@ -342,7 +342,7 @@ export default function DocumentTemplatePicker() {
           {/* ── Hero row ── */}
           <div className="mb-8">
             <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">Choose a template</h2>
-            <p className="text-sm text-muted-foreground mt-1.5">Pick a styled template or start blank — your Word workspace opens instantly.</p>
+            <p className="text-sm text-muted-foreground mt-1.5">Pick a styled template or start blank — your Documents workspace opens instantly.</p>
           </div>
 
           {/* ── Blank card (hero) ── */}

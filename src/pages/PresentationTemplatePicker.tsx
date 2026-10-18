@@ -72,7 +72,7 @@ export default function PresentationTemplatePicker() {
           <div className="max-w-6xl mx-auto">
             <div className="mb-4">
               <h2 className="text-xl sm:text-2xl font-semibold text-foreground">Start a new presentation</h2>
-              <p className="text-xs text-muted-foreground mt-1">Pick a designed template or start blank — your PowerPoint workspace opens after this.</p>
+              <p className="text-xs text-muted-foreground mt-1">Pick a designed template or start blank — your Slide workspace opens after this.</p>
             </div>
 
             <button

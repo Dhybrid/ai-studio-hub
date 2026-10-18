@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft, FileText, Cloud, CloudOff, Save, Share2, ChevronDown, Search, MoreHorizontal,
@@ -8,9 +8,11 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useWorkspace } from '@/hooks/useWorkspace';
+import { useBrowserTabs } from '@/hooks/useBrowserTabs';
 import WordRibbon, { RibbonTab } from '@/components/office/WordRibbon';
 import { buildTableHTML } from '@/components/office/TableGridPicker';
 import EditorContextMenu from '@/components/office/EditorContextMenu';
+import OfficeBackstageModal from '@/components/office/OfficeBackstageModal';
 
 const templateContent: Record<string, { name: string; html: string }> = {
   blank: { name: 'Untitled Document', html: '<p><br></p>' },
@@ -118,6 +120,7 @@ const templateContent: Record<string, { name: string; html: string }> = {
 
 export default function WordWorkspace() {
   const { theme, toggleTheme } = useWorkspace();
+  const { openTab } = useBrowserTabs();
   const navigate = useNavigate();
   const { projectId } = useParams();
   const [search] = useSearchParams();
@@ -300,11 +303,11 @@ export default function WordWorkspace() {
   };
 
   return (
-    <div className="flex flex-col h-screen w-full bg-background overflow-hidden">
+    <div className="flex flex-col h-full w-full bg-background overflow-hidden">
       {/* Title bar */}
       <div className="h-11 flex items-center justify-between px-3 border-b border-border bg-background flex-shrink-0">
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          <button onClick={() => navigate('/office/documents')} className="w-8 h-8 rounded flex items-center justify-center hover:bg-surface-hover" title="Documents Home">
+          <button onClick={() => openTab({ type: 'office', title: 'Office Studio' })} className="w-8 h-8 rounded flex items-center justify-center hover:bg-surface-hover" title="Office Studio">
             <FileText className="w-4 h-4 text-blue-500" />
           </button>
           {/* Quick access */}
@@ -363,34 +366,45 @@ export default function WordWorkspace() {
         <span className="text-[10px] text-muted-foreground hidden md:inline">{docName} · Page {pageCount}</span>
       </div>
 
-      {showFile && (
-        <div className="absolute inset-0 z-50 bg-background flex">
-          <div className="w-56 bg-foreground text-background p-3 flex flex-col gap-1">
-            <button onClick={() => setShowFile(false)} className="self-start mb-3 w-8 h-8 rounded flex items-center justify-center hover:bg-white/10"><ArrowLeft className="w-4 h-4" /></button>
-            {[
-              { icon: Home, label: 'Home', action: () => navigate('/office/documents') },
-              { icon: FilePlus, label: 'New', action: () => navigate('/office/documents/new') },
-              { icon: FolderOpen, label: 'Open', action: () => {} },
-              { icon: Save, label: 'Save', action: () => setShowFile(false) },
-              { icon: FileDown, label: 'Save As', action: () => setShowFile(false) },
-              { icon: Download, label: 'Export PDF', action: downloadPDF },
-              { icon: FileDown, label: 'Export DOCX', action: downloadDocx },
-              { icon: Printer, label: 'Print', action: () => window.print() },
-              { icon: Share2, label: 'Share', action: () => {} },
-            ].map((m, i) => (
-              <button key={i} onClick={() => { m.action(); }} className="flex items-center gap-3 px-3 py-2 rounded text-xs hover:bg-white/10 text-left">
-                <m.icon className="w-3.5 h-3.5" /> {m.label}
-              </button>
-            ))}
-          </div>
-          <div className="flex-1 p-8 overflow-auto">
-            <h2 className="text-2xl font-bold mb-1">Good day</h2>
-            <p className="text-sm text-muted-foreground mb-6">Recent documents and templates</p>
-            <button onClick={() => { setShowFile(false); navigate('/office/documents/new'); }}
-              className="px-4 py-2 rounded-lg bg-foreground text-background text-xs">New document</button>
-          </div>
-        </div>
-      )}
+      <OfficeBackstageModal
+        isOpen={showFile}
+        onClose={() => setShowFile(false)}
+        toolType="word"
+        docName={docName}
+        onRenameDoc={(name) => {
+          setDocName(name);
+          markUnsaved();
+        }}
+        onNewDoc={(templateKey) => {
+          const t = templateContent[templateKey || 'blank'] || templateContent.blank;
+          setPages([t.html]);
+          setDocName(t.name);
+          markUnsaved();
+        }}
+        onOpenFile={() => {
+          navigate('/office/documents/new');
+        }}
+        onSave={() => {
+          setSaveStatus('saving');
+          setTimeout(() => setSaveStatus('saved'), 500);
+        }}
+        onExportPdf={downloadPDF}
+        onExportNative={downloadDocx}
+        nativeFormatLabel="Export .docx Document"
+        stats={{
+          countLabel: 'Total Pages',
+          countValue: pageCount,
+          secondaryLabel: 'Word Count',
+          secondaryValue: wordCount,
+          themeOrFormat: 'Standard Letter (OpenXML)',
+        }}
+        templates={Object.entries(templateContent).map(([key, t]) => ({
+          id: key,
+          name: t.name,
+          desc: 'Formatted document template',
+          category: 'Documents',
+        }))}
+      />
 
       {/* Ribbon */}
       <WordRibbon

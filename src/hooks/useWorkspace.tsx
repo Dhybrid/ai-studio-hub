@@ -11,6 +11,14 @@ export interface ChatHistoryItem {
   messages: any[];
 }
 
+export interface WorkspaceUser {
+  name: string;
+  email: string;
+  isGuest: boolean;
+  avatar?: string;
+  initials: string;
+}
+
 interface WorkspaceState {
   mode: WorkspaceMode;
   setMode: (mode: WorkspaceMode) => void;
@@ -19,7 +27,11 @@ interface WorkspaceState {
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
   theme: 'light' | 'dark';
+  themeMode: 'light' | 'dark' | 'system';
+  setThemeMode: (mode: 'light' | 'dark' | 'system') => void;
   toggleTheme: () => void;
+  user: WorkspaceUser;
+  setUser: (user: WorkspaceUser) => void;
   chatKey: number;
   startNewChat: () => void;
   chats: ChatHistoryItem[];
@@ -108,12 +120,98 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
   const [model, setModel] = useState('gpt-4');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [chatKey, setChatKey] = useState(0);
+
+  // User state - defaults to guest user
+  const [user, setUser] = useState<WorkspaceUser>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('eruwa_user');
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+    return {
+      name: 'Guest User',
+      email: 'guest@eruwa.ai',
+      isGuest: true,
+      initials: 'GU'
+    };
+  });
+
+  useEffect(() => {
+    localStorage.setItem('eruwa_user', JSON.stringify(user));
+  }, [user]);
+
+  // Theme mode: light (DEFAULT), dark, or system
+  const [themeMode, setThemeModeState] = useState<'light' | 'dark' | 'system'>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('eruwa_theme_mode');
+      if (stored === 'light' || stored === 'dark' || stored === 'system') {
+        return stored;
+      }
+    }
+    // Default is light mode as requested!
+    return 'light';
+  });
+
+  // Effective theme: 'light' or 'dark'
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     if (typeof window !== 'undefined') {
-      return document.documentElement.classList.contains('dark') ? 'dark' : 'dark';
+      const stored = localStorage.getItem('eruwa_theme_mode');
+      if (stored === 'dark') return 'dark';
+      if (stored === 'system') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
     }
-    return 'dark';
+    return 'light';
   });
+
+  // Apply theme to document root
+  const applyTheme = useCallback((mode: 'light' | 'dark' | 'system') => {
+    let resolved: 'light' | 'dark' = 'light';
+    if (mode === 'dark') {
+      resolved = 'dark';
+    } else if (mode === 'system') {
+      resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    } else {
+      resolved = 'light';
+    }
+
+    setTheme(resolved);
+    if (typeof document !== 'undefined') {
+      if (resolved === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  }, []);
+
+  const setThemeMode = useCallback((mode: 'light' | 'dark' | 'system') => {
+    setThemeModeState(mode);
+    localStorage.setItem('eruwa_theme_mode', mode);
+    applyTheme(mode);
+  }, [applyTheme]);
+
+  const toggleTheme = useCallback(() => {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    setThemeMode(next);
+  }, [theme, setThemeMode]);
+
+  // Listen for system theme changes if themeMode is system
+  useEffect(() => {
+    applyTheme(themeMode);
+
+    if (themeMode === 'system') {
+      const media = window.matchMedia('(prefers-color-scheme: dark)');
+      const listener = () => applyTheme('system');
+      media.addEventListener('change', listener);
+      return () => media.removeEventListener('change', listener);
+    }
+  }, [themeMode, applyTheme]);
 
   const [chats, setChats] = useState<ChatHistoryItem[]>(() => {
     if (typeof window !== 'undefined') {
@@ -132,12 +230,6 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     localStorage.setItem('eruwa_chats', JSON.stringify(chats));
   }, [chats]);
-
-  const toggleTheme = () => {
-    const next = theme === 'dark' ? 'light' : 'dark';
-    setTheme(next);
-    document.documentElement.classList.toggle('dark', next === 'dark');
-  };
 
   const startNewChat = useCallback(() => {
     setChatKey(k => k + 1);
@@ -173,13 +265,11 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
     setChats(prev => prev.map(c => c.id === id ? { ...c, messages: updatedMessages, timestamp: new Date().toISOString() } : c));
   }, []);
 
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-  }, [theme]);
-
   return (
     <WorkspaceContext.Provider value={{
-      mode, setMode, model, setModel, sidebarOpen, setSidebarOpen, theme, toggleTheme, chatKey, startNewChat,
+      mode, setMode, model, setModel, sidebarOpen, setSidebarOpen,
+      theme, themeMode, setThemeMode, toggleTheme, user, setUser,
+      chatKey, startNewChat,
       chats, pinChat, archiveChat, deleteChat, addChat, updateChatMessages
     }}>
       {children}

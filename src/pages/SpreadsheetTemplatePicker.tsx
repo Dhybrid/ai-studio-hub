@@ -70,7 +70,7 @@ export default function SpreadsheetTemplatePicker() {
           <div className="max-w-6xl mx-auto">
             <div className="mb-4">
               <h2 className="text-xl sm:text-2xl font-semibold text-foreground">Start a new spreadsheet</h2>
-              <p className="text-xs text-muted-foreground mt-1">Pick a styled template or start blank — your Excel workspace opens after this.</p>
+              <p className="text-xs text-muted-foreground mt-1">Pick a styled template or start blank — your Sheet workspace opens after this.</p>
             </div>
 
             <button

@@ -90,62 +90,62 @@ export const ProjectDashboard = ({
     : 'hover:border-orange-500/35';
 
   return (
-    <div className="h-full overflow-y-auto bg-[#070708] text-white">
+    <div className="h-full overflow-y-auto bg-[#FAFBFD] dark:bg-[#070708] text-slate-900 dark:text-white transition-colors">
       {/* Repeating grid masks */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:30px_30px] pointer-events-none [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] z-0" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:30px_30px] pointer-events-none [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] z-0" />
       
       <div className="max-w-5xl mx-auto px-6 py-10 relative z-10">
         
         {/* Core Personal Dashboard Stats Header */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-          <div className="rounded-xl border border-white/5 bg-[#0b0b0d]/50 p-4">
+          <div className="rounded-xl border border-slate-200/80 dark:border-white/5 bg-white dark:bg-[#0b0b0d]/50 p-4 shadow-xs">
             <div className="flex justify-between items-start mb-2">
-              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Active Workspace</span>
+              <span className="text-[9px] font-bold text-slate-400 dark:text-muted-foreground uppercase tracking-widest">Active Workspace</span>
               <div className={cn("w-6 h-6 rounded-md flex items-center justify-center", bgClass)}>
                 {icon}
               </div>
             </div>
-            <p className="text-lg font-bold text-white leading-none capitalize">{title}</p>
-            <p className="text-[10px] text-muted-foreground mt-1.5 font-light">Custom local sandbox</p>
+            <p className="text-lg font-bold text-slate-900 dark:text-white leading-none capitalize">{title}</p>
+            <p className="text-[10px] text-slate-400 dark:text-muted-foreground mt-1.5 font-light">Custom local sandbox</p>
           </div>
           
-          <div className="rounded-xl border border-white/5 bg-[#0b0b0d]/50 p-4">
-            <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Total Files</span>
-            <p className="text-lg font-bold text-white leading-none">{projects.length} files</p>
-            <p className="text-[10px] text-muted-foreground mt-1.5 font-light">Synced locally</p>
+          <div className="rounded-xl border border-slate-200/80 dark:border-white/5 bg-white dark:bg-[#0b0b0d]/50 p-4 shadow-xs">
+            <span className="text-[9px] font-bold text-slate-400 dark:text-muted-foreground uppercase tracking-widest block mb-2">Total Files</span>
+            <p className="text-lg font-bold text-slate-900 dark:text-white leading-none">{projects.length} files</p>
+            <p className="text-[10px] text-slate-400 dark:text-muted-foreground mt-1.5 font-light">Synced locally</p>
           </div>
           
-          <div className="rounded-xl border border-white/5 bg-[#0b0b0d]/50 p-4">
-            <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Allocated Space</span>
-            <p className="text-lg font-bold text-white leading-none flex items-center gap-1">
-              <HardDrive className="w-3.5 h-3.5 text-muted-foreground" />
+          <div className="rounded-xl border border-slate-200/80 dark:border-white/5 bg-white dark:bg-[#0b0b0d]/50 p-4 shadow-xs">
+            <span className="text-[9px] font-bold text-slate-400 dark:text-muted-foreground uppercase tracking-widest block mb-2">Allocated Space</span>
+            <p className="text-lg font-bold text-slate-900 dark:text-white leading-none flex items-center gap-1">
+              <HardDrive className="w-3.5 h-3.5 text-slate-400 dark:text-muted-foreground" />
               <span>28.4 MB</span>
             </p>
-            <p className="text-[10px] text-muted-foreground mt-1.5 font-light">Out of 1.0 GB limit</p>
+            <p className="text-[10px] text-slate-400 dark:text-muted-foreground mt-1.5 font-light">Out of 1.0 GB limit</p>
           </div>
 
-          <div className="rounded-xl border border-white/5 bg-[#0b0b0d]/50 p-4">
-            <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">AI Synthetics</span>
-            <p className="text-lg font-bold text-white leading-none flex items-center gap-1">
-              <Cpu className="w-3.5 h-3.5 text-muted-foreground" />
+          <div className="rounded-xl border border-slate-200/80 dark:border-white/5 bg-white dark:bg-[#0b0b0d]/50 p-4 shadow-xs">
+            <span className="text-[9px] font-bold text-slate-400 dark:text-muted-foreground uppercase tracking-widest block mb-2">AI Synthetics</span>
+            <p className="text-lg font-bold text-slate-900 dark:text-white leading-none flex items-center gap-1">
+              <Cpu className="w-3.5 h-3.5 text-slate-400 dark:text-muted-foreground" />
               <span>85.0K</span>
             </p>
-            <p className="text-[10px] text-muted-foreground mt-1.5 font-light">Remaining tokens</p>
+            <p className="text-[10px] text-slate-400 dark:text-muted-foreground mt-1.5 font-light">Remaining tokens</p>
           </div>
         </div>
 
         {/* Prompt Input Box */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 text-white border border-white/5 text-[10px] font-semibold uppercase tracking-wider mb-5">
-            <Sparkles className="w-3.5 h-3.5 text-yellow-400" />
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-white/5 text-slate-800 dark:text-white border border-slate-200 dark:border-white/5 text-[10px] font-semibold uppercase tracking-wider mb-5">
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
             <span>Generate draft template</span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight mb-2 uppercase">{subtitle}</h1>
-          <p className="text-xs text-muted-foreground mb-8 font-light">Describe what you need and the AI compiler will generate the workspace nodes.</p>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2 uppercase">{subtitle}</h1>
+          <p className="text-xs text-slate-500 dark:text-muted-foreground mb-8 font-light">Describe what you need and the AI compiler will generate the workspace nodes.</p>
 
           <div className="relative max-w-2xl mx-auto">
             <div className={cn(
-              "flex items-start rounded-2xl border bg-[#0b0b0d]/90 backdrop-blur-xl p-2.5 transition-all duration-350 shadow-lg",
+              "flex items-start rounded-2xl border bg-white dark:bg-[#0b0b0d]/90 backdrop-blur-xl p-2.5 transition-all duration-350 shadow-md border-slate-200/80 dark:border-white/10",
               borderClass,
               glowShadow
             )}>
@@ -160,12 +160,12 @@ export const ProjectDashboard = ({
                 }}
                 placeholder={promptPlaceholder}
                 rows={2}
-                className="flex-1 px-3 py-2 text-sm text-white bg-transparent outline-none resize-none placeholder:text-muted-foreground font-light"
+                className="flex-1 px-3 py-2 text-sm text-slate-900 dark:text-white bg-transparent outline-none resize-none placeholder:text-slate-400 font-light"
               />
               <button
                 onClick={handleCreate}
                 disabled={!prompt.trim()}
-                className="m-1.5 px-4.5 py-2.5 rounded-xl bg-white text-black text-xs font-bold hover:bg-neutral-100 transition-all disabled:opacity-20 flex items-center gap-2 flex-shrink-0"
+                className="m-1.5 px-4.5 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-black text-xs font-bold hover:bg-slate-800 dark:hover:bg-neutral-100 transition-all disabled:opacity-20 flex items-center gap-2 flex-shrink-0"
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Create</span>
@@ -176,14 +176,14 @@ export const ProjectDashboard = ({
 
         {/* Tab switcher & Search */}
         <div className="flex items-center justify-between mb-6 gap-4">
-          <div className="flex items-center p-0.5 rounded-xl bg-white/5 border border-white/5">
+          <div className="flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200/80 dark:border-white/5">
             <button
               onClick={() => setTab('projects')}
               className={cn(
                 'flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all',
                 tab === 'projects'
-                  ? 'bg-white/10 text-white shadow-sm'
-                  : 'text-muted-foreground hover:text-white'
+                  ? 'bg-white dark:bg-white/10 text-slate-900 dark:text-white shadow-xs font-bold'
+                  : 'text-slate-500 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-white'
               )}
             >
               <LayoutGrid className="w-3.5 h-3.5" />
@@ -195,8 +195,8 @@ export const ProjectDashboard = ({
                 className={cn(
                   'flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all',
                   tab === 'templates'
-                    ? 'bg-white/10 text-white shadow-sm'
-                    : 'text-muted-foreground hover:text-white'
+                    ? 'bg-white dark:bg-white/10 text-slate-900 dark:text-white shadow-xs font-bold'
+                    : 'text-slate-500 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-white'
                 )}
               >
                 <Users className="w-3.5 h-3.5" />
@@ -206,12 +206,12 @@ export const ProjectDashboard = ({
           </div>
 
           <div className="relative w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 dark:text-muted-foreground" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search workspaces..."
-              className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#0e0e11] border border-white/5 text-xs text-white outline-none focus:border-white/10 placeholder:text-muted-foreground font-light"
+              className="w-full pl-9 pr-3 py-2 rounded-xl bg-white dark:bg-[#0e0e11] border border-slate-200/80 dark:border-white/5 text-xs text-slate-900 dark:text-white outline-none focus:border-blue-400 placeholder:text-slate-400 font-light shadow-2xs"
             />
           </div>
         </div>
@@ -232,17 +232,17 @@ export const ProjectDashboard = ({
                 <button
                   onClick={() => onNewProject('')}
                   className={cn(
-                    "flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-[#0b0b0d]/20 transition-all min-h-[230px] group",
+                    "flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 dark:border-white/10 bg-white/70 dark:bg-[#0b0b0d]/20 transition-all min-h-[230px] group shadow-xs hover:shadow-md",
                     hoverBorder
                   )}
                 >
-                  <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 group-hover:bg-white/10 transition-colors">
-                    <Plus className="w-5 h-5 text-muted-foreground group-hover:text-white transition-colors" />
+                  <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center mb-4 group-hover:bg-slate-200 dark:group-hover:bg-white/10 transition-colors">
+                    <Plus className="w-5 h-5 text-slate-500 dark:text-muted-foreground group-hover:text-slate-900 dark:group-hover:text-white transition-colors" />
                   </div>
-                  <span className="text-xs font-bold text-white uppercase tracking-wider">
+                  <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                     New Blank File
                   </span>
-                  <span className="text-[10px] text-muted-foreground/60 mt-1.5 font-light">Compile from scratch</span>
+                  <span className="text-[10px] text-slate-400 dark:text-muted-foreground/60 mt-1.5 font-light">Compile from scratch</span>
                 </button>
 
                 {/* Projects list */}
@@ -254,12 +254,12 @@ export const ProjectDashboard = ({
                     transition={{ delay: idx * 0.04 }}
                     onClick={() => onOpenProject(project.id)}
                     className={cn(
-                      "group flex flex-col rounded-2xl border border-white/5 bg-[#0b0b0d]/50 transition-all cursor-pointer overflow-hidden relative",
+                      "group flex flex-col rounded-2xl border border-slate-200/80 dark:border-white/5 bg-white dark:bg-[#0b0b0d]/50 transition-all cursor-pointer overflow-hidden relative shadow-xs hover:shadow-md",
                       hoverBorder
                     )}
                   >
                     {/* SVG preview thumbnail based on file type */}
-                    <div className="h-[130px] bg-[#09090b]/80 border-b border-white/5 flex items-center justify-center relative overflow-hidden p-6">
+                    <div className="h-[130px] bg-slate-50 dark:bg-[#09090b]/80 border-b border-slate-100 dark:border-white/5 flex items-center justify-center relative overflow-hidden p-6">
                       {isDocs ? (
                         <svg className="w-full h-full max-w-[120px] opacity-75 group-hover:opacity-100 transition-opacity" viewBox="0 0 100 80" fill="none">
                           <rect x="15" y="5" width="70" height="70" rx="3" fill="#131317" stroke="#25252d" strokeWidth="1" />
@@ -310,19 +310,19 @@ export const ProjectDashboard = ({
 
                     {/* Details content */}
                     <div className="p-5 flex-1 flex flex-col">
-                      <h3 className="text-xs font-bold text-white group-hover:text-blue-400 transition-colors mb-1 uppercase tracking-wide">
+                      <h3 className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-blue-500 transition-colors mb-1 uppercase tracking-wide">
                         {project.name}
                       </h3>
-                      <p className="text-[11px] text-muted-foreground line-clamp-2 flex-1 font-light leading-relaxed">
+                      <p className="text-[11px] text-slate-500 dark:text-muted-foreground line-clamp-2 flex-1 font-light leading-relaxed">
                         {project.description}
                       </p>
                       
-                      <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/5">
-                        <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground font-mono">
+                      <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100 dark:border-white/5">
+                        <div className="flex items-center gap-1.5 text-[9px] text-slate-400 dark:text-muted-foreground font-mono">
                           <Clock className="w-3 h-3" />
                           {project.updatedAt}
                         </div>
-                        <ArrowRight className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-0.5" />
+                        <ArrowRight className="w-3.5 h-3.5 text-slate-400 dark:text-muted-foreground opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-0.5" />
                       </div>
                     </div>
                   </motion.div>
@@ -331,7 +331,7 @@ export const ProjectDashboard = ({
 
               {filtered.length === 0 && (
                 <div className="text-center py-16">
-                  <p className="text-xs text-muted-foreground font-light">No documents stored in this workspace.</p>
+                  <p className="text-xs text-slate-400 dark:text-muted-foreground font-light">No documents stored in this workspace.</p>
                 </div>
               )}
             </motion.div>
@@ -353,7 +353,7 @@ export const ProjectDashboard = ({
                     transition={{ delay: idx * 0.04 }}
                     onClick={() => onOpenProject(template.id)}
                     className={cn(
-                      "group flex flex-col rounded-2xl border border-white/5 bg-[#0b0b0d]/50 transition-all cursor-pointer overflow-hidden relative",
+                      "group flex flex-col rounded-2xl border border-slate-200/80 dark:border-white/5 bg-white dark:bg-[#0b0b0d]/50 transition-all cursor-pointer overflow-hidden relative shadow-xs hover:shadow-md",
                       hoverBorder
                     )}
                   >
@@ -381,18 +381,18 @@ export const ProjectDashboard = ({
                       )}
                       
                       <div className="absolute top-2.5 left-2.5">
-                        <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-white/5 border border-white/5 text-muted-foreground backdrop-blur-sm">
+                        <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 text-slate-600 dark:text-muted-foreground backdrop-blur-sm">
                           {template.category}
                         </span>
                       </div>
                     </div>
 
                     <div className="p-5">
-                      <h3 className="text-xs font-bold text-white group-hover:text-blue-400 transition-colors mb-1 uppercase tracking-wide">
+                      <h3 className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-blue-500 transition-colors mb-1 uppercase tracking-wide">
                         {template.name}
                       </h3>
-                      <p className="text-[11px] text-muted-foreground line-clamp-2 font-light leading-relaxed">{template.description}</p>
-                      <p className="text-[9px] text-muted-foreground/40 mt-3 font-mono">Segment: {template.author}</p>
+                      <p className="text-[11px] text-slate-500 dark:text-muted-foreground line-clamp-2 font-light leading-relaxed">{template.description}</p>
+                      <p className="text-[9px] text-slate-400 dark:text-muted-foreground/60 mt-3 font-mono">By: {template.author}</p>
                     </div>
                   </motion.div>
                 ))}
@@ -400,7 +400,7 @@ export const ProjectDashboard = ({
 
               {filteredTemplates.length === 0 && (
                 <div className="text-center py-16">
-                  <p className="text-xs text-muted-foreground font-light">No templates configured for this category.</p>
+                  <p className="text-xs text-slate-400 dark:text-muted-foreground font-light">No templates configured for this category.</p>
                 </div>
               )}
             </motion.div>

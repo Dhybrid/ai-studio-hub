@@ -20,9 +20,9 @@ import PresentationEditor from '@/components/office/PresentationEditor';
 type OfficeMode = 'document' | 'spreadsheet' | 'presentation';
 
 const modeExtensions: Record<OfficeMode, { ext: string; mime: string; label: string }> = {
-  document: { ext: '.docx', mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', label: 'Word Document (.docx)' },
-  spreadsheet: { ext: '.xlsx', mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', label: 'Excel Workbook (.xlsx)' },
-  presentation: { ext: '.pptx', mime: 'application/vnd.openxmlformats-officedocument.presentationml.presentation', label: 'PowerPoint (.pptx)' },
+  document: { ext: '.docx', mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', label: 'Document (.docx)' },
+  spreadsheet: { ext: '.xlsx', mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', label: 'Sheet Workbook (.xlsx)' },
+  presentation: { ext: '.pptx', mime: 'application/vnd.openxmlformats-officedocument.presentationml.presentation', label: 'Slide Deck (.pptx)' },
 };
 
 type MenuKey = 'file' | 'edit' | 'view' | 'insert' | 'format' | 'tools' | 'help' | null;

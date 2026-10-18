@@ -163,4 +163,14 @@
   }
   .typing-dot:nth-child(1) { animation-delay: -0.32s; }
   .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+  @keyframes border-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .chasing-border-spin {
+    animation: border-spin 4s linear infinite;
+  }
 }
+

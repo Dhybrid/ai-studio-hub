@@ -201,7 +201,7 @@ const SidebarContent = ({
       </div>
       {!collapsed && (
         <div className="overflow-hidden whitespace-nowrap flex-1">
-          <p className="text-sm font-semibold text-foreground tracking-tight">IIkiogha's {title}</p>
+          <p className="text-sm font-semibold text-foreground tracking-tight">Ikiogha's {title}</p>
         </div>
       )}
       {onClose && (

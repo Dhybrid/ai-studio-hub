@@ -8,7 +8,9 @@ import {
 import { cn } from '@/lib/utils';
 import { routeAgent, exportXlsx, exportPdf } from '@/lib/agentApi';
 import { useWorkspace } from '@/hooks/useWorkspace';
+import { useBrowserTabs } from '@/hooks/useBrowserTabs';
 import ExcelRibbon, { ExcelTab } from '@/components/office/ExcelRibbon';
+import OfficeBackstageModal from '@/components/office/OfficeBackstageModal';
 
 // ============ Types ============
 interface CellFormat {
@@ -360,6 +362,7 @@ function normalizeAgentCells(raw: unknown): Record<string, Cell> {
 // ============ Main Component ============
 export default function ExcelWorkspace() {
   const { theme: appTheme, toggleTheme } = useWorkspace();
+  const { openTab } = useBrowserTabs();
   const navigate = useNavigate();
   const { projectId } = useParams();
   const [searchParams] = useSearchParams();
@@ -370,7 +373,7 @@ export default function ExcelWorkspace() {
   const [editingName, setEditingName] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved');
   const [activeTab, setActiveTab] = useState<ExcelTab>('home');
-  const [fileMenu, setFileMenu] = useState(false);
+  const [showFile, setShowFile] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
   const [aiPrompt, setAiPrompt] = useState(initialPrompt);
   const [aiBusy, setAiBusy] = useState(false);
@@ -761,11 +764,11 @@ export default function ExcelWorkspace() {
   const formulaBarValue = editing ? editing.v : (cells[cellId(sel.s.r, sel.s.c)]?.v || '');
 
   return (
-    <div className="flex flex-col h-screen w-full bg-background overflow-hidden">
+    <div className="flex flex-col h-full w-full bg-background overflow-hidden">
       {/* Top bar */}
       <div className="h-10 flex items-center justify-between px-2 sm:px-3 border-b border-border bg-emerald-700 text-white flex-shrink-0">
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          <button onClick={() => navigate('/office')} className="w-7 h-7 rounded hover:bg-white/15 flex items-center justify-center" title="Office Home">
+          <button onClick={() => openTab({ type: 'office', title: 'Office Studio' })} className="w-7 h-7 rounded hover:bg-white/15 flex items-center justify-center" title="Office Studio">
             <FileSpreadsheet className="w-4 h-4" />
           </button>
           {editingName ? (
@@ -802,25 +805,57 @@ export default function ExcelWorkspace() {
         </div>
       </div>
 
+      <OfficeBackstageModal
+        isOpen={showFile}
+        onClose={() => setShowFile(false)}
+        toolType="excel"
+        docName={docName}
+        onRenameDoc={(name) => {
+          setDocName(name);
+          markUnsaved();
+        }}
+        onNewDoc={(templateKey) => {
+          const loadedSheet = buildSheetFromTemplate((templateKey as any) || 'blank');
+          setSheets([loadedSheet]);
+          setActiveSheetId(loadedSheet.id);
+          setDocName(templates[templateKey || 'blank']?.name || 'Untitled Workbook');
+          markUnsaved();
+        }}
+        onOpenFile={() => {
+          importFile();
+        }}
+        onSave={() => {
+          setSaveStatus('saving');
+          setTimeout(() => setSaveStatus('saved'), 500);
+        }}
+        onExportPdf={exportPDF}
+        onExportNative={exportXLSX}
+        nativeFormatLabel="Export .xlsx Workbook"
+        onExportAlternative={exportCSV}
+        altFormatLabel="Export .csv Spreadsheet"
+        stats={{
+          countLabel: 'Total Sheets',
+          countValue: sheets.length,
+          secondaryLabel: 'Active Cells',
+          secondaryValue: Object.keys(cells).length,
+          themeOrFormat: 'Financial Grid Matrix',
+        }}
+        templates={Object.entries(templates).map(([key, t]) => ({
+          id: key,
+          name: t.name,
+          desc: 'Analytical tabular model with formulas',
+          category: 'Spreadsheets',
+        }))}
+      />
+
       {/* File menu strip */}
-      <div ref={fileMenuRef} className="h-7 flex items-center px-2 border-b border-border bg-surface/40 text-xs flex-shrink-0 relative">
-        <button onClick={() => setFileMenu(f => !f)} className={cn("px-2 py-0.5 rounded", fileMenu && "bg-accent/15 text-accent")}>File</button>
-        {fileMenu && (
-          <div className="absolute top-full left-2 mt-0.5 bg-card border border-border rounded-lg shadow-xl z-50 py-1 w-56">
-            <button onClick={() => { navigate('/office'); setFileMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-surface-hover"><Home className="w-3.5 h-3.5" /> Office Home</button>
-            <div className="h-px bg-border my-1" />
-            <button onClick={() => { navigate('/office/spreadsheets/new'); setFileMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-surface-hover"><FilePlus className="w-3.5 h-3.5" /> New</button>
-            <button onClick={() => { importFile(); setFileMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-surface-hover"><FolderOpen className="w-3.5 h-3.5" /> Import...</button>
-            <div className="h-px bg-border my-1" />
-            <button onClick={() => { setSaveStatus('saving'); setTimeout(() => setSaveStatus('saved'), 500); setFileMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-surface-hover"><Save className="w-3.5 h-3.5" /> Save</button>
-            <div className="h-px bg-border my-1" />
-            <button onClick={() => { exportXLSX(); setFileMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-surface-hover"><FileDown className="w-3.5 h-3.5" /> Download .xlsx</button>
-            <button onClick={() => { exportCSV(); setFileMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-surface-hover"><FileDown className="w-3.5 h-3.5" /> Download .csv</button>
-            <button onClick={() => { exportPDF(); setFileMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-surface-hover"><FileDown className="w-3.5 h-3.5" /> Download as PDF</button>
-            <div className="h-px bg-border my-1" />
-            <button onClick={() => { window.print(); setFileMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-surface-hover"><Printer className="w-3.5 h-3.5" /> Print</button>
-          </div>
-        )}
+      <div className="h-7 flex items-center px-2 border-b border-border bg-surface/40 text-xs flex-shrink-0 relative">
+        <button
+          onClick={() => setShowFile(!showFile)}
+          className={cn("px-2.5 h-6 rounded text-[11px] font-medium", showFile ? "bg-accent text-accent-foreground" : "bg-foreground text-background hover:opacity-90")}
+        >
+          File
+        </button>
         <button className="px-2 py-0.5 rounded hover:bg-surface-hover">Edit</button>
         <button className="px-2 py-0.5 rounded hover:bg-surface-hover">View</button>
         <button className="px-2 py-0.5 rounded hover:bg-surface-hover">Insert</button>
